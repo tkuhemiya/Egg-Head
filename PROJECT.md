@@ -1,6 +1,6 @@
-# Bridgekeeper — the on-call agent that knows when to speak
+# Egg Head — the on-call agent that knows when to speak
 
-> Working name. A voice agent that sits silently on an incident bridge call, checks what people claim against the real systems, and speaks up only when it matters. Strands Decider 2B makes the "should I check / should I speak" calls locally in ~150 ms. Amazon Bedrock only runs when the agent has something worth saying.
+> A voice agent that sits silently on an incident bridge call, checks what people claim against the real systems, and speaks up only when it matters. Strands Decider 2B makes the "should I check / should I speak" calls locally in ~150 ms. Amazon Bedrock only runs when the agent has something worth saying.
 
 - **Hackathon:** Agent Experience Hackathon: Strands Decider
 - **Due:** Sat 24 Oct 2026, 12:29 PM Colombo
@@ -46,7 +46,7 @@ On an incident call, people constantly make claims about system state, for examp
 
 > "The DB is fine, it's the API." · "We didn't deploy anything today." · "Error rate is back to normal."
 
-Some are wrong, and wrong claims send the team chasing the wrong thing. Bridgekeeper:
+Some are wrong, and wrong claims send the team chasing the wrong thing. Egg Head:
 
 1. **Hears** each utterance (speaker-labelled transcript).
 2. **Decides** whether the utterance is a *checkable claim*, and if so **which check** to run and **on which resource**. This is a Decider choice over a registry of checks and a live resource inventory.
@@ -71,7 +71,7 @@ Decider makes the judgment calls. Code does everything deterministic. Bedrock wr
  Amazon Transcribe streaming (speaker labels)
       │  final segments
       ▼
- ┌─────────────────────────── Bridgekeeper (local) ───────────────────────────┐
+ ┌───────────────────────────── Egg Head (local) ─────────────────────────────┐
  │                                                                            │
  │  Transcript window + Claim ledger  (code: rolling window ≤ ~3k tokens)     │
  │      │                                                                     │
@@ -211,13 +211,13 @@ Each ships with typed question definitions, option sets, the handler wiring, def
 2. **The incident (0:20–1:40):**
    - People debug.
    - Someone says "DB is fine".
-   - Bridgekeeper checks, finds a contradiction, waits for a gap and gives a one-sentence flag with evidence.
-   - Later a teammate corrects someone themselves, and Bridgekeeper stays silent (shown on the dashboard).
+   - Egg Head checks, finds a contradiction, waits for a gap and gives a one-sentence flag with evidence.
+   - Later a teammate corrects someone themselves, and Egg Head stays silent (shown on the dashboard).
 3. **Side by side (1:40–2:20):** a "Bedrock on every utterance" baseline, showing cost, latency and noise.
 4. **How it works and the patterns (2:20–2:55).**
 
 ### Metrics (baseline = LLM decides on every utterance)
-- Bedrock calls / tokens / $ per call-hour, Bedrock-only vs Bridgekeeper
+- Bedrock calls / tokens / $ per call-hour, Bedrock-only vs Egg Head
 - Decision latency per utterance (Decider p50/p95 vs Bedrock)
 - Interjection precision and recall on labelled scripts; false interjections; correct silences after self-repair
 - Calibration: accuracy of answers at confidence ≥ 0.9
@@ -267,7 +267,7 @@ If day 1 fails (routing is not reliable at high confidence), simplify: fewer and
 ## Open questions
 
 1. **Declared pattern tag:** `#policy` (SpeakGate is the headline) or `#tool-selection` (ClaimCheckRouter)? Leaning `#policy`, with tool selection as the second pattern.
-2. **Name:** keep "Bridgekeeper"?
+2. ~~**Name**~~ — decided: **Egg Head**.
 3. **Demo stack:** real AWS resources with fault injection (more convincing) vs a mocked metrics source (cheaper, fully repeatable)? Leaning real AWS with a small footprint.
 4. **Bedrock model and region** for generation and the escalation baseline.
 5. **Voices for the scripted call:** friends, or TTS voices for the "humans"?
