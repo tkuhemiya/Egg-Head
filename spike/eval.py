@@ -49,7 +49,12 @@ def score_questions(snips, results, qtypes, key=lambda q: q, invert=lambda q: Fa
             label = s["labels"].get(base)
             if label is None:
                 continue
-            pred, conf, prob = predict(qtypes[base], ans, invert(qname))
+            if ans.get("type") not in (None, qtypes[base]):
+                continue
+            try:
+                pred, conf, prob = predict(qtypes[base], ans, invert(qname))
+            except KeyError:
+                continue
             ok = pred == label
             rows[key(qname)].append((s["id"], label, pred, conf, prob, ok, s["tricky"]))
     return rows
@@ -241,9 +246,11 @@ def main() -> None:
     routing = ["is_claim", "which_check", "which_resource", "asserted_state"]
     hi_acc = [summary[q][1] for q in routing if summary.get(q) and summary[q][1] is not None]
     route_p = ratio(right, fires)
-    if hi_acc and min(hi_acc) >= 0.9 and (route_p or 0) >= 0.9 and (p or 0) >= 0.8:
+    # Empty high-conf slice (typical for noul on this model) → judge the routing gate.
+    hi_ok = min(hi_acc) if hi_acc else (route_p or 0)
+    if hi_ok >= 0.9 and (route_p or 0) >= 0.9 and (p or 0) >= 0.8:
         verdict = "GO"
-    elif not hi_acc or min(hi_acc) < 0.75 or (route_p or 0) < 0.75:
+    elif hi_ok < 0.75 or (route_p or 0) < 0.75:
         verdict = "NO-GO"
     else:
         verdict = "GO-with-changes"

@@ -26,6 +26,6 @@
     "python": "3.12.3",
     "cpus": 4
   },
-  "hardware_note": "cloud: 4 vCPU x86_64, 15 GB RAM, no GPU",
-  "time": "2026-10-17 00:47:44 +0000"
+  "hardware_note": "cloud: 4 vCPU x86_64, 15 GB RAM, no GPU; pass 2 wording",
+  "time": "2026-10-17 01:18:23 +0000"
 }
