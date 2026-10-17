@@ -118,12 +118,31 @@ def main() -> None:
         md.append(f"- Hardware note: {meta['hardware_note']}")
     md.append("")
 
+    def invert_q(qname: str) -> bool:
+        if qname == "floor_free" and Q.FLOOR_INVERT:
+            return True
+        if "@v" in qname:
+            base, _, rest = qname.partition("@v")
+            try:
+                return (base, int(rest)) in Q.INVERTED
+            except ValueError:
+                return False
+        return False
+
     # 1-2. Per-question accuracy and high-confidence slice.
-    rows = score_questions(snips, results, qtypes)
+    # Patch labels in a shallow copy so scoring sees mapped gold.
+    snips_scored = []
+    for s in snips:
+        lab = dict(s["labels"])
+        if qtypes.get("silence_cost") == "noul" and isinstance(lab.get("silence_cost"), int):
+            lab["silence_cost"] = lab["silence_cost"] >= Q.SILENCE_COST_NOUL_AT
+        snips_scored.append({**s, "labels": lab})
+    rows = score_questions(snips_scored, results, qtypes, invert=invert_q)
     table, summary = acc_table(rows)
     md += ["## 1. Per-question accuracy", "",
            "Confidence: noul = max(p, 1−p); choice = (N·p_max−1)/(N−1); score = the ordinal "
-           "confidence the server returns. `silence_cost` counts as correct only on the exact level.",
+           "confidence the server returns. Pass-2 `silence_cost` is noul (gold = level ≥ moderate). "
+           "Pass-2 `floor_free` is asked as 'would speaking interrupt?' and inverted.",
            "", *table, ""]
 
     # 3. Calibration.
@@ -169,13 +188,16 @@ def main() -> None:
     tp, fp, fn, p, r = prf([(x[1], x[2]) for x in speak])
     md += ["## 4. Speak gate (§5.3 'speak', snippets with an open flagged claim)", "",
            f"- Precision **{pct(p)}**, recall **{pct(r)}** (TP {tp}, FP {fp}, FN {fn}, n {len(speak)})",
-           "", "| id | gold | gate | self_repaired | floor_free | silence s | E[silence_cost] |",
+           f"- Thresholds: T_ROUTE={Q.T_ROUTE}, T_SELF_REPAIRED={Q.T_SELF_REPAIRED}, "
+           f"T_FLOOR={Q.T_FLOOR} (FLOOR_INVERT={Q.FLOOR_INVERT}), T_SILENCE_S={Q.T_SILENCE_S}s, "
+           f"T_COST={Q.T_COST}",
+           "", "| id | gold | gate | self_repaired | floor_free | silence s | silence_cost |",
            "|---|---|---|---|---|---|---|"]
     for sid, pred, gold, a in speak:
         flag = "" if pred == gold else " ❌"
         md.append(f"| {sid}{flag} | {'speak' if gold else 'quiet'} | {'speak' if pred else 'quiet'} "
-                  f"| {a['self_repaired']['noul']:.2f} | {a['floor_free']['noul']:.2f} "
-                  f"| {by_id[sid]['silence_s']} | {a['silence_cost']['score']:.2f} |")
+                  f"| {a['self_repaired']['noul']:.2f} | {Q.floor_free_p(a):.2f} "
+                  f"| {by_id[sid]['silence_s']} | {Q.silence_cost_p(a):.2f} |")
     md.append("")
 
     # 6. Latency.
@@ -199,7 +221,7 @@ def main() -> None:
     worst = sorted(summary, key=lambda q: (summary[q][0] or 0))[:3]
     md += ["## 6. Rewording test", ""]
     if rew:
-        rrows = score_questions(snips, rew, qtypes, invert=lambda q: (q.split("@")[0], int(q.split("@v")[1])) in Q.INVERTED)
+        rrows = score_questions(snips_scored, rew, qtypes, invert=invert_q)
         t, _ = acc_table({**{f"{q.split('@')[0]} (base)": rows[q.split("@")[0]] for q in rrows}, **rrows})
         md += t
         md += ["", "Variant wording: see `questions.VARIANTS`."]
@@ -228,8 +250,9 @@ def main() -> None:
     md += ["## 8. Suggested verdict", "",
            f"**{verdict}** (rule: GO if every routing question is ≥ 90% accurate at confidence ≥ 0.9, "
            "routing-gate precision ≥ 90% and speak-gate precision ≥ 80%; NO-GO if any of the first two is "
-           "below 75%; otherwise GO-with-changes). The final call, thresholds and wording are a human "
-           "decision: record them in NextSteps.md.", ""]
+           "below 75%; otherwise GO-with-changes). Pass 1 showed conf ≥ 0.9 is mostly empty on these "
+           "noul questions, so the human call should also look at routing-gate precision at T_ROUTE and "
+           "speak-gate precision. Record the call in NextSteps.md.", ""]
     if meta.get("dry_run"):
         md.insert(2, "> Verdict below is computed from random answers. Ignore it.\n")
 

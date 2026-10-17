@@ -35,12 +35,18 @@ ASSERTED = {
 
 SILENCE_COST = ["none", "low", "moderate", "high", "critical"]
 
-# Gate thresholds (PROJECT.md §5.3). Starting points; the spike calibrates them.
-T_ROUTE = 0.9          # is_claim probability and choice confidence to run a check
-T_SELF_REPAIRED = 0.3  # speak only if P(self_repaired) below this
-T_FLOOR = 0.7          # floor_free probability, or ...
-T_SILENCE_S = 1.2      # ... this much silence from VAD
-T_COST = 2.0           # E[silence_cost] index >= "moderate"
+# Gate thresholds. Pass 1 (PROJECT.md §5.3 starting points) never fired: noul
+# answers sat in 0.5–0.8, so conf ≥ 0.9 had ~0% coverage. Pass 2 uses the
+# calibration from pass 1 (routing precision was 100% at T=0.7).
+T_ROUTE = 0.7          # is_claim probability and choice confidence to run a check
+T_SELF_REPAIRED = 0.45 # speak only if P(self_repaired) below this
+T_FLOOR = 0.5          # P(floor is free) after inverting the interrupt question
+T_SILENCE_S = 1.2      # ... or this much silence from VAD
+T_COST = 0.5           # noul: worth interrupting? (pass 1 5-level score always ~2)
+# floor_free is asked as "would speaking interrupt?" — invert so True = gap.
+FLOOR_INVERT = True
+# Dataset silence_cost is still 0–4; the noul gold is "at least moderate".
+SILENCE_COST_NOUL_AT = 2
 
 
 def load_world() -> dict:
@@ -56,14 +62,19 @@ def inventory(world: dict) -> dict[str, str]:
 
 def render_state(snippet: dict) -> str:
     """One Decider state per snippet: transcript window, latest marked, open ledger."""
-    lines = ["Incident bridge call transcript (oldest first)."]
+    lines = [
+        "Incident bridge call transcript (oldest first).",
+        "Routing questions (is_claim, which_check, which_resource, asserted_state) "
+        "apply ONLY to the utterance marked LATEST, not to the flagged claim.",
+    ]
     turns = snippet["transcript"]
     for i, t in enumerate(turns):
         mark = ">>> LATEST " if i == len(turns) - 1 else ""
         lines.append(f'{mark}{t["speaker"]}: {t["text"]}')
     lines.append("")
     if snippet.get("ledger"):
-        lines.append("Flagged claim (checked by Egg Head, not yet raised on the call):")
+        lines.append("Flagged claim (already checked by Egg Head, not yet raised on the call). "
+                     "Use this only for self_repaired, open_question, floor_free, silence_cost:")
         for item in snippet["ledger"]:
             lines.append(
                 f'- {item["speaker"]} said "{item["claim"]}". '
@@ -79,43 +90,49 @@ def build_questions(world: dict) -> dict[str, dict]:
     return {
         "is_claim": {
             "type": "noul",
-            "instructions": "Does the latest utterance assert something about the current state "
-            "of a system, service, metric or recent change?",
+            "instructions": "Is the LATEST utterance a factual statement about how a system is "
+            "behaving right now, or about a recent deploy or change? Guesses, questions, plans, "
+            "actions, and statements about the past are not. Ignore the flagged claim.",
         },
         "which_check": {
             "type": "choice",
-            "instructions": "Which check would verify the latest utterance?",
+            "instructions": "Which one check would verify the LATEST utterance? If that utterance "
+            "is not a checkable claim, choose none. Ignore the flagged claim.",
             "criteria": CHECKS,
         },
         "which_resource": {
             "type": "choice",
-            "instructions": "Which resource is the latest utterance about?",
+            "instructions": "Which single named resource does the LATEST utterance refer to? "
+            "Use earlier turns to resolve words like 'it' or 'the database'. If it is unclear, "
+            "several, or none, choose unknown. Ignore the flagged claim.",
             "criteria": inventory(world),
         },
         "asserted_state": {
             "type": "choice",
-            "instructions": "What does the speaker of the latest utterance claim about it?",
+            "instructions": "What does the speaker of the LATEST utterance claim about that "
+            "resource? Ignore the flagged claim.",
             "criteria": ASSERTED,
         },
         "self_repaired": {
             "type": "noul",
-            "instructions": "Since the flagged claim was made, has anyone on the call already "
-            "corrected or questioned it?",
+            "instructions": "After the flagged claim, did someone on the call already say it was "
+            "wrong, or ask whether it was right? Agreeing with the claim is not a correction.",
         },
         "open_question": {
             "type": "noul",
-            "instructions": "Is there a question in the recent conversation that nobody has answered?",
+            "instructions": "Did someone ask a question in the recent conversation that is still "
+            "waiting for an answer?",
         },
         "floor_free": {
             "type": "noul",
-            "instructions": "Is this a natural moment to interject, rather than mid-thought or "
-            "mid-argument?",
+            # Asked as the interrupt question (pass-1 v1, 87% after invert). Gate inverts it.
+            "instructions": "Would speaking right now interrupt someone in the middle of a "
+            "sentence or an argument?",
         },
         "silence_cost": {
-            "type": "score",
-            "instructions": "How harmful would it be for the team to keep going without being told "
-            "the flagged check result?",
-            "criteria": SILENCE_COST,
+            "type": "noul",
+            "instructions": "Is the flagged check result important enough to interrupt the team "
+            "with, given what they are currently discussing? Parked or off-path topics are not.",
         },
     }
 
@@ -197,11 +214,24 @@ def route_gate(a: dict) -> bool:
     )
 
 
+def floor_free_p(a: dict) -> float:
+    """P(natural gap). Pass 2 asks the interrupt question and inverts."""
+    p = a["floor_free"]["noul"]
+    return 1 - p if FLOOR_INVERT else p
+
+
+def silence_cost_p(a: dict) -> float:
+    """P(worth interrupting). Pass 1 was a 5-level score; pass 2 is noul."""
+    if a["silence_cost"]["type"] == "noul":
+        return a["silence_cost"]["noul"]
+    return a["silence_cost"]["score"] / (len(SILENCE_COST) - 1)
+
+
 def speak_gate(a: dict, silence_s: float, cooldown_ok: bool = True) -> bool:
     """PROJECT.md §5.3 'speak' rule for an open, already-persisted contradiction."""
     return (
         a["self_repaired"]["noul"] < T_SELF_REPAIRED
-        and (a["floor_free"]["noul"] >= T_FLOOR or silence_s >= T_SILENCE_S)
-        and a["silence_cost"]["score"] >= T_COST
+        and (floor_free_p(a) >= T_FLOOR or silence_s >= T_SILENCE_S)
+        and silence_cost_p(a) >= T_COST
         and cooldown_ok
     )

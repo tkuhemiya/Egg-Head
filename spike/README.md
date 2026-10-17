@@ -31,6 +31,8 @@ python spike/eval.py
 
 `python spike/run.py --dry-run` uses random answers to test the pipeline without the model; the report is stamped as a dry run.
 
+Pass 1 (PROJECT.md wording, T_ROUTE=0.9) is archived in `out/pass1/` and `REPORT-pass1.md`. Pass 2 uses the calibrated wording and thresholds in `questions.py` and writes `REPORT.md`.
+
 ## Labelling conventions
 
 - `is_claim`: an assertion about *current* system state or a recent change. Guesses, questions, plans, actions and past state are not claims.
