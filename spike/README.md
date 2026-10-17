@@ -29,7 +29,9 @@ python spike/run.py --url http://127.0.0.1:8000 --reword is_claim,floor_free
 python spike/eval.py
 ```
 
-`python spike/run.py --dry-run` uses random answers to test the pipeline without the model; the report is stamped as a dry run.
+`python spike/run.py --dry-run` uses random answers to test the pipeline without the model; the report is stamped as a dry run. It **overwrites** `out/results.jsonl`.
+
+Pass 1 (PROJECT.md wording, T_ROUTE=0.9) is archived in `out/pass1/` and `REPORT-pass1.md`. Pass 2 is `REPORT.md` and `out/pass2/`. **Verdict: GO-with-changes** — see [NextSteps.md](../NextSteps.md) §3.
 
 ## Labelling conventions
 

@@ -1,6 +1,6 @@
 # Next Steps
 
-Status as of Fri 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline: **Sat 24 Oct, 12:29 PM Colombo**.
+Status as of Sat 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline: **Sat 24 Oct, 12:29 PM Colombo**.
 
 ## 1. Decide the open questions (from PROJECT.md)
 
@@ -12,48 +12,43 @@ Status as of Fri 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline:
 
 ## 2. Make a real cloud run possible
 
-- [x] Create a GitHub repo (keep it **private** until submission, since originality requires it to be unpublished) and push `main`:
-  ```bash
-  gh repo create Strands-Decider-usecase --private --source . --push
-  ```
-- [x] Start a cloud session at **claude.ai/code** on that repo.
-- [x] Before relying on latency numbers, check what hardware the cloud session has (GPU or CPU only). Accuracy results are valid either way; latency must be re-measured on the M4.
-  - Cloud session: 4 vCPU x86_64, 15 GB RAM, **no GPU**. Its network policy **blocks huggingface.co**, so the weights can't be downloaded there. Either allow `huggingface.co` (and `*.hf.co` / `cdn-lfs.huggingface.co`) in the environment's network settings, or run the spike on the Mac.
+- [x] Create a GitHub repo (keep it **private** until submission, since originality requires it to be unpublished) and push `main`.
+- [x] Start a cloud session on that repo.
+- [x] Hardware: 4 vCPU x86_64, 15 GB RAM, **no GPU**. Hugging Face is reachable in the current cloud agent environment (earlier session had it blocked). Accuracy is valid; **re-measure latency on the M4** before quoting ms numbers. Pass-2 CPU batch p50 was ~12 s (8 questions).
 
-## 3. Run the go/no-go test (day 1, today)
+## 3. Go/no-go test (done)
 
-In the cloud session, or locally if the Mac is free. The goal is to find out whether Decider 2B answers our questions reliably before building anything.
+Harness: [spike/README.md](spike/README.md). Labels in `spike/dataset.jsonl` were written before any model run.
 
-Harness is ready: see [spike/README.md](spike/README.md) for the commands.
+- [x] Install `strands-decider`, load `StrandsAgents/strands-decider-2B-qwen3.5-v1-2610`
+- [x] Labelled dataset, batched `run.py`, `eval.py`, rewording on pass 1
+- [x] Pass 1 on the real model → [spike/REPORT-pass1.md](spike/REPORT-pass1.md) (suggested **NO-GO** at T_ROUTE=0.9: routing fired 0/46; noul never reached conf ≥ 0.9)
+- [x] Pass 2: simpler wording, LATEST-only routing, inverted `floor_free`, noul `silence_cost`, T_ROUTE=0.7 → [spike/REPORT.md](spike/REPORT.md)
+- [x] **Verdict: GO-with-changes**
 
-- [ ] Install `strands-decider`, load `StrandsAgents/strands-decider-2B-qwen3.5-v1-2610` (blocked in the cloud session: huggingface.co not allowed)
-- [x] Write `spike/dataset.jsonl`: ~40 labelled bridge-call snippets. Write the correct answers **before** running the model. Include a mix of:
-  - true and false claims
-  - guesses that aren't claims
-  - self-corrections
-  - unanswered questions
-  - mid-argument moments
-  - unclear resource names
-  - some deliberately tricky cases
-- [x] `spike/run.py`: all §5 questions in **one batch per snippet**. Confirm the state is read once (`--prefix-check` compares the batch with one-by-one questions).
-- [x] `spike/eval.py` → `spike/REPORT.md` (written; tested on a dry run only):
-  - per-question accuracy
-  - accuracy and coverage at confidence ≥ 0.9
-  - calibration table
-  - speak-gate precision and recall
-  - latency p50/p95 and hardware
-  - rewording tests on the 2–3 worst questions
-- [ ] Run it on the model and read `spike/REPORT.md`
-- [ ] **Verdict:** GO / GO-with-changes / NO-GO. Set thresholds and question wording.
+### What we keep
 
-If it's NO-GO: use fewer and simpler questions, move more structure into code, or narrow the claim types, then re-run.
+| Decision | Owner | Threshold / wording |
+|---|---|---|
+| Run a check | Decider `is_claim` + `which_check` + `which_resource` | Fire at **0.7**. Precision on pass 2: **100%** (4/4), recall 19%. Escalate the 0.55–0.7 band to Bedrock (counted). |
+| Floor / interrupt | Decider `floor_free` asked as *"Would speaking interrupt?"* then invert | 87% accuracy. OR VAD silence ≥ 1.2 s (code). |
+| Open question | Decider `open_question` | 87%. Useful for the dashboard; not required to speak. |
+| Claim vs check | **Code** `compare()` | Do not wait for `asserted_state` when it says `unclear` (pass 2 dropped to 56%). If check+resource fired, run the check and compare. |
 
-## 4. Build (only after GO)
+### What we move into code (Decider is weak here)
+
+- **`silence_cost`**: 12% as noul; always ~0.4. Derive from check severity + whether the topic was parked (s07).
+- **`self_repaired`**: 69%, overlap too high to threshold. Overlay keywords ("wait", "are you sure", "hold on") and ledger updates from later true claims.
+- **Conf ≥ 0.9 rule**: empty coverage on every noul. Do not use it as the speak/check gate.
+
+Pass-1 rewording that we adopted: interrupt wording for `floor_free`; "latest utterance only" for routing (stopped ledger leak into `which_check` on speak snippets).
+
+## 4. Build (GO-with-changes)
 
 | When | Work |
 |---|---|
-| Sat 18 Oct | Check registry + small AWS demo stack + fault injection. `ClaimCheckRouter` end-to-end on text. |
-| Sun 19 Oct | `SpeakGate` + claim ledger + Strands agent with `InterventionHandler` + Bedrock. Text-only end-to-end. **First:** check what `Deny` does in `before_model_call`. |
+| Sat 18 Oct | Check registry + small AWS demo stack + fault injection. `ClaimCheckRouter` end-to-end on text (T_ROUTE=0.7, Bedrock escalate mid-band). |
+| Sun 19 Oct | `SpeakGate` in code (VAD + inverted `floor_free` + keyword self-repair + cost from the check) + claim ledger + Strands `InterventionHandler` + Bedrock. **First:** check what `Deny` does in `before_model_call`. |
 | Mon 20 Oct | Audio: Transcribe streaming + Polly. Decision dashboard. |
 | Tue 21 Oct | Scripted scenarios, "Bedrock on every utterance" baseline, metrics. Package both patterns with usage notes. |
 | Wed 22 Oct | Builder Center article draft. Record demo. |
