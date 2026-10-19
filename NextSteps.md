@@ -6,7 +6,7 @@ Status as of Sat 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline:
 
 - [ ] Hackathon tag: `#policy` (recommended) or `#tool-selection`
 - [x] Name: **Egg Head**
-- [ ] Demo stack: real AWS resources with fault injection (recommended) or mocked metrics
+- [x] Demo stack: **local only**, mocked check source with fault injection (`egghead.checks.MockSource`). The deliverable is a video, so nothing is hosted. Bedrock is still the writer/escalation path.
 - [ ] Bedrock model and AWS region
 - [ ] Voices for the scripted call: friends or TTS
 
@@ -42,6 +42,14 @@ Harness: [spike/README.md](spike/README.md). Labels in `spike/dataset.jsonl` wer
 - **Conf ≥ 0.9 rule**: empty coverage on every noul. Do not use it as the speak/check gate.
 
 Pass-1 rewording that we adopted: interrupt wording for `floor_free`; "latest utterance only" for routing (stopped ledger leak into `which_check` on speak snippets).
+
+## 3b. Speak gate rework (Mon 19 Oct)
+
+`egghead/gate.py` moves the weak Decider questions into code, per the pass-2 findings: `silence_cost` from the check that disagreed (and dropped when the call parks the topic), `self_repaired` from keywords / a later true claim with the Decider as a weak vote, and a hard 0.5 s minimum of silence before speaking. Re-scored on the saved pass-2 answers: [spike/REPORT-gate.md](spike/REPORT-gate.md) (`python spike/gate_eval.py`), precision/recall 0% / 0% → 100% / 100%.
+
+**Caveat:** the rules were written after reading those 16 snippets, so this is a fit, not a held-out result. Needs ~15 new labelled gate snippets and a model run before the number is quoted.
+
+Also written: `egghead/` (checks + `MockSource`, router, ledger, text-mode `Bridge`, Decider backends, template speaker) and `tests/` (`python -m unittest discover -s tests -t .`). Not yet: Bedrock writer/escalation, Strands `InterventionHandler`, audio, dashboard, a runnable demo script.
 
 ## 4. Build (GO-with-changes)
 
