@@ -128,6 +128,8 @@ def main() -> None:
                     "the batch reads the state once")
     ap.add_argument("--reword", default="", help="comma-separated question ids to reword-test")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--dataset", default="dataset.jsonl", help="file in spike/")
+    ap.add_argument("--out", default="out", help="output dir in spike/")
     args = ap.parse_args()
 
     if args.url:
@@ -137,9 +139,11 @@ def main() -> None:
     else:
         backend = LocalBackend(args.checkpoint, args.device)
 
+    global OUT
+    OUT = Q.HERE / args.out
     world = Q.load_world()
     base_qs = Q.build_questions(world)
-    snippets = [json.loads(l) for l in (Q.HERE / "dataset.jsonl").read_text().splitlines() if l]
+    snippets = [json.loads(l) for l in (Q.HERE / args.dataset).read_text().splitlines() if l]
     if args.limit:
         snippets = snippets[: args.limit]
     OUT.mkdir(exist_ok=True)

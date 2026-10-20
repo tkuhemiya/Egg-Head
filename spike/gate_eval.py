@@ -11,6 +11,7 @@ model run before it is quoted as accuracy.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -58,9 +59,17 @@ def pct(x):
 
 
 def main() -> None:
-    snips = [json.loads(l) for l in (Q.HERE / "dataset.jsonl").read_text().splitlines() if l]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dataset", default="dataset.jsonl")
+    ap.add_argument("--results", default="out/results.jsonl")
+    ap.add_argument("--report", default="REPORT-gate.md")
+    ap.add_argument("--title", default="Speak gate rework: re-score on pass-2 answers")
+    ap.add_argument("--note", default="The new gate was written after reading these 16 snippets and "
+                    "the pass-2 errors. Read the score as a fit, not a held-out result.")
+    args = ap.parse_args()
+    snips = [json.loads(l) for l in (Q.HERE / args.dataset).read_text().splitlines() if l]
     results = {json.loads(l)["id"]: json.loads(l)
-               for l in (Q.HERE / "out" / "results.jsonl").read_text().splitlines() if l}
+               for l in (Q.HERE / args.results).read_text().splitlines() if l}
     rows = []
     for s in snips:
         if not s["ledger"] or s["id"] not in results:
@@ -70,9 +79,7 @@ def main() -> None:
         d = G.decide(gate_input(s, a))
         rows.append((s, old, d))
 
-    md = ["# Speak gate rework: re-score on pass-2 answers", "",
-          "> The new gate was written after reading these 16 snippets and the pass-2 errors. "
-          "Read the score as a fit, not a held-out result.", ""]
+    md = [f"# {args.title}", "", f"> {args.note}", ""]
     for name, key in (("Pass-2 gate (questions.speak_gate)", lambda r: r[1]),
                       ("Reworked gate (egghead.gate)", lambda r: r[2].speak)):
         tp, fp, fn, p, r_ = prf([(key(r), r[0]["labels"]["should_speak"]) for r in rows])
@@ -86,7 +93,7 @@ def main() -> None:
         md.append(f"| {s['id']}{flag} | {'speak' if gold else 'quiet'} | {'speak' if old else 'quiet'} "
                   f"| {'speak' if d.speak else 'quiet'} | {d.blocked_by or ''} | {d.repaired_by or ''} "
                   f"| {G.LEVELS[d.cost_level]} | {d.floor_p:.2f} | {s['silence_s']} |")
-    (Q.HERE / "REPORT-gate.md").write_text("\n".join(md) + "\n")
+    (Q.HERE / args.report).write_text("\n".join(md) + "\n")
     print("\n".join(md))
 
 
