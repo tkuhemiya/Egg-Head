@@ -40,3 +40,14 @@ Pass 1 (PROJECT.md wording, T_ROUTE=0.9) is archived in `out/pass1/` and `REPORT
 - A self-correction inside one utterance is labelled by its final assertion.
 - `self_repaired`, `silence_cost` and `should_speak` are only labelled for snippets with a flagged claim. Agreeing with a wrong claim is not a repair; questioning it is.
 - `silence_cost` is a level index: 0 none, 1 low, 2 moderate, 3 high, 4 critical.
+
+## Held-out gate set
+
+`dataset_heldout.jsonl`: 20 gate snippets (h01-h20) labelled before any model run, about half built to break the keyword rules in `egghead/gate.py`.
+
+```bash
+python spike/run.py --checkpoint --device cpu --dataset dataset_heldout.jsonl --out out/heldout --prefix-check 0
+python spike/gate_eval.py --dataset dataset_heldout.jsonl --results out/heldout/results.jsonl \
+  --report REPORT-gate-heldout.md --title "Speak gate: held-out set (h01-h20)" \
+  --note "Labels committed before the run; rules frozen."
+```

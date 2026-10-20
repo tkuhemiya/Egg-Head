@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
+from typing import Callable
 
 from . import gate as G
 from .checks import CheckSource
@@ -40,6 +41,7 @@ class Bridge:
     decider: Decider
     source: CheckSource
     writer: Writer = template_line
+    escalator: Callable[[list[tuple[str, str]]], Route] | None = None  # Bedrock support
     ledger: Ledger = field(default_factory=Ledger)
     turns: list[tuple[str, str]] = field(default_factory=list)
     events: list[Event] = field(default_factory=list)
@@ -63,6 +65,8 @@ class Bridge:
         if rt.action == "escalate":
             self.escalations += 1
             ev.escalations = self.escalations
+            if self.escalator:
+                rt = ev.route = self.escalator(window)
         supports_open = False
         if rt.action == "check":
             res = self.source.run(rt.check, rt.resource)

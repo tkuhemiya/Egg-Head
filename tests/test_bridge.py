@@ -112,6 +112,14 @@ class BridgeTests(unittest.TestCase):
         ])
         self.assertEqual(evs[0].verdict, "contradicts")
 
+    def test_escalation_hands_the_utterance_to_bedrock_support(self):
+        mid = routed("db_health", "orders-db", "healthy")
+        mid["which_check"]["confidence"] = 0.6
+        picked = route(routed("db_health", "orders-db", "healthy"))
+        bridge = Bridge(ScriptedDecider([mid]), MockSource.load(), escalator=lambda turns: picked)
+        ev = bridge.hear("Sam", "The DB is fine.", 0.4)
+        self.assertEqual((ev.verdict, bridge.escalations), ("contradicts", 1))
+
     def test_escalations_are_counted(self):
         mid = routed("db_health", "orders-db", "healthy")
         mid["which_check"]["confidence"] = 0.6

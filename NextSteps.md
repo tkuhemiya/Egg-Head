@@ -49,7 +49,11 @@ Pass-1 rewording that we adopted: interrupt wording for `floor_free`; "latest ut
 
 **Caveat:** the rules were written after reading those 16 snippets, so this is a fit, not a held-out result. Needs ~15 new labelled gate snippets and a model run before the number is quoted.
 
-Also written: `egghead/` (checks + `MockSource`, router, ledger, text-mode `Bridge`, Decider backends, template speaker) and `tests/` (`python -m unittest discover -s tests -t .`). Not yet: Bedrock writer/escalation, Strands `InterventionHandler`, audio, dashboard, a runnable demo script.
+Also written: `egghead/` (checks + `MockSource`, router, ledger, text-mode `Bridge`, Decider backends, template speaker) and `tests/` (`python -m unittest discover -s tests -t .`). Bedrock (`egghead/bedrock.py`): a Strands agent that is (a) the tool-calling writer when the gate opens (checks are its tools) and (b) the support for the 0.55-0.7 routing band (`Bridge(escalator=...)`, counted). `SpeakGuard` is the `InterventionHandler`. **The `Deny` TODO is resolved:** in `before_model_call` it sets `event.cancel`, the event loop skips the model and returns "DENIED: reason" with zero usage. Tested with stubs only; not yet run against real Bedrock (no credentials in the cloud session). Needs `EGGHEAD_MODEL_ID` / `AWS_REGION`.
+
+**Held-out set:** `spike/dataset_heldout.jsonl` (20 snippets, labels committed before any run). Scoring is blocked: the cloud session's network policy denies `huggingface.co` (403), so the model could not be downloaded. Allow the host (or run on the M4), then run the two commands in the commit message / `spike/README.md`.
+
+Not yet: audio, dashboard, a runnable demo script.
 
 ## 4. Build (GO-with-changes)
 
