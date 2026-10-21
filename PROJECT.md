@@ -1,6 +1,6 @@
 # Egg Head — the on-call agent that knows when to speak
 
-> A voice agent that sits silently on an incident bridge call, checks what people claim against the real systems, and speaks up only when it matters. Strands Decider 2B makes the "should I check / should I speak" calls locally in ~150 ms. Amazon Bedrock only runs when the agent has something worth saying.
+> **What this is:** a pattern for agents that decide, locally and fast, *when a person's turn is over, whether the agent should speak up or stay silent, and what action to take on what was just said*. Strands Decider 2B makes those calls in ~150 ms; Amazon Bedrock only runs when the agent acts. **The demo** is a voice agent on a scripted incident bridge call that checks what people claim against live systems and speaks up only when it matters. The incident call is the showcase, not the goal of the project.
 
 - **Hackathon:** Agent Experience Hackathon: Strands Decider
 - **Due:** Sat 24 Oct 2026, 12:29 PM Colombo
@@ -259,7 +259,7 @@ If day 1 fails (routing is not reliable at high confidence), simplify: fewer and
 
 - No post-training of Decider. Use only the published weights.
 - Anything deterministic is done in code. Decider is used only for judgment.
-- Don't look at the hackathon projects tab for ideas.
+- Don't take ideas from the hackathon projects tab. (Lifted 21 Oct by the owner for one purpose only: a competitive read on overlap and novelty. The tab is currently unreachable from the cloud session, `builder.aws.com` is denied.)
 - Original and unpublished until submission.
 
 ---

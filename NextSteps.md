@@ -1,12 +1,14 @@
 # Next Steps
 
-Status as of Sat 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline: **Sat 24 Oct, 12:29 PM Colombo**.
+Status as of Wed 21 Oct 2026. **Scope reminder:** the project is the turn-taking / when-to-speak / what-action-to-take decision pattern; the incident call is only the demo.
+
+Previous status line: Sat 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline: **Sat 24 Oct, 12:29 PM Colombo**.
 
 ## 1. Decide the open questions (from PROJECT.md)
 
 - [ ] Hackathon tag: `#policy` (recommended) or `#tool-selection`
 - [x] Name: **Egg Head**
-- [ ] Demo stack: real AWS resources with fault injection (recommended) or mocked metrics
+- [x] Demo stack: **local only**, mocked check source with fault injection (`egghead.checks.MockSource`). The deliverable is a video, so nothing is hosted. Bedrock is still the writer/escalation path.
 - [ ] Bedrock model and AWS region
 - [ ] Voices for the scripted call: friends or TTS
 
@@ -42,6 +44,18 @@ Harness: [spike/README.md](spike/README.md). Labels in `spike/dataset.jsonl` wer
 - **Conf ≥ 0.9 rule**: empty coverage on every noul. Do not use it as the speak/check gate.
 
 Pass-1 rewording that we adopted: interrupt wording for `floor_free`; "latest utterance only" for routing (stopped ledger leak into `which_check` on speak snippets).
+
+## 3b. Speak gate rework (Mon 19 Oct)
+
+`egghead/gate.py` moves the weak Decider questions into code, per the pass-2 findings: `silence_cost` from the check that disagreed (and dropped when the call parks the topic), `self_repaired` from keywords / a later true claim with the Decider as a weak vote, and a hard 0.5 s minimum of silence before speaking. Re-scored on the saved pass-2 answers: [spike/REPORT-gate.md](spike/REPORT-gate.md) (`python spike/gate_eval.py`), precision/recall 0% / 0% → 100% / 100%.
+
+**Caveat:** the rules were written after reading those 16 snippets, so this is a fit, not a held-out result. Needs ~15 new labelled gate snippets and a model run before the number is quoted.
+
+Also written: `egghead/` (checks + `MockSource`, router, ledger, text-mode `Bridge`, Decider backends, template speaker) and `tests/` (`python -m unittest discover -s tests -t .`). Bedrock (`egghead/bedrock.py`): a Strands agent that is (a) the tool-calling writer when the gate opens (checks are its tools) and (b) the support for the 0.55-0.7 routing band (`Bridge(escalator=...)`, counted). `SpeakGuard` is the `InterventionHandler`. **The `Deny` TODO is resolved:** in `before_model_call` it sets `event.cancel`, the event loop skips the model and returns "DENIED: reason" with zero usage. Tested with stubs only; not yet run against real Bedrock (no credentials in the cloud session). Needs `EGGHEAD_MODEL_ID` / `AWS_REGION`.
+
+**Held-out set:** `spike/dataset_heldout.jsonl` (20 snippets, labels committed before any run). Scoring is blocked: the cloud session's network policy denies `huggingface.co` (403), so the model could not be downloaded. Allow the host (or run on the M4), then run the two commands in the commit message / `spike/README.md`.
+
+Not yet: audio, dashboard, a runnable demo script.
 
 ## 4. Build (GO-with-changes)
 
