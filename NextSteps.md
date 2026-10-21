@@ -1,6 +1,8 @@
 # Next Steps
 
-Status as of Sat 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline: **Sat 24 Oct, 12:29 PM Colombo**.
+Status as of Wed 21 Oct 2026. **Scope reminder:** the project is the turn-taking / when-to-speak / what-action-to-take decision pattern; the incident call is only the demo.
+
+Previous status line: Sat 17 Oct 2026. The plan is in [PROJECT.md](PROJECT.md). Deadline: **Sat 24 Oct, 12:29 PM Colombo**.
 
 ## 1. Decide the open questions (from PROJECT.md)
 
