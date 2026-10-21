@@ -1,0 +1,1030 @@
+[
+ {
+  "id": "q000",
+  "claim_item": "x000",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let's go service by service."
+   }
+  ],
+  "claim": {
+   "speaker": "Priya",
+   "text": "The orders database is fine, CPU's normal."
+  },
+  "resource": "orders-db",
+  "check": "db_health",
+  "repair_at": 1,
+  "follow": [
+   {
+    "speaker": "Lee",
+    "text": "Hmm, that doesn't match my dashboard for orders-db.",
+    "repair": true
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Can someone mute? There's an echo.",
+    "repair": false
+   },
+   {
+    "speaker": "Priya",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q001",
+  "claim_item": "x001",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   }
+  ],
+  "claim": {
+   "speaker": "Jordan",
+   "text": "Nothing wrong with orders-db, connections are normal."
+  },
+  "resource": "orders-db",
+  "check": "db_health",
+  "repair_at": 2,
+  "follow": [
+   {
+    "speaker": "Priya",
+    "text": "Let me check the load balancer.",
+    "repair": false
+   },
+   {
+    "speaker": "Mei",
+    "text": "Wait, are you sure? I see orders-db looking bad on my screen.",
+    "repair": true
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Good, so it has to be something else.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q002",
+  "claim_item": "x006",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   }
+  ],
+  "claim": {
+   "speaker": "Mei",
+   "text": "The payments database is struggling, connections are maxed."
+  },
+  "resource": "payments-db",
+  "check": "db_health",
+  "repair_at": 3,
+  "follow": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let me check the load balancer.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "I don't think that's true about payments-db.",
+    "repair": true
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q003",
+  "claim_item": "x007",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   }
+  ],
+  "claim": {
+   "speaker": "Mei",
+   "text": "Error rate on orders-api is flat."
+  },
+  "resource": "orders-api",
+  "check": "service_error_rate",
+  "repair_at": null,
+  "follow": [
+   {
+    "speaker": "Jordan",
+    "text": "Okay, noted.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "I'm pulling up the logs now.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Let me check the load balancer.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q004",
+  "claim_item": "x012",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   }
+  ],
+  "claim": {
+   "speaker": "Priya",
+   "text": "Payments-api is throwing a lot of 500s."
+  },
+  "resource": "payments-api",
+  "check": "service_error_rate",
+  "repair_at": 1,
+  "follow": [
+   {
+    "speaker": "Mei",
+    "text": "Sorry to jump in, but payments-api is definitely not fine.",
+    "repair": true
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let me check the load balancer.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Let's look at the pods.",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q005",
+  "claim_item": "x013",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let's go service by service."
+   }
+  ],
+  "claim": {
+   "speaker": "Lee",
+   "text": "The auth service is throwing a lot of 500s."
+  },
+  "resource": "auth-service",
+  "check": "service_error_rate",
+  "repair_at": 2,
+  "follow": [
+   {
+    "speaker": "Priya",
+    "text": "Sam, can you share your screen?",
+    "repair": false
+   },
+   {
+    "speaker": "Mei",
+    "text": "Hmm, that doesn't match my dashboard for auth-service.",
+    "repair": true
+   },
+   {
+    "speaker": "Priya",
+    "text": "Sam, can you share your screen?",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q006",
+  "claim_item": "x014",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   }
+  ],
+  "claim": {
+   "speaker": "Mei",
+   "text": "Auth is erroring badly."
+  },
+  "resource": "auth-service",
+  "check": "service_error_rate",
+  "repair_at": 3,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "Let's look at the pods.",
+    "repair": false
+   },
+   {
+    "speaker": "Priya",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   },
+   {
+    "speaker": "Mei",
+    "text": "Hold on, that's not right, auth-service is in trouble.",
+    "repair": true
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q007",
+  "claim_item": "x015",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   }
+  ],
+  "claim": {
+   "speaker": "Sam",
+   "text": "The orders API is completely down, nothing is getting through."
+  },
+  "resource": "orders-api",
+  "check": "service_error_rate",
+  "repair_at": null,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "I'm pulling up the logs now.",
+    "repair": false
+   },
+   {
+    "speaker": "Priya",
+    "text": "Sam, can you share your screen?",
+    "repair": false
+   },
+   {
+    "speaker": "Priya",
+    "text": "Good, so it has to be something else.",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q008",
+  "claim_item": "x016",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   }
+  ],
+  "claim": {
+   "speaker": "Lee",
+   "text": "The orders API is hard down."
+  },
+  "resource": "orders-api",
+  "check": "service_error_rate",
+  "repair_at": 1,
+  "follow": [
+   {
+    "speaker": "Lee",
+    "text": "Hmm, that doesn't match my dashboard for orders-api.",
+    "repair": true
+   },
+   {
+    "speaker": "Priya",
+    "text": "Who's writing the timeline?",
+    "repair": false
+   },
+   {
+    "speaker": "Sam",
+    "text": "Sam, can you share your screen?",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q009",
+  "claim_item": "x017",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   }
+  ],
+  "claim": {
+   "speaker": "Lee",
+   "text": "The payments API is completely down, nothing is getting through."
+  },
+  "resource": "payments-api",
+  "check": "service_error_rate",
+  "repair_at": 2,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "I'm pulling up the logs now.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Actually no, I'm looking at payments-api and it's not what you said.",
+    "repair": true
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q010",
+  "claim_item": "x018",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let's go service by service."
+   }
+  ],
+  "claim": {
+   "speaker": "Priya",
+   "text": "Latency on the orders API is fine."
+  },
+  "resource": "orders-api",
+  "check": "latency_p99",
+  "repair_at": 3,
+  "follow": [
+   {
+    "speaker": "Priya",
+    "text": "I'll ping the payments team.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Let me check the load balancer.",
+    "repair": false
+   },
+   {
+    "speaker": "Mei",
+    "text": "Wait, are you sure? I see orders-api looking bad on my screen.",
+    "repair": true
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q011",
+  "claim_item": "x019",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   }
+  ],
+  "claim": {
+   "speaker": "Priya",
+   "text": "Orders-api p99 is normal, a few hundred ms."
+  },
+  "resource": "orders-api",
+  "check": "latency_p99",
+  "repair_at": null,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "I'm pulling up the logs now.",
+    "repair": false
+   },
+   {
+    "speaker": "Sam",
+    "text": "Good, so it has to be something else.",
+    "repair": false
+   },
+   {
+    "speaker": "Priya",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q012",
+  "claim_item": "x023",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   }
+  ],
+  "claim": {
+   "speaker": "Jordan",
+   "text": "P99 on the payments API is way up, like four seconds."
+  },
+  "resource": "payments-api",
+  "check": "latency_p99",
+  "repair_at": 1,
+  "follow": [
+   {
+    "speaker": "Mei",
+    "text": "Wait, are you sure? I see payments-api looking bad on my screen.",
+    "repair": true
+   },
+   {
+    "speaker": "Sam",
+    "text": "Let me check the load balancer.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Let's look at the pods.",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q013",
+  "claim_item": "x024",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   }
+  ],
+  "claim": {
+   "speaker": "Lee",
+   "text": "Payments-api is super slow, latency spiked."
+  },
+  "resource": "payments-api",
+  "check": "latency_p99",
+  "repair_at": 2,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "Okay, noted.",
+    "repair": false
+   },
+   {
+    "speaker": "Mei",
+    "text": "I don't think that's true about payments-api.",
+    "repair": true
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q014",
+  "claim_item": "x025",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   }
+  ],
+  "claim": {
+   "speaker": "Mei",
+   "text": "We shipped a new version of payments-api today."
+  },
+  "resource": "payments-api",
+  "check": "recent_deploys",
+  "repair_at": 3,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "I'll ping the payments team.",
+    "repair": false
+   },
+   {
+    "speaker": "Mei",
+    "text": "I don't think that's true about payments-api.",
+    "repair": true
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q015",
+  "claim_item": "x028",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   }
+  ],
+  "claim": {
+   "speaker": "Sam",
+   "text": "Checkout-queue is basically empty."
+  },
+  "resource": "checkout-queue",
+  "check": "queue_depth",
+  "repair_at": null,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   },
+   {
+    "speaker": "Priya",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Who's writing the timeline?",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q016",
+  "claim_item": "x029",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   }
+  ],
+  "claim": {
+   "speaker": "Sam",
+   "text": "Queue depth on the checkout queue is normal, around fifty."
+  },
+  "resource": "checkout-queue",
+  "check": "queue_depth",
+  "repair_at": 1,
+  "follow": [
+   {
+    "speaker": "Jordan",
+    "text": "Sorry to jump in, but checkout-queue is definitely not fine.",
+    "repair": true
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Let's move on to the API.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Okay, noted.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q017",
+  "claim_item": "x031",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let's go service by service."
+   }
+  ],
+  "claim": {
+   "speaker": "Priya",
+   "text": "No alarms are firing on orders-db."
+  },
+  "resource": "orders-db",
+  "check": "alarm_state",
+  "repair_at": 2,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "Let's move on to the API.",
+    "repair": false
+   },
+   {
+    "speaker": "Mei",
+    "text": "Hmm, that doesn't match my dashboard for orders-db.",
+    "repair": true
+   },
+   {
+    "speaker": "Sam",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q018",
+  "claim_item": "x032",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   }
+  ],
+  "claim": {
+   "speaker": "Mei",
+   "text": "Orders-db alarms are all green."
+  },
+  "resource": "orders-db",
+  "check": "alarm_state",
+  "repair_at": 3,
+  "follow": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   },
+   {
+    "speaker": "Sam",
+    "text": "Sam, can you share your screen?",
+    "repair": false
+   },
+   {
+    "speaker": "Lee",
+    "text": "Wait, are you sure? I see orders-db looking bad on my screen.",
+    "repair": true
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q019",
+  "claim_item": "x033",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   }
+  ],
+  "claim": {
+   "speaker": "Mei",
+   "text": "No alarms are firing on orders-api."
+  },
+  "resource": "orders-api",
+  "check": "alarm_state",
+  "repair_at": null,
+  "follow": [
+   {
+    "speaker": "Priya",
+    "text": "Let's move on to the API.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Okay, let's keep going.",
+    "repair": false
+   },
+   {
+    "speaker": "Sam",
+    "text": "Good, so it has to be something else.",
+    "repair": false
+   }
+  ],
+  "split": "dev"
+ },
+ {
+  "id": "q020",
+  "claim_item": "x038",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Mei",
+    "text": "I'm on the dashboards now, give me a sec."
+   },
+   {
+    "speaker": "Sam",
+    "text": "Payments looks quiet from my side."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let's go service by service."
+   }
+  ],
+  "claim": {
+   "speaker": "Jordan",
+   "text": "There's an alarm firing on the payments API."
+  },
+  "resource": "payments-api",
+  "check": "alarm_state",
+  "repair_at": 1,
+  "follow": [
+   {
+    "speaker": "Jordan",
+    "text": "Actually no, I'm looking at payments-api and it's not what you said.",
+    "repair": true
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let's look at the pods.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Alright, what's next?",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q021",
+  "claim_item": "x039",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Let's look at the orders database first."
+   }
+  ],
+  "claim": {
+   "speaker": "Jordan",
+   "text": "It's fine, CPU is normal."
+  },
+  "resource": "orders-db",
+  "check": "db_health",
+  "repair_at": 2,
+  "follow": [
+   {
+    "speaker": "Jordan",
+    "text": "Let me check the load balancer.",
+    "repair": false
+   },
+   {
+    "speaker": "Lee",
+    "text": "Hmm, that doesn't match my dashboard for orders-db.",
+    "repair": true
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Sam, can you share your screen?",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q022",
+  "claim_item": "x042",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Did orders-api change today?"
+   }
+  ],
+  "claim": {
+   "speaker": "Jordan",
+   "text": "No, nothing went out to it."
+  },
+  "resource": "orders-api",
+  "check": "recent_deploys",
+  "repair_at": 3,
+  "follow": [
+   {
+    "speaker": "Jordan",
+    "text": "Let's move on to the API.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Good, so it has to be something else.",
+    "repair": false
+   },
+   {
+    "speaker": "Lee",
+    "text": "Sorry to jump in, but orders-api is definitely not fine.",
+    "repair": true
+   }
+  ],
+  "split": "heldout"
+ },
+ {
+  "id": "q023",
+  "claim_item": "x044",
+  "context": [
+   {
+    "speaker": "Priya",
+    "text": "Okay, checkout is failing for about a third of users. What are we seeing?"
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Orders API is throwing a lot of 500s."
+   },
+   {
+    "speaker": "Priya",
+    "text": "Is auth okay?"
+   }
+  ],
+  "claim": {
+   "speaker": "Jordan",
+   "text": "No, it's totally down."
+  },
+  "resource": "auth-service",
+  "check": "service_error_rate",
+  "repair_at": null,
+  "follow": [
+   {
+    "speaker": "Sam",
+    "text": "Can someone mute? There's an echo.",
+    "repair": false
+   },
+   {
+    "speaker": "Jordan",
+    "text": "Okay, noted.",
+    "repair": false
+   },
+   {
+    "speaker": "Sam",
+    "text": "Alright, what's next?",
+    "repair": false
+   }
+  ],
+  "split": "heldout"
+ }
+]

@@ -1,0 +1,21 @@
+claim
+  single0  F1@.5 0.90 AUC 0.962 ECE 0.237 bestF1 0.91@0.51
+  single1  F1@.5 0.69 AUC 0.956 ECE 0.109 bestF1 0.90@0.65
+  single2  F1@.5 0.84 AUC 0.966 ECE 0.178 bestF1 0.87@0.57
+  single3  F1@.5 0.83 AUC 0.919 ECE 0.218 bestF1 0.88@0.53
+  single4  F1@.5 0.00 AUC 0.920 ECE 0.252 bestF1 0.78@0.29
+  mean_K3  F1@.5 0.87 AUC 0.979 ECE 0.244 bestF1 0.92@0.59
+  mean_K5  F1@.5 0.90 AUC 0.972 ECE 0.290 bestF1 0.92@0.53
+  vote_K3  F1@.5 0.87 AUC 0.958 ECE 0.070 bestF1 0.91@0.67
+  vote_K5  F1@.5 0.89 AUC 0.955 ECE 0.094 bestF1 0.91@0.61
+addr
+  single0  F1@.5 0.93 AUC 1.000 ECE 0.294 bestF1 1.00@0.39
+  single1  F1@.5 0.94 AUC 0.998 ECE 0.248 bestF1 0.97@0.58
+  single2  F1@.5 0.67 AUC 0.982 ECE 0.308 bestF1 0.90@0.54
+  single3  F1@.5 0.72 AUC 0.998 ECE 0.305 bestF1 0.93@0.44
+  single4  F1@.5 0.86 AUC 1.000 ECE 0.326 bestF1 1.00@0.55
+  mean_K3  F1@.5 0.93 AUC 1.000 ECE 0.320 bestF1 1.00@0.46
+  mean_K5  F1@.5 0.97 AUC 1.000 ECE 0.337 bestF1 1.00@0.44
+  vote_K3  F1@.5 0.93 AUC 0.992 ECE 0.027 bestF1 0.93@0.34
+  vote_K5  F1@.5 0.93 AUC 0.999 ECE 0.033 bestF1 0.94@0.21
+{'network': 1380, 'cached': 0, 'errors': 45}

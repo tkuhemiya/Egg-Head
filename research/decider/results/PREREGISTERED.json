@@ -1,0 +1,7 @@
+{"written": "2026-10-21 before the single heldout run",
+ "stage1": "one batch, kv format, window 1: claim=CLAIM_Q.short noul, addr=ADDR_Q.repo noul; Platt params from exp6 dev; branch request if pa>=0.5 else claim if pc>=0.5",
+ "resource": "code alias pre-pass; if not exactly one alias, Decider choice over shortlist (+unknown), all rotations averaged, window 3",
+ "check": "choice limited to that resource's checks (+none), all rotations averaged; fire if top!=none and rescaled confidence>=0.25",
+ "speak_gate": "Egg-Head gate.py with Decider self_repaired noul and interrupt=1-platt(fin)",
+ "persistence": "decider_or_keyword correction detector, persist=3, t=0.6 (dev best); persist=2 also reported",
+ "baselines": "keyword routing, keyword addressee, keyword claim regex, silence>=1.5s, always-speak, keyword persistence; LLM-every-line TODO (no Bedrock creds)"}

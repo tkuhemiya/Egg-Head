@@ -1,0 +1,104 @@
+{
+ "routing": {
+  "pipeline": {
+   "P": 0.952,
+   "R": 0.556,
+   "F1": 0.702,
+   "fired": 21,
+   "gold": 36
+  },
+  "keyword_rule": {
+   "P": 0.692,
+   "R": 0.75,
+   "F1": 0.72,
+   "fired": 39,
+   "gold": 36
+  }
+ },
+ "addressed": {
+  "pipeline": {
+   "P": 1.0,
+   "R": 0.75,
+   "F1": 0.857
+  },
+  "keyword_rule": {
+   "P": 1.0,
+   "R": 1.0,
+   "F1": 1.0
+  }
+ },
+ "is_claim": {
+  "pipeline": {
+   "P": 0.895,
+   "R": 0.81,
+   "F1": 0.85
+  },
+  "keyword_rule": {
+   "P": 0.875,
+   "R": 0.5,
+   "F1": 0.636
+  }
+ },
+ "speak_gate": {
+  "pipeline(egghead gate.py + Decider rep/fin)": {
+   "P": 0.769,
+   "R": 0.909,
+   "F1": 0.833,
+   "false_interrupts": 3,
+   "missed": 1,
+   "n": 18
+  },
+  "silence>=1.5s rule": {
+   "P": 1.0,
+   "R": 0.636,
+   "F1": 0.778,
+   "false_interrupts": 0,
+   "missed": 4,
+   "n": 18
+  },
+  "always speak when a claim is flagged": {
+   "P": 0.611,
+   "R": 1.0,
+   "F1": 0.759,
+   "false_interrupts": 7,
+   "missed": 0,
+   "n": 18
+  }
+ },
+ "persistence": {
+  "pipeline decider_or_keyword persist=3 t=0.6 (dev best)": {
+   "correct": 12,
+   "false_interrupt": 0,
+   "missed": 0,
+   "n": 12
+  },
+  "pipeline decider_or_keyword persist=2 t=0.6 (Jarvis tau=2)": {
+   "correct": 9,
+   "false_interrupt": 3,
+   "missed": 0,
+   "n": 12
+  },
+  "keyword only persist=2": {
+   "correct": 9,
+   "false_interrupt": 3,
+   "missed": 0,
+   "n": 12
+  },
+  "keyword only persist=3": {
+   "correct": 12,
+   "false_interrupt": 0,
+   "missed": 0,
+   "n": 12
+  },
+  "speak at once (no persistence)": {
+   "correct": 3,
+   "false_interrupt": 9,
+   "missed": 0,
+   "n": 12
+  }
+ },
+ "stage1_latency_p50_ms": 90.5,
+ "requests_per_utterance": 3.16,
+ "LLM_every_line_baseline": "TODO: no AWS/Bedrock credentials on the box"
+}
+{'network': 350, 'cached': 18, 'errors': 21}

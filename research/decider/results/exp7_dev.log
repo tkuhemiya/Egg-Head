@@ -1,0 +1,20 @@
+fin_pause=False            F1@.5 0.00 AUC 0.948 ECE 0.586 bestF1 0.98@0.27
+int_pause=False            F1@.5 0.00 AUC 0.567 ECE 0.207 bestF1 0.19@0.31
+fin_pause=True             F1@.5 0.42 AUC 0.795 ECE 0.238 bestF1 0.98@0.36
+int_pause=True             F1@.5 0.00 AUC 0.302 ECE 0.218 bestF1 0.16@0.05
+fin_rule_pause>=0.5s       F1@.5 0.95 AUC 0.677 ECE 0.087 bestF1 0.95@0.05
+fin_rule_trailing_word     F1@.5 0.98 AUC 0.796 ECE 0.036 bestF1 0.98@0.05
+int_rule_trailing_word     F1@.5 0.74 AUC 0.792 ECE 0.036 bestF1 0.74@0.05
+addr_rule_keyword          F1@.5 1.00 AUC 1.000 ECE 0.000 bestF1 1.00@0.05
+unfinished share 0.072 | pause mean finished 0.88 unfinished 0.42
+decider              persist=1: {'correct': 4, 'false_interrupt': 8, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+decider              persist=2: {'correct': 7, 'false_interrupt': 5, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+decider              persist=3: {'correct': 10, 'false_interrupt': 2, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+keyword              persist=1: {'correct': 6, 'false_interrupt': 6, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+keyword              persist=2: {'correct': 6, 'false_interrupt': 6, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+keyword              persist=3: {'correct': 12, 'false_interrupt': 0, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+decider_or_keyword   persist=1: {'correct': 6, 'false_interrupt': 6, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+decider_or_keyword   persist=2: {'correct': 8, 'false_interrupt': 4, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+decider_or_keyword   persist=3: {'correct': 12, 'false_interrupt': 0, 'missed': 0, 'n': 12, 'median_turns_waited': None}
+self_repaired decider F1@.5 0.73 AUC 0.885 bestF1 0.89@0.44
+{'network': 312, 'cached': 0, 'errors': 16}
