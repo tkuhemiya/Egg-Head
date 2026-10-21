@@ -1,0 +1,11 @@
+claim short 0.954 raw 0.867 cc 0.627 best None
+claim defn 0.894 raw 0.543 cc 0.475 best None
+claim contrast 0.964 raw 0.874 cc 0.592 best None
+claim persona 0.963 raw 0.864 cc 0.596 best None
+claim neg 0.048 raw 0.354 cc 0.475 best None
+claim negpair 0.967 raw 0.861 cc nan best None
+claim ens3 0.956 raw 0.864 cc nan best None
+claim ens3+neg 0.963 raw 0.867 cc nan best None
+prior {'short': -1.027563257407551, 'defn': -0.8711853203391701, 'contrast': -0.617840774988907, 'persona': -1.2926631517647733, 'neg': -0.34104729957261426}
+check {'desc': 0.889, 'claimy': 0.639, 'names': 0.722}
+gate {'base': {'repair_AUC': 0.696, 'F1': 0.833, 'false_interrupts': 3, 'missed': 1}, 'contrast': {'repair_AUC': 0.839, 'F1': 0.87, 'false_interrupts': 2, 'missed': 1}, 'neg': {'repair_AUC': 0.661, 'F1': 0, 'false_interrupts': 0, 'missed': 11}, 'negpair': {'repair_AUC': 0.804, 'F1': 0, 'false_interrupts': 0, 'missed': 11}}
