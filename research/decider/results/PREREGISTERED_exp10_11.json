@@ -1,0 +1,4 @@
+{"written": "2026-10-21 after exp10/exp11 dev, before held-out",
+ "decider": "No exp10 technique beat the exp9 choices on dev by more than noise. The exp9 pipeline stays frozen. exp10_prompting.py is run once on heldout only to report how each technique transfers, not to select.",
+ "llm": "Held-out configs: rubric_none (rubric prompt, reasoning effort none: dev claim F1 0.95, route F1 0.935 at p50 1.4 s) as the fast LLM. v1_default (already run) as the strong LLM. Same 117 non-gate held-out lines.",
+ "not_run": "Self-consistency: dev run invalid (OpenRouter 402s)."}

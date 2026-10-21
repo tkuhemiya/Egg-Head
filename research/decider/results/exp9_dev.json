@@ -1,0 +1,1321 @@
+{
+ "n": 138,
+ "single:short": {
+  "AUC": 0.963
+ },
+ "single:repo": {
+  "AUC": 0.956
+ },
+ "single:fact": {
+  "AUC": 0.936
+ },
+ "single:names": {
+  "AUC": 0.918
+ },
+ "single:status": {
+  "AUC": 0.948
+ },
+ "single:hedge": {
+  "AUC": 0.152
+ },
+ "combo:short": {
+  "AUC_loo": 0.957,
+  "at0.5": {
+   "t": 0.5,
+   "P": 0.9302325581395349,
+   "R": 0.8888888888888888,
+   "F1": 0.9090909090909092,
+   "acc": 0.9420289855072463
+  },
+  "best_t": {
+   "t": 0.38,
+   "P": 0.9111111111111111,
+   "R": 0.9111111111111111,
+   "F1": 0.9111111111111111,
+   "acc": 0.9420289855072463
+  }
+ },
+ "combo:short+fact+status-hedge": {
+  "AUC_loo": 0.961,
+  "at0.5": {
+   "t": 0.5,
+   "P": 0.9761904761904762,
+   "R": 0.9111111111111111,
+   "F1": 0.9425287356321839,
+   "acc": 0.9637681159420289
+  },
+  "best_t": {
+   "t": 0.5,
+   "P": 0.9761904761904762,
+   "R": 0.9111111111111111,
+   "F1": 0.9425287356321839,
+   "acc": 0.9637681159420289
+  }
+ },
+ "combo:all6": {
+  "AUC_loo": 0.962,
+  "at0.5": {
+   "t": 0.5,
+   "P": 0.9534883720930233,
+   "R": 0.9111111111111111,
+   "F1": 0.9318181818181819,
+   "acc": 0.9565217391304348
+  },
+  "best_t": {
+   "t": 0.48,
+   "P": 0.9534883720930233,
+   "R": 0.9111111111111111,
+   "F1": 0.9318181818181819,
+   "acc": 0.9565217391304348
+  }
+ },
+ "combo:short+status": {
+  "AUC_loo": 0.965,
+  "at0.5": {
+   "t": 0.5,
+   "P": 0.9130434782608695,
+   "R": 0.9333333333333333,
+   "F1": 0.9230769230769231,
+   "acc": 0.9492753623188406
+  },
+  "best_t": {
+   "t": 0.43,
+   "P": 0.9130434782608695,
+   "R": 0.9333333333333333,
+   "F1": 0.9230769230769231,
+   "acc": 0.9492753623188406
+  }
+ },
+ "claimF1:short:tc0.3": {
+  "t": 0.3,
+  "P": 0.8367346938775511,
+  "R": 0.9111111111111111,
+  "F1": 0.8723404255319148,
+  "acc": 0.9130434782608695
+ },
+ "claimF1:short:tc0.4": {
+  "t": 0.4,
+  "P": 0.9111111111111111,
+  "R": 0.9111111111111111,
+  "F1": 0.9111111111111111,
+  "acc": 0.9420289855072463
+ },
+ "claimF1:short:tc0.5": {
+  "t": 0.5,
+  "P": 0.9302325581395349,
+  "R": 0.8888888888888888,
+  "F1": 0.9090909090909092,
+  "acc": 0.9420289855072463
+ },
+ "claimF1:short+fact+status-hedge:tc0.3": {
+  "t": 0.3,
+  "P": 0.84,
+  "R": 0.9333333333333333,
+  "F1": 0.8842105263157894,
+  "acc": 0.9202898550724637
+ },
+ "claimF1:short+fact+status-hedge:tc0.4": {
+  "t": 0.4,
+  "P": 0.9130434782608695,
+  "R": 0.9333333333333333,
+  "F1": 0.9230769230769231,
+  "acc": 0.9492753623188406
+ },
+ "claimF1:short+fact+status-hedge:tc0.5": {
+  "t": 0.5,
+  "P": 0.9767441860465116,
+  "R": 0.9333333333333333,
+  "F1": 0.9545454545454545,
+  "acc": 0.9710144927536232
+ },
+ "route_grid": [
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.732,
+   "R": 0.732,
+   "F1": 0.732,
+   "fired": 41
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.732,
+   "R": 0.732,
+   "F1": 0.732,
+   "fired": 41
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.75,
+   "R": 0.732,
+   "F1": 0.741,
+   "fired": 40
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.75,
+   "R": 0.732,
+   "F1": 0.741,
+   "fired": 40
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.806,
+   "R": 0.707,
+   "F1": 0.753,
+   "fired": 36
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.806,
+   "R": 0.707,
+   "F1": 0.753,
+   "fired": 36
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.829,
+   "R": 0.707,
+   "F1": 0.763,
+   "fired": 35
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.829,
+   "R": 0.707,
+   "F1": 0.763,
+   "fired": 35
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.879,
+   "R": 0.707,
+   "F1": 0.784,
+   "fired": 33
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.879,
+   "R": 0.707,
+   "F1": 0.784,
+   "fired": 33
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.906,
+   "R": 0.707,
+   "F1": 0.795,
+   "fired": 32
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.906,
+   "R": 0.707,
+   "F1": 0.795,
+   "fired": 32
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.906,
+   "R": 0.707,
+   "F1": 0.795,
+   "fired": 32
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.906,
+   "R": 0.707,
+   "F1": 0.795,
+   "fired": 32
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.906,
+   "R": 0.707,
+   "F1": 0.795,
+   "fired": 32
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.906,
+   "R": 0.707,
+   "F1": 0.795,
+   "fired": 32
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.585,
+   "F1": 0.738,
+   "fired": 24
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.732,
+   "R": 0.732,
+   "F1": 0.732,
+   "fired": 41
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.732,
+   "R": 0.732,
+   "F1": 0.732,
+   "fired": 41
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.75,
+   "R": 0.732,
+   "F1": 0.741,
+   "fired": 40
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.75,
+   "R": 0.732,
+   "F1": 0.741,
+   "fired": 40
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.3,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.769,
+   "R": 0.732,
+   "F1": 0.75,
+   "fired": 39
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.769,
+   "R": 0.732,
+   "F1": 0.75,
+   "fired": 39
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.789,
+   "R": 0.732,
+   "F1": 0.759,
+   "fired": 38
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.857,
+   "R": 0.732,
+   "F1": 0.789,
+   "fired": 35
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.4,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.811,
+   "R": 0.732,
+   "F1": 0.769,
+   "fired": 37
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.833,
+   "R": 0.732,
+   "F1": 0.779,
+   "fired": 36
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.0,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.882,
+   "R": 0.732,
+   "F1": 0.8,
+   "fired": 34
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 0.909,
+   "R": 0.732,
+   "F1": 0.811,
+   "fired": 33
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 0.909,
+   "R": 0.732,
+   "F1": 0.811,
+   "fired": 33
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 0.909,
+   "R": 0.732,
+   "F1": 0.811,
+   "fired": 33
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 0.909,
+   "R": 0.732,
+   "F1": 0.811,
+   "fired": 33
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 0.909,
+   "R": 0.732,
+   "F1": 0.811,
+   "fired": 33
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.25,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 0.909,
+   "R": 0.732,
+   "F1": 0.811,
+   "fired": 33
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.0,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.125,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "min",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  },
+  {
+   "claim": "short+fact+status-hedge",
+   "tc": 0.5,
+   "tr": 0.5,
+   "tcc": 0.25,
+   "mode": "nopc",
+   "P": 1.0,
+   "R": 0.61,
+   "F1": 0.758,
+   "fired": 25
+  }
+ ]
+}

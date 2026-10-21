@@ -1,0 +1,157 @@
+{
+ "v1_none": {
+  "claim_PRF": [
+   0.889,
+   0.952,
+   0.92
+  ],
+  "addr_PRF": [
+   0.842,
+   1.0,
+   0.914
+  ],
+  "route_PRF": [
+   0.9,
+   0.947,
+   0.923
+  ],
+  "parse_fail": 0,
+  "p50_ms": 1428,
+  "p95_ms": 3670,
+  "out_tok": 39,
+  "usd": 0.036
+ },
+ "v1_low": {
+  "claim_PRF": [
+   0.953,
+   0.976,
+   0.965
+  ],
+  "addr_PRF": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "route_PRF": [
+   0.902,
+   0.974,
+   0.937
+  ],
+  "parse_fail": 0,
+  "p50_ms": 6292,
+  "p95_ms": 15311,
+  "out_tok": 326,
+  "usd": 0.119
+ },
+ "v1_default": {
+  "claim_PRF": [
+   0.976,
+   0.952,
+   0.964
+  ],
+  "addr_PRF": [
+   0.941,
+   1.0,
+   0.97
+  ],
+  "route_PRF": [
+   0.923,
+   0.947,
+   0.935
+  ],
+  "parse_fail": 0,
+  "p50_ms": 5182,
+  "p95_ms": 16378,
+  "out_tok": 335,
+  "usd": 0.122
+ },
+ "rubric_none": {
+  "claim_PRF": [
+   0.952,
+   0.952,
+   0.952
+  ],
+  "addr_PRF": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "route_PRF": [
+   0.923,
+   0.947,
+   0.935
+  ],
+  "parse_fail": 0,
+  "p50_ms": 1389,
+  "p95_ms": 3257,
+  "out_tok": 39,
+  "usd": 0.042
+ },
+ "why_none": {
+  "claim_PRF": [
+   0.93,
+   0.952,
+   0.941
+  ],
+  "addr_PRF": [
+   0.941,
+   1.0,
+   0.97
+  ],
+  "route_PRF": [
+   0.923,
+   0.947,
+   0.935
+  ],
+  "parse_fail": 0,
+  "p50_ms": 2033,
+  "p95_ms": 5385,
+  "out_tok": 73,
+  "usd": 0.047
+ },
+ "rubric_default": {
+  "claim_PRF": [
+   1.0,
+   0.929,
+   0.963
+  ],
+  "addr_PRF": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "route_PRF": [
+   0.972,
+   0.921,
+   0.946
+  ],
+  "parse_fail": 12,
+  "p50_ms": 4052,
+  "p95_ms": 12250,
+  "out_tok": 305,
+  "usd": 0.107
+ },
+ "rubric_none@sc3": {
+  "claim_PRF": [
+   0.938,
+   0.714,
+   0.811
+  ],
+  "addr_PRF": [
+   0.933,
+   0.875,
+   0.903
+  ],
+  "route_PRF": [
+   0.935,
+   0.763,
+   0.841
+  ],
+  "parse_fail": 95,
+  "p50_ms": 1513,
+  "p95_ms": 3199,
+  "out_tok": 38,
+  "usd": 0.093,
+  "INVALID": "intermittent HTTP 402 from OpenRouter (credit reservation); 95 of 414 samples failed in the rerun, so self-consistency is not measured"
+ }
+}

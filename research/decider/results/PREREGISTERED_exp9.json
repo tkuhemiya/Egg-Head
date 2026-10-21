@@ -1,0 +1,4 @@
+{"written": "2026-10-21 after exp9 dev, before the exp9 heldout run",
+ "claim": "4 noul questions in one batch (short, fact, status, hedge), kv format, window 1; logistic combo of logits, weights fit on all dev (results/exp9_weights_dev.json); claim if p>=0.5",
+ "route": "same resource/check stages as final_eval; fire if check!=none and min(pc, resource conf, check conf) >= 0.25 (was effectively 0.5)",
+ "also_reported": "the old single-question claim with only the route threshold changed (short, tc 0.5, tr 0.25) to separate the two effects. The full grid is saved but NOT used for selection."}

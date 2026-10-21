@@ -1,0 +1,71 @@
+{
+ "v1_default": {
+  "claim_PRF": [
+   0.975,
+   0.975,
+   0.975
+  ],
+  "addr_PRF": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "route_PRF": [
+   0.895,
+   0.971,
+   0.932
+  ],
+  "parse_fail": 0,
+  "p50_ms": 5636,
+  "p95_ms": 17996,
+  "out_tok": 339,
+  "usd": 0.12
+ },
+ "rubric_none": {
+  "claim_PRF": [
+   0.952,
+   1.0,
+   0.976
+  ],
+  "addr_PRF": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "route_PRF": [
+   0.897,
+   1.0,
+   0.946
+  ],
+  "parse_fail": 0,
+  "p50_ms": 1249,
+  "p95_ms": 3022,
+  "out_tok": 39,
+  "usd": 0.041,
+  "n_valid": 117,
+  "note": "first pass had 27 failed calls (HTTP 402); the failed calls were retried and all 117 returned; scored on all 117"
+ },
+ "v1_default@same106": {
+  "claim_PRF": [
+   0.975,
+   0.975,
+   0.975
+  ],
+  "addr_PRF": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "route_PRF": [
+   0.895,
+   0.971,
+   0.932
+  ],
+  "parse_fail": 0,
+  "p50_ms": 5636,
+  "p95_ms": 17996,
+  "out_tok": 339,
+  "usd": 0.12,
+  "note": "identical to v1_default (all 117 lines)"
+ }
+}
