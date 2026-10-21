@@ -37,7 +37,12 @@ class HttpBackend:
     def ask(self, state: str, qs: dict) -> tuple[dict, dict]:
         body = json.dumps({"state": state, "questions": qs}).encode()
         req = urllib.request.Request(
-            self.url + "/v1/systemone", body, {"content-type": "application/json"}
+            self.url + "/v1/systemone",
+            body,
+            {
+                "content-type": "application/json",
+                "user-agent": "egghead-spike/1.0 (+https://github.com/tkuhemiya/Egg-Head)",
+            },
         )
         with urllib.request.urlopen(req, timeout=300) as r:
             resp = json.load(r)
