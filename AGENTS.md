@@ -9,6 +9,9 @@ Hackathon agent: incident-call bridge that uses **Strands Decider 2B** for fast 
 | `egghead/` | Runtime: Decider client, questions, gate, checks, `Bridge`, Bedrock speaker |
 | `tests/` | Unit tests (`ScriptedDecider` stubs; no live Decider or AWS) |
 | `spike/` | Day-1 eval harness, labeled snippets, saved reports under `spike/out/` |
+| `research/decider/` | Decider 2B research campaign (prompting, bias, routing, calibration); see [`FINDINGS.md`](research/decider/FINDINGS.md) |
+
+**Decider research (Oct 2026):** Prefer separate yes/no questions in one batch over N-way choices; rotate or average `choice` option order; use the latest utterance (kv format) for claim detection and Platt-calibrate probabilities on dev before thresholding. Full methods and held-out numbers are in [`research/decider/FINDINGS.md`](research/decider/FINDINGS.md).
 
 ## Tests
 

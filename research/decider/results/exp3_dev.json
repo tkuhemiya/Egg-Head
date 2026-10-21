@@ -1,0 +1,71 @@
+{
+ "split": "dev",
+ "summary": {
+  "choice3_canon": {
+   "acc": 0.717,
+   "macroF1": 0.7,
+   "F1_request": 0.516,
+   "F1_claim": 0.901,
+   "F1_other": 0.683,
+   "ECE": 0.08,
+   "calls_per_utt": 1,
+   "latency_p50_ms": 46.66
+  },
+  "choice3_rot": {
+   "acc": 0.761,
+   "macroF1": 0.739,
+   "F1_request": 0.571,
+   "F1_claim": 0.899,
+   "F1_other": 0.748,
+   "ECE": 0.099,
+   "calls_per_utt": 3,
+   "latency_p50_ms": 140.35000000000002
+  },
+  "yesno2_one_batch": {
+   "acc": 0.928,
+   "macroF1": 0.927,
+   "F1_request": 0.933,
+   "F1_claim": 0.911,
+   "F1_other": 0.936,
+   "best_dev_thresholds": {
+    "t_addr": 0.4,
+    "t_claim": 0.5,
+    "acc": 0.935,
+    "macroF1": 0.94,
+    "F1_request": 0.968,
+    "F1_claim": 0.911,
+    "F1_other": 0.942
+   },
+   "calls_per_utt": 1,
+   "latency_p50_ms": 90.35499999999999
+  },
+  "staged_tree_addr_then_claim": {
+   "acc": 0.928,
+   "macroF1": 0.927,
+   "F1_request": 0.933,
+   "F1_claim": 0.911,
+   "F1_other": 0.936,
+   "best_dev_thresholds": {
+    "t_addr": 0.4,
+    "t_claim": 0.5,
+    "acc": 0.935,
+    "macroF1": 0.94,
+    "F1_request": 0.968,
+    "F1_claim": 0.911,
+    "F1_other": 0.942
+   },
+   "calls_per_utt": 1.9,
+   "latency_p50_ms": 92.355
+  },
+  "claim_signal_AUC": {
+   "noul_yes_prob": 0.962,
+   "score_expected_value": 0.977,
+   "score_top_level_prob": 0.956
+  },
+  "gold_counts": {
+   "request": 16,
+   "claim": 45,
+   "other": 77
+  }
+ }
+}
