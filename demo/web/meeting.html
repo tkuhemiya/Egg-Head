@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Incident bridge · Egg Head</title>
+<link rel="stylesheet" href="/vendor/xterm.css">
+<style>
+  :root {
+    --bg: #18171c; --bar: #232229; --tile: #2a2931; --panel: #201f25; --line: #34333c; --text: #ecebf0; --muted: #9b99a6;
+    --accent: #8b8cf7; --egg: #f5c84c; --ok: #4cc38a; --bad: #ef6b6b; --info: #6aa8ff; --chip: #2d2c35;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif; overflow: hidden; }
+  .app { display: grid; grid-template-rows: 48px minmax(0, 1fr) 64px; height: 100vh; }
+
+  /* top bar */
+  .bar { display: flex; align-items: center; gap: 14px; padding: 0 16px; background: var(--bar); border-bottom: 1px solid #111; }
+  .bar .logo { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, #8b8cf7, #5b5fd6); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+  .bar .title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar .sub { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+  .bar .timer { font-variant-numeric: tabular-nums; color: var(--muted); padding: 3px 9px; border-radius: 6px; background: #2f2e36; }
+  .bar .live { display: none; align-items: center; gap: 6px; color: #ff8a8a; font-size: 12.5px; }
+  .bar .live.on { display: flex; }
+  .bar .live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff5d5d; box-shadow: 0 0 0 3px rgba(255,93,93,.25); }
+  .bar .grow { flex: 1; }
+  .bar a { color: var(--muted); text-decoration: none; font-size: 12.5px; }
+  .bar a:hover { color: var(--text); }
+  .bar button { background: var(--accent); color: #12122a; border: 0; border-radius: 6px; padding: 7px 14px; font-weight: 650; cursor: pointer; }
+  .bar button:disabled { opacity: .45; cursor: default; }
+
+  /* room */
+  .room { display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0; }
+  .stage { display: grid; grid-template-rows: minmax(0, 1fr) var(--term-h, 34%); gap: 10px; padding: 10px; min-height: 0; transition: grid-template-rows .4s ease; }
+  body.agent-busy .stage { grid-template-rows: minmax(0, 1fr) var(--term-busy, 56%); }
+  .grid { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 10px; min-height: 0; }
+  .tile { position: relative; border-radius: 10px; overflow: hidden; background: radial-gradient(120% 90% at 50% 20%, var(--bg1, #3a3f4a), var(--bg2, #22252c)); min-height: 0; outline: 3px solid transparent; outline-offset: -3px; transition: outline-color .15s; }
+  .tile::before { content: ""; position: absolute; inset: 0; background:
+      radial-gradient(circle at 15% 30%, rgba(255,255,255,.06) 0 22px, transparent 23px),
+      radial-gradient(circle at 82% 22%, rgba(255,255,255,.05) 0 30px, transparent 31px),
+      linear-gradient(transparent 68%, rgba(0,0,0,.18) 68% 70%, transparent 70%); pointer-events: none; }
+  .tile.speaking { outline-color: var(--accent); }
+  .tile.egg.speaking { outline-color: var(--egg); }
+  .tile .art { position: absolute; inset: 10% 0 0 0; display: flex; justify-content: center; align-items: flex-end; }
+  .tile .art svg { height: 100%; max-width: 100%; }
+  .tile .name { position: absolute; left: 8px; bottom: 8px; display: flex; gap: 6px; align-items: center; background: rgba(20,19,24,.72); padding: 3px 9px 3px 7px; border-radius: 6px; font-size: 12.5px; font-weight: 600; max-width: calc(100% - 16px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .name .role { color: var(--muted); font-weight: 400; }
+  .tile .name svg { width: 13px; height: 13px; flex: none; }
+  .tile .badge { position: absolute; top: 8px; right: 8px; font-size: 11.5px; padding: 3px 8px; border-radius: 6px; background: rgba(20,19,24,.78); opacity: 0; transition: opacity .2s; }
+  .tile .badge.on { opacity: 1; }
+  .tile .badge.cut { color: #ffb3b3; }
+  .tile .badge.ask { color: #c8c9ff; }
+  .mic-on path { fill: var(--text); } .mic-off path { fill: var(--muted); }
+
+  .tile.me video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); background: #111; }
+  .tile.me .nocam { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; padding: 10px; }
+  .tile.me .nocam b { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: #5b5fd6; color: #fff; font-size: 24px; margin: 0 auto 8px; }
+
+  .tile.egg { grid-column: span 2; --bg1: #4b4329; --bg2: #26221a; }
+  .tile.egg .art { inset: 4% 52% 13% 0; }
+  .tile.egg .mind { position: absolute; left: 47%; right: 14px; top: 14px; bottom: 44px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .mind .state { font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 8px; }
+  .mind .state i { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+  .mind .state.checking i { background: var(--info); animation: pulse 1s infinite; }
+  .mind .state.gap i, .mind .state.floor i { background: var(--egg); animation: pulse .8s infinite; }
+  .mind .state.waiting i { background: var(--accent); animation: pulse 1.2s infinite; }
+  .mind .state.listening i { background: var(--ok); }
+  .mind .detail { color: #d6d3c4; font-size: 13px; min-height: 2.8em; }
+  .mind .said { font-size: 13.5px; color: var(--egg); font-style: italic; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  .captions { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); max-width: 78%; background: rgba(12,12,16,.82); border-radius: 8px; padding: 7px 14px; font-size: 16px; line-height: 1.35; text-align: center; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 5; }
+  .captions.on { opacity: 1; }
+  .captions b { color: #c8c9ff; margin-right: 6px; }
+  .captions.egg b { color: var(--egg); }
+
+  /* terminal */
+  .term { display: grid; grid-template-rows: 34px minmax(0, 1fr); background: #0e0e12; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-height: 0; }
+  .term header { display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #1a1a20; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  .term header .dots { display: flex; gap: 6px; } .term header .dots i { width: 10px; height: 10px; border-radius: 50%; background: #3a3a44; }
+  .term header b { color: var(--text); font-weight: 600; }
+  .term header .pill { margin-left: auto; padding: 2px 9px; border-radius: 10px; background: #26262e; display: none; }
+  .term header .pill.busy { background: #1e3350; color: #9cc6ff; display: inline; }
+  .term .screen { padding: 6px 8px; min-height: 0; }
+  .term .screen .xterm { height: 100%; }
+
+  /* Egg Head panel */
+  .panel { display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--panel); border-left: 1px solid #111; min-height: 0; }
+  .panel .head { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .panel .head .mini { width: 38px; height: 38px; }
+  .panel .head .mini svg { width: 100%; height: 100%; }
+  .panel .head h2 { margin: 0; font-size: 15px; }
+  .panel .head p { margin: 0; color: var(--muted); font-size: 12px; }
+  .feed { overflow-y: auto; padding: 10px 12px 18px; display: flex; flex-direction: column; gap: 8px; }
+  .feed .empty { color: var(--muted); font-size: 13px; padding: 8px 2px; }
+  .item { border-radius: 8px; padding: 7px 10px; background: #26252d; font-size: 12.8px; }
+  .item .who { font-weight: 650; margin-right: 5px; }
+  .item .txt { color: #d9d7e2; }
+  .item .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .chip { background: #31303a; border-radius: 5px; padding: 1px 7px; font-size: 11.5px; color: var(--muted); }
+  .chip b { color: var(--text); font-weight: 600; }
+  .chip.bad { color: #ffb0b0; background: #3a2328; } .chip.good { color: #9fe6c3; background: #1f3329; } .chip.info { color: #b9d6ff; background: #1f2b3d; }
+  .chip.ask { color: #c8c9ff; background: #2b2b4a; }
+  .item.egg { background: #3a321a; border: 1px solid #6a5820; }
+  .item.egg .who { color: var(--egg); }
+  .item.egg .kind { float: right; font-size: 11px; color: #e9cf85; text-transform: uppercase; letter-spacing: .04em; }
+  .item.agent { background: #1d2738; border: 1px solid #2c4366; }
+  .item.agent .who { color: #9cc6ff; }
+  .item.quiet { background: transparent; border: 1px dashed #3d3c47; color: var(--muted); }
+  .item.quiet .who { color: #b8b6c4; }
+  .item.dim .txt { color: var(--muted); }
+
+  /* controls */
+  .controls { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--bar); border-top: 1px solid #111; position: relative; }
+  .controls button { display: flex; flex-direction: column; align-items: center; gap: 2px; background: transparent; color: var(--text); border: 0; border-radius: 8px; padding: 6px 14px; font-size: 11px; cursor: pointer; }
+  .controls button:hover { background: #2f2e36; }
+  .controls button svg { width: 20px; height: 20px; fill: var(--text); }
+  .controls button.off svg { fill: var(--muted); }
+  .controls .leave { background: #c4314b; padding: 9px 18px; font-weight: 600; font-size: 13px; flex-direction: row; }
+  .controls .leave:hover { background: #a82840; }
+  .controls .note { position: absolute; left: 16px; color: var(--muted); font-size: 12px; }
+
+  /* toon animation */
+  .toon .head { transform-box: fill-box; transform-origin: 50% 90%; }
+  .toon.talking .head { animation: bob .36s ease-in-out infinite alternate; }
+  .toon .eye { transform-box: fill-box; transform-origin: center; transition: transform .06s; }
+  .toon.blink .eye { transform: scaleY(.08); }
+  .toon.egg.thinking .glint { animation: glint 1.2s infinite; }
+  .toon.egg.thinking .head { animation: think 2.4s ease-in-out infinite; }
+  @keyframes bob { from { transform: translateY(0) rotate(-.6deg); } to { transform: translateY(-2.5px) rotate(.6deg); } }
+  @keyframes think { 50% { transform: rotate(-3deg) translateY(-2px); } }
+  @keyframes glint { 50% { opacity: .1; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <div class="logo">IB</div>
+    <div>
+      <div class="title" id="title">Incident bridge</div>
+      <div class="sub" id="sub">#inc-checkout · Sev 2</div>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+    <div class="live" id="live">Live</div>
+    <div class="grow"></div>
+    <a href="/dashboard" target="_blank">Open dashboard ↗</a>
+    <button id="start">Start call</button>
+  </div>
+
+  <div class="room">
+    <section class="stage">
+      <div class="grid" id="grid">
+        <div class="captions" id="captions"></div>
+      </div>
+      <section class="term">
+        <header>
+          <div class="dots"><i></i><i></i><i></i></div>
+          <span><b>Egg Head's agent</b> · <span id="agent-label"></span></span>
+          <span class="pill" id="agent-pill"></span>
+        </header>
+        <div class="screen" id="screen"></div>
+      </section>
+    </section>
+
+    <aside class="panel">
+      <div class="head">
+        <div class="mini" id="mini"></div>
+        <h2>Egg Head</h2>
+      </div>
+      <div class="feed" id="feed"><div class="empty">Egg Head's activity shows up here.</div></div>
+    </aside>
+  </div>
+
+  <div class="controls">
+    <button class="off" title="Muted"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2zM3.3 2.3 2 3.6l18.4 18.4 1.3-1.3z"/></svg>Mic</button>
+    <button id="cam-btn" title="Camera"><svg viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>Camera</button>
+    <button title="Share"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6v2H8v2h8v-2h-2v-2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 12H4V6h16zM12 7l-4 4h3v4h2v-4h3z"/></svg>Share</button>
+    <button title="React"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-3.5 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm7 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM12 18a5.5 5.5 0 0 1-5-3.2h10A5.5 5.5 0 0 1 12 18z"/></svg>React</button>
+    <button title="Raise"><svg viewBox="0 0 24 24"><path d="M18 8.5V6a1.5 1.5 0 0 0-3 0V4.5a1.5 1.5 0 0 0-3 0V4a1.5 1.5 0 0 0-3 0v1a1.5 1.5 0 0 0-3 0v8.6L4.7 12a1.6 1.6 0 0 0-2.3 2.2l4.8 5.4A6 6 0 0 0 11.7 22H14a6 6 0 0 0 6-6V8.5a1 1 0 0 0-2 0z"/></svg>Raise</button>
+    <button class="leave" title="Leave">Leave</button>
+  </div>
+</div>
+
+<script src="/vendor/xterm.js"></script>
+<script src="/vendor/addon-fit.js"></script>
+<script type="module" src="/web/meeting.js"></script>
+</body>
+</html>

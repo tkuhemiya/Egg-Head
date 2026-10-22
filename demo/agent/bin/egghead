@@ -1,0 +1,43 @@
+#!/usr/bin/env node
+/**
+ * How the coding agent hands its result back to Egg Head (any agent with a shell can run it):
+ *
+ *   egghead report <task> --status healthy|degraded|down|changed|unchanged --fact "<spoken words>"
+ *   egghead answer <task> "<one spoken sentence>"
+ *
+ * POSTs to the demo server at $EGGHEAD_REPORT_URL.
+ */
+const STATUSES = ["healthy", "degraded", "down", "changed", "unchanged"]
+const [kind, task, ...rest] = process.argv.slice(2)
+const usage = () => {
+  process.stderr.write(
+    "usage:\n  egghead report <task> --status " + STATUSES.join("|") + " --fact \"<what you found, in spoken words>\"\n" +
+      "  egghead answer <task> \"<one spoken sentence>\"\n"
+  )
+  process.exit(2)
+}
+if (!["report", "answer"].includes(kind) || !/^\d+$/.test(task ?? "")) usage()
+
+const option = (name) => {
+  const i = rest.findIndex((a) => a === `--${name}` || a.startsWith(`--${name}=`))
+  if (i < 0) return undefined
+  return rest[i].includes("=") ? rest[i].split(/=(.*)/s)[1] : rest[i + 1]
+}
+const body = kind === "report"
+  ? { kind, task: Number(task), status: option("status"), fact: option("fact") }
+  : { kind, task: Number(task), answer: rest.filter((a) => !a.startsWith("--")).join(" ") }
+if (kind === "report" && (!STATUSES.includes(body.status) || !body.fact)) usage()
+if (kind === "answer" && !body.answer.trim()) usage()
+
+const url = process.env.EGGHEAD_REPORT_URL
+if (!url) {
+  process.stderr.write("EGGHEAD_REPORT_URL is not set\n")
+  process.exit(1)
+}
+const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+  .catch((e) => ({ ok: false, status: 0, text: async () => String(e) }))
+if (!res.ok) {
+  process.stderr.write(`Egg Head did not take it (${res.status}): ${await res.text()}\n`)
+  process.exit(1)
+}
+process.stdout.write(`Sent to Egg Head (task ${task}).\n`)

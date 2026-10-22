@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Egg Head · run dashboard</title>
+<style>
+  :root {
+    --bg: #111216; --panel: #1a1b21; --line: #2a2c35; --text: #e8e9ee; --muted: #8d90a0; --chip: #23252e;
+    --egg: #f5c84c; --ok: #4cc38a; --bad: #ef6b6b; --info: #6aa8ff; --ask: #a7a8ff; --agent: #7fb5ff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 14px; padding: 12px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: rgba(17,18,22,.94); backdrop-filter: blur(6px); z-index: 3; }
+  header h1 { margin: 0; font-size: 17px; font-weight: 650; }
+  header h1 span { color: var(--egg); }
+  header .sub { color: var(--muted); font-size: 13px; }
+  header .grow { flex: 1; }
+  header a { color: var(--muted); font-size: 13px; text-decoration: none; }
+  header button { background: var(--egg); color: #1a1500; border: 0; border-radius: 7px; padding: 7px 14px; font-weight: 650; cursor: pointer; }
+  header button:disabled { opacity: .45; cursor: default; }
+  .live { color: #ff8a8a; font-size: 12.5px; display: none; } .live.on { display: inline; }
+
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; padding: 16px 22px 0; }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .kpi b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .kpi span { color: var(--muted); font-size: 12px; }
+  .kpi small { color: var(--muted); font-size: 11.5px; display: block; margin-top: 2px; }
+  .kpi.egg b { color: var(--egg); } .kpi.agent b { color: var(--agent); } .kpi.quiet b { color: #c9c7d6; }
+
+  main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; padding: 16px 22px 40px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; min-width: 0; }
+  h2 { margin: 0 0 10px; font-size: 12.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); display: flex; justify-content: space-between; }
+  h2 em { font-style: normal; text-transform: none; letter-spacing: 0; }
+  .right { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .empty { color: var(--muted); font-size: 13px; }
+
+  /* transcript */
+  .t-line { display: grid; grid-template-columns: 48px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .t-line:last-child { border: 0; }
+  .t-time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .t-who { font-weight: 650; margin-right: 6px; }
+  .t-who i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+  .t-text.cut::after { content: " (cut off)"; color: #ffb0b0; font-size: 12px; }
+  .trig { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; align-items: center; }
+  .tag { border-radius: 5px; padding: 1px 7px; font-size: 12px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+  .tag b { color: var(--text); font-weight: 600; }
+  .tag.decider { color: #c5c7d4; }
+  .tag.claim { color: #b9d6ff; background: #1c2738; }
+  .tag.bad { color: #ffb0b0; background: #36202a; } .tag.good { color: #9fe6c3; background: #1b3027; }
+  .tag.ask { color: var(--ask); background: #25264a; }
+  .tag.agent { color: var(--agent); background: #1a2840; }
+  .tag.gate { background: transparent; border: 1px solid var(--line); }
+  .tag.gate.pass { color: var(--ok); } .tag.gate.fail { color: var(--bad); }
+  .sub-row { margin: 6px 0 0; padding: 6px 10px; border-radius: 7px; font-size: 13px; }
+  .sub-row.egg { background: #33290f; border: 1px solid #5f4c17; }
+  .sub-row.egg b { color: var(--egg); }
+  .sub-row.egg .k { float: right; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #e3c46f; }
+  .sub-row.agent { background: #17233a; border: 1px solid #263d61; }
+  .sub-row.agent b { color: var(--agent); }
+  .sub-row.quiet { border: 1px dashed #3a3c48; color: var(--muted); }
+  .sub-row.quiet b { color: #c9c7d6; }
+  .sub-row.note { color: var(--muted); font-size: 12.5px; padding: 2px 10px; }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 4px 6px 6px; border-bottom: 1px solid var(--line); }
+  td { padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border: 0; }
+  td .dim { color: var(--muted); font-size: 12px; display: block; }
+  td.n { white-space: nowrap; }
+  .state { font-size: 12px; padding: 1px 7px; border-radius: 5px; white-space: nowrap; }
+  .state.raised, .state.barged { color: var(--egg); background: #33290f; }
+  .state.corrected, .state.true, .state.overruled, .state.parked { color: var(--ok); background: #1b3027; }
+  .state.contradicted, .state.checking, .state.confirmed { color: #ffb0b0; background: #36202a; }
+  .state.answered { color: var(--egg); background: #33290f; } .state.dropped { color: var(--ok); background: #1b3027; }
+  .state.listening, .state.ready { color: var(--ask); background: #25264a; }
+  .quiet-list div { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: #c9c7d6; }
+  .quiet-list div:last-child { border: 0; }
+  .quiet-list span { color: var(--muted); font-size: 12px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>Egg Head</span> · run dashboard</h1>
+  <div class="sub" id="title"></div>
+  <span class="live" id="live">● live</span>
+  <div class="grow"></div>
+  <a href="/">Meeting ↗</a>
+  <button id="start">Start call</button>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><b id="k-lines">0</b><span>lines heard</span></div>
+  <div class="kpi"><b id="k-wrong">0</b><span>wrong claims caught</span></div>
+  <div class="kpi egg"><b id="k-spoke">0</b><span>times Egg Head spoke</span></div>
+  <div class="kpi quiet"><b id="k-quiet">0</b><span>times it stayed quiet</span></div>
+  <div class="kpi agent"><b id="k-llm">0</b><span>LLM calls</span></div>
+</div>
+
+<main>
+  <section>
+    <h2>Transcript</h2>
+    <div id="transcript"><div class="empty">The call shows up here once it starts.</div></div>
+  </section>
+  <div class="right">
+    <section>
+      <h2>Claims checked</h2>
+      <div id="checks"><div class="empty">None yet.</div></div>
+    </section>
+    <section>
+      <h2>Agent tasks</h2>
+      <div id="tasks"><div class="empty">None yet.</div></div>
+    </section>
+    <section>
+      <h2>Questions</h2>
+      <div id="questions"><div class="empty">None yet.</div></div>
+    </section>
+    <section>
+      <h2>Why Egg Head stayed quiet</h2>
+      <div id="quiet" class="quiet-list"><div class="empty">Nothing yet.</div></div>
+    </section>
+  </div>
+</main>
+<script type="module" src="/web/dashboard.js"></script>
+</body>
+</html>
