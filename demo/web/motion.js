@@ -86,7 +86,9 @@ export function reconcile(box, items, { onEnter = enter, onChange } = {}) {
     let el = old.get(it.key)
     if (el) {
       old.delete(it.key)
-      if (el._html !== it.html || el.className !== it.cls) {
+      if (el._html === it.html) {
+        if (el.className !== it.cls) el.className = it.cls
+      } else {
         const had = new Set([...el.querySelectorAll("[data-k]")].map((e) => e.dataset.k))
         el.className = it.cls
         el.innerHTML = it.html
