@@ -2,7 +2,7 @@
 # AWS usage and estimated spend for Egg Head, from CloudWatch metrics (free to read; Cost
 # Explorer is $0.01 per request and lags a day). Bedrock tokens per model, Polly characters.
 # Transcribe streaming publishes no CloudWatch metrics: the audio scripts log their own seconds
-# to spike/out/transcribe-seconds.log, which is summed here.
+# to demo/out/transcribe-seconds.log, which is summed here.
 #
 #   scripts/aws-usage.sh                    # since 00:00 UTC today
 #   scripts/aws-usage.sh 2026-10-22T08:00Z  # since a time
@@ -67,7 +67,7 @@ for region in $(echo "$REGION ${EGGHEAD_VOICE_REGION:-}" | tr ' ' '\n' | sort -u
 done
 polly_usd=$(awk -v c="$chars" 'BEGIN { printf "%.5f", c * 16 / 1e6 }') # neural, before free tier
 
-log="$(dirname "$0")/../spike/out/transcribe-seconds.log"
+log="$(dirname "$0")/../demo/out/transcribe-seconds.log"
 secs=$( [ -f "$log" ] && awk -v s="$SINCE" '$1 >= s { t += $2 } END { print t + 0 }' "$log" || echo 0)
 transcribe_usd=$(awk -v s="$secs" 'BEGIN { printf "%.5f", s / 60 * 0.024 }') # tier 1, before free tier
 

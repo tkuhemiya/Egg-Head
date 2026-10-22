@@ -1,53 +1,32 @@
-# Day-1 spike: does Decider 2B answer our questions reliably?
+# Day-1 spike (history, frozen)
 
-Go/no-go test from [NextSteps.md](../NextSteps.md) §3. The labels in `dataset.jsonl` were written before any model run.
+The go/no-go test from 17 Oct: does Decider 2B answer Egg Head's questions reliably? Pass 1 (the original wording, T_ROUTE=0.9) never fired; pass 2 (simpler wording, latest-line routing, T_ROUTE=0.7) gave **GO-with-changes** ([REPORT.md](REPORT.md)). The speak gate was then reworked in code and re-scored on the pass-2 answers ([REPORT-gate.md](REPORT-gate.md); a fit to those 16 snippets, not a held-out result). The research campaign in [`research/decider/`](../research/decider/FINDINGS.md) replaced this harness, and the TypeScript runtime replaced the gate.
+
+What pass 2 decided:
+
+| Decision | Owner after pass 2 |
+|---|---|
+| Run a check | Decider `is_claim` + `which_check` + `which_resource`, fire at 0.7 (precision 4/4, recall 19%); 0.55–0.7 escalates to Bedrock |
+| Floor / interrupt | Decider, asked as "would speaking interrupt?" and inverted (87%), plus a minimum of VAD silence in code |
+| Claim vs check | Code (`compare`); `asserted_state` fell to 56% |
+| `silence_cost` | Code, from the check that disagreed (Decider 12%, always ~0.4) |
+| `self_repaired` | Keywords and later true claims in code, Decider as a weak vote (69%) |
+
+The research campaign later replaced the routing questions and the gate's Decider inputs (see `AGENTS.md`, "Router = research pipeline").
+
+What is left is what the parity tests and research scripts still need:
 
 | File | What |
 |---|---|
-| `dataset.jsonl` | 46 labelled bridge-call moments: 30 for claim routing, 16 with an open flagged claim for the speak gate. 16 are marked `tricky`. |
-| `world.json` | What each deterministic check returns during the scripted incident (stands in for CloudWatch). |
-| `questions.py` | The §5 questions, option sets, state rendering, §5.3 gates, claim-vs-check comparison, rewording variants. |
-| `run.py` | Asks all questions in **one batch per snippet** → `out/results.jsonl` + `out/meta.json`. |
-| `eval.py` | → `REPORT.md`: per-question accuracy, accuracy/coverage at confidence ≥ 0.9, calibration, routing-gate and speak-gate precision/recall, latency p50/p95, state-read-once check, rewording, errors, suggested verdict. |
+| `egghead_gate.py` | The frozen Python speak gate. `src/Gate.ts` is held to it (`test/Parity.test.ts`); `research/decider/scripts/final_eval.py` and `exp10_prompting.py` import it. |
+| `questions.py` | The pass-2 question set, gates and claim/check comparison. |
+| `out/results.jsonl`, `out/meta.json` | The pass-2 Decider answers (local HF weights; `meta.json` records the backend). |
+| `gate_eval.py` | Re-scores the gate on those answers and writes `REPORT-gate.md`. |
+| `export_gate_parity.py` | Writes `test/fixtures/gate-parity.json` (the 16 pass-2 rows plus a 20k-point input grid). |
 
-## Run
-
-```bash
-pip install strands-decider            # Python ≥ 3.10
-
-# Option A: server (recommended on the Mac; reuse it for the rewording pass)
-strands-decider serve StrandsAgents/strands-decider-2B-qwen3.5-v1-2610 --device mps --port 8000
-python spike/run.py --url http://127.0.0.1:8000 --hardware-note "M4, MPS"
-
-# Option B: in-process
-python spike/run.py --checkpoint --device mps      # or cpu / cuda
-
-python spike/eval.py                                # writes spike/REPORT.md
-
-# Rewording test on the worst 2–3 questions (REPORT.md §6 prints the command)
-python spike/run.py --url http://127.0.0.1:8000 --reword is_claim,floor_free
-python spike/eval.py
-```
-
-`python spike/run.py --dry-run` uses random answers to test the pipeline without the model; the report is stamped as a dry run. It **overwrites** `out/results.jsonl`.
-
-Pass 1 (PROJECT.md wording, T_ROUTE=0.9) is archived in `out/pass1/` and `REPORT-pass1.md`. Pass 2 is `REPORT.md` and `out/pass2/`. **Verdict: GO-with-changes** — see [NextSteps.md](../NextSteps.md) §3.
-
-## Labelling conventions
-
-- `is_claim`: an assertion about *current* system state or a recent change. Guesses, questions, plans, actions and past state are not claims.
-- Routing labels (`which_check`, `which_resource`, `asserted_state`) are `null` where the answer is ambiguous (guesses, past state) and are not scored there; chit-chat and actions are labelled `none` / `unknown`.
-- A self-correction inside one utterance is labelled by its final assertion.
-- `self_repaired`, `silence_cost` and `should_speak` are only labelled for snippets with a flagged claim. Agreeing with a wrong claim is not a repair; questioning it is.
-- `silence_cost` is a level index: 0 none, 1 low, 2 moderate, 3 high, 4 critical.
-
-## Held-out gate set
-
-`dataset_heldout.jsonl`: 20 gate snippets (h01-h20) labelled before any model run, about half built to break the keyword rules in the gate (`egghead_gate.py` here, `src/Gate.ts` in the runtime).
+The labelled snippets are `research/decider/data/source/egghead_spike.jsonl` and the check world is `data/world.json`. The pass-1 archive, the run/eval harness and the never-scored held-out gate set are in git history.
 
 ```bash
-python spike/run.py --checkpoint --device cpu --dataset dataset_heldout.jsonl --out out/heldout --prefix-check 0
-python spike/gate_eval.py --dataset dataset_heldout.jsonl --results out/heldout/results.jsonl \
-  --report REPORT-gate-heldout.md --title "Speak gate: held-out set (h01-h20)" \
-  --note "Labels committed before the run; rules frozen."
+python3 spike/gate_eval.py            # REPORT-gate.md (standard library only)
+python3 spike/export_gate_parity.py   # regenerate the gate fixture after an intentional gate change
 ```

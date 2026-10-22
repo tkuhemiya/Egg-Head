@@ -1,8 +1,9 @@
-"""Decider question set for the go/no-go spike (PROJECT.md §5).
+"""Decider question set from the Day-1 go/no-go spike (pass 2), frozen.
 
-Everything here is shared by run.py and eval.py: the check registry, the
-option sets, how a snippet is rendered into one Decider state, the gate, and
-the claim/check comparison. Edit wording here, then re-run.
+The pass-2 run that produced out/results.jsonl used these questions. Kept for
+gate_eval.py and export_gate_parity.py: the check registry, the pass-2 gates and
+the claim/check comparison. The harness that asked them (run.py, eval.py) is in
+git history.
 """
 
 from __future__ import annotations
@@ -11,6 +12,10 @@ import json
 from pathlib import Path
 
 HERE = Path(__file__).parent
+ROOT = HERE.parent
+# The labelled snippets and the check world live with the rest of the data.
+DATASET = ROOT / "research/decider/data/source/egghead_spike.jsonl"
+WORLD = ROOT / "data/world.json"
 DEFAULT_MODEL = "StrandsAgents/strands-decider-2B-qwen3.5-v1-2610"
 
 # Check registry: name -> one-line description (the Decider option label).
@@ -35,7 +40,7 @@ ASSERTED = {
 
 SILENCE_COST = ["none", "low", "moderate", "high", "critical"]
 
-# Gate thresholds. Pass 1 (PROJECT.md §5.3 starting points) never fired: noul
+# Gate thresholds. Pass 1 (the original design's 0.9 starting points) never fired: noul
 # answers sat in 0.5–0.8, so conf ≥ 0.9 had ~0% coverage. Pass 2 uses the
 # calibration from pass 1 (routing precision was 100% at T=0.7).
 T_ROUTE = 0.7          # is_claim probability and choice confidence to run a check
@@ -50,7 +55,7 @@ SILENCE_COST_NOUL_AT = 2
 
 
 def load_world() -> dict:
-    return json.loads((HERE / "world.json").read_text())
+    return json.loads(WORLD.read_text())
 
 
 def inventory(world: dict) -> dict[str, str]:
@@ -137,7 +142,7 @@ def build_questions(world: dict) -> dict[str, dict]:
     }
 
 
-# Alternate wordings for the rewording test (run.py --reword).
+# Alternate wordings for the pass-1 rewording test.
 VARIANTS = {
     "is_claim": [
         "Is the latest utterance a factual statement about how a system is behaving right now, "
@@ -204,7 +209,7 @@ def choice_conf(ans: dict) -> float:
 
 
 def route_gate(a: dict) -> bool:
-    """PROJECT.md §5.3 'run check' rule over Decider answers."""
+    """The spike's 'run check' rule over Decider answers."""
     return (
         a["is_claim"]["noul"] >= T_ROUTE
         and a["which_check"]["choice"] != "none"
@@ -228,7 +233,7 @@ def silence_cost_p(a: dict) -> float:
 
 
 def speak_gate(a: dict, silence_s: float, cooldown_ok: bool = True) -> bool:
-    """PROJECT.md §5.3 'speak' rule for an open, already-persisted contradiction."""
+    """The spike's 'speak' rule for an open, already-persisted contradiction."""
     return (
         a["self_repaired"]["noul"] < T_SELF_REPAIRED
         and (floor_free_p(a) >= T_FLOOR or silence_s >= T_SILENCE_S)

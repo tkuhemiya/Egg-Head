@@ -45,7 +45,7 @@ def row(g: G.GateInput) -> dict:
 
 
 def pass2() -> list[dict]:
-    snips = [json.loads(l) for l in (Q.HERE / "dataset.jsonl").read_text().splitlines() if l]
+    snips = [json.loads(l) for l in Q.DATASET.read_text().splitlines() if l]
     results = {json.loads(l)["id"]: json.loads(l)
                for l in (Q.HERE / "out/results.jsonl").read_text().splitlines() if l}
     rows = []

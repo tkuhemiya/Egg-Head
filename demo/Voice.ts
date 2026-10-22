@@ -4,7 +4,7 @@
  * Bedrock API key does not work for them. EGGHEAD_VOICE_REGION picks their region (default:
  * AWS_REGION): use the one nearest you, since Egg Head's line is synthesised mid-call (from
  * Colombo, ap-south-1 answered in ~0.3 s and us-east-1 in ~2.2 s). Transcribe seconds are appended to
- * spike/out/transcribe-seconds.log so scripts/aws-usage.sh can count them.
+ * demo/out/transcribe-seconds.log so scripts/aws-usage.sh can count them.
  */
 import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly"
 import { StartStreamTranscriptionCommand, TranscribeStreamingClient } from "@aws-sdk/client-transcribe-streaming"
@@ -15,7 +15,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 export const SAMPLE_RATE = 16000
 const voiceRegion = process.env.EGGHEAD_VOICE_REGION ? { region: process.env.EGGHEAD_VOICE_REGION } : {}
 const OUT = new URL("./out/audio/", import.meta.url)
-const TRANSCRIBE_LOG = new URL("../spike/out/transcribe-seconds.log", import.meta.url)
+const TRANSCRIBE_LOG = new URL("./out/transcribe-seconds.log", import.meta.url)
 
 export class AudioError extends Schema.TaggedError<AudioError>()("AudioError", {
   operation: Schema.Literals(["synthesize", "transcribe"]),

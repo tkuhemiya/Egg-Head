@@ -1,7 +1,7 @@
 """Re-score the speak gate on the pass-2 Decider answers (no model run needed).
 
 Compares the pass-2 gate (questions.speak_gate) with the reworked code gate
-(egghead.gate) on the 16 snippets that hold an open flagged claim, and writes
+(egghead_gate.py) on the 16 snippets that hold an open flagged claim, and writes
 spike/REPORT-gate.md.
 
 The reworked gate was written after reading these 16 snippets and the pass-2 errors, so
@@ -60,7 +60,7 @@ def pct(x):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dataset", default="dataset.jsonl")
+    ap.add_argument("--dataset", default=str(Q.DATASET))
     ap.add_argument("--results", default="out/results.jsonl")
     ap.add_argument("--report", default="REPORT-gate.md")
     ap.add_argument("--title", default="Speak gate rework: re-score on pass-2 answers")
