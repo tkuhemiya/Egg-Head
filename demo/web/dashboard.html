@@ -22,7 +22,7 @@
   header button:disabled { opacity: .45; cursor: default; }
   .live { color: #ff8a8a; font-size: 12.5px; display: none; } .live.on { display: inline; }
 
-  .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; padding: 16px 22px 0; }
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; padding: 16px 22px 0; }
   .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
   .kpi b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
   .kpi span { color: var(--muted); font-size: 12px; }
@@ -88,33 +88,31 @@
   <div class="sub" id="title"></div>
   <span class="live" id="live">● live</span>
   <div class="grow"></div>
-  <div class="sub" id="mode"></div>
   <a href="/">Meeting ↗</a>
   <button id="start">Start call</button>
 </header>
 
 <div class="kpis">
-  <div class="kpi"><b id="k-lines">0</b><span>lines heard</span><small id="k-decider">Decider –</small></div>
-  <div class="kpi"><b id="k-checks">0</b><span>claims checked (fast, no LLM)</span><small id="k-wrong">0 contradicted</small></div>
-  <div class="kpi agent"><b id="k-llm">0</b><span>LLM calls by Egg Head</span><small id="k-every">vs 0 with an LLM on every line</small></div>
-  <div class="kpi egg"><b id="k-spoke">0</b><span>times Egg Head spoke</span><small id="k-kinds">–</small></div>
-  <div class="kpi quiet"><b id="k-quiet">0</b><span>chose to stay quiet</span><small>with a reason, below</small></div>
-  <div class="kpi"><b id="k-questions">0</b><span>questions</span><small id="k-q">–</small></div>
+  <div class="kpi"><b id="k-lines">0</b><span>lines heard</span></div>
+  <div class="kpi"><b id="k-wrong">0</b><span>wrong claims caught</span></div>
+  <div class="kpi egg"><b id="k-spoke">0</b><span>times Egg Head spoke</span></div>
+  <div class="kpi quiet"><b id="k-quiet">0</b><span>times it stayed quiet</span></div>
+  <div class="kpi agent"><b id="k-llm">0</b><span>LLM calls</span></div>
 </div>
 
 <main>
   <section>
-    <h2>Meeting transcript <em id="t-sub">and what each line triggered</em></h2>
-    <div id="transcript"><div class="empty">Press Start call (here or on the meeting page). Each line shows up with what Decider made of it, the check it ran, and what Egg Head did.</div></div>
+    <h2>Transcript</h2>
+    <div id="transcript"><div class="empty">The call shows up here once it starts.</div></div>
   </section>
   <div class="right">
     <section>
-      <h2>Claims checked against live systems</h2>
+      <h2>Claims checked</h2>
       <div id="checks"><div class="empty">None yet.</div></div>
     </section>
     <section>
-      <h2>LLM agent tasks <em id="agent-label"></em></h2>
-      <div id="tasks"><div class="empty">None yet. The agent only runs to confirm a wrong claim before interrupting, or to answer a question.</div></div>
+      <h2>Agent tasks</h2>
+      <div id="tasks"><div class="empty">None yet.</div></div>
     </section>
     <section>
       <h2>Questions</h2>

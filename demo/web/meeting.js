@@ -1,7 +1,7 @@
 // The meeting page: cartoon teammates who lip-sync to their Polly voices, your camera, Egg Head
 // with what it is doing right now, its coding agent's live terminal, and a feed of every decision.
 import { drawEggHead, drawPerson, personOf } from "./avatars.js"
-import { connect, createStore, eggState, esc, KIND_LABEL, pct, secs } from "./store.js"
+import { connect, createStore, eggState, esc } from "./store.js"
 
 const $ = (id) => document.getElementById(id)
 const h = (tag, cls, html) => {
@@ -14,8 +14,7 @@ const params = new URLSearchParams(location.search)
 const me = params.get("me") || "You"
 const cfg = await fetch("/config").then((r) => r.json())
 $("title").textContent = `Incident bridge · ${cfg.title}`
-$("agent-label").textContent = cfg.agent === "none" ? "no agent in this run" : cfg.agent
-if (cfg.rehearsal) $("note").textContent = "Rehearsal: scripted Decider and model"
+$("agent-label").textContent = cfg.agent === "none" ? "off" : cfg.agent.startsWith("pi · amazon-bedrock") ? "pi on Amazon Bedrock" : cfg.agent.split(" · ")[0]
 // ?term=30%&busy=60%: terminal height when idle, and while the agent works (it grows so its commands show)
 if (params.has("term")) document.documentElement.style.setProperty("--term-h", params.get("term"))
 if (params.has("busy")) document.documentElement.style.setProperty("--term-busy", params.get("busy"))
@@ -84,7 +83,7 @@ const egg = tile("Egg Head", "egg")
 egg.label.innerHTML = `${MIC_ON}<span>Egg Head</span><span class="role">AI teammate</span>`
 const eggToon = drawEggHead()
 egg.art.append(eggToon.svg)
-const mind = h("div", "mind", '<div class="state listening" id="egg-state"><i></i><span>Ready</span></div><div class="detail" id="egg-detail"></div><div class="said" id="egg-said"></div>')
+const mind = h("div", "mind", '<div class="state listening" id="egg-state"><i></i><span>Ready</span></div><div class="detail" id="egg-detail"></div>')
 egg.t.append(mind)
 tiles.set("Egg Head", { ...egg, toon: eggToon })
 $("mini").append(drawEggHead().svg)
@@ -211,7 +210,6 @@ store.subscribe((s, m) => {
       eggToon.say(m.marks, m.durationS)
       play(m.audio)
       caption("Egg Head", m.marks, m.durationS, true, m.text)
-      $("egg-said").textContent = `“${m.text}”`
       break
     case "done":
       $("live").classList.remove("on")
@@ -227,9 +225,7 @@ store.subscribe((s, m) => {
     }
   }
   renderEgg(s)
-  renderStats(s)
   renderFeed(s)
-  $("status").textContent = s.done ? "" : s.status
 })
 
 let eggSpeakingUntil = 0
@@ -242,12 +238,11 @@ function renderEgg(s) {
   const listening = [...s.requests.values()].find((r) => r.state === "listening" && r.kind === "addressed")
   const confirmed = [...s.claims.values()].find((c) => c.state === "confirmed")
   const ready = [...s.requests.values()].find((r) => r.state === "ready")
+  const answering = [...s.requests.values()].find((r) => r.state === "checking")
   $("egg-detail").textContent = running
-    ? (running.job === "confirm" ? `Verifying ${running.detail}` : `Looking up: ${running.detail}`)
-    : listening ? listening.note
-    : confirmed ? `${confirmed.speaker}'s claim is wrong. Raising it when there is a gap.`
-    : ready ? `Answer for ${ready.speaker} ready. Waiting for a gap.`
-    : s.hold ? "The call is giving Egg Head the floor."
+    ? running.job === "confirm" ? `Checking ${running.detail?.split(":")[0]}'s claim` : `Looking into ${answering?.speaker ?? "a"}'s question`
+    : confirmed ? `${confirmed.speaker}'s claim is wrong`
+    : ready ? `Has an answer for ${ready.speaker}`
     : ""
   const busy = !!running
   // the terminal grows while the agent works, and stays big a moment after it reports
@@ -262,64 +257,42 @@ function renderEgg(s) {
     }, 3000)
   }
   $("agent-pill").className = `pill${busy ? " busy" : ""}`
-  $("agent-pill").textContent = busy ? `task ${running.task} running` : `${s.tasks.size} task${s.tasks.size === 1 ? "" : "s"} done`
-}
-
-function renderStats(s) {
-  const st = s.stats
-  if (!st) return
-  $("s-decider").textContent = st.deciderBatches ? `${st.deciderMsP50} ms` : "–"
-  $("s-llm").textContent = st.agentTasks + st.bedrockCalls
-  $("s-every").textContent = st.lines
+  $("agent-pill").textContent = busy ? "working" : ""
 }
 
 let feedTouched = 0
 $("feed").addEventListener("wheel", () => (feedTouched = Date.now()), { passive: true })
 
-/** One feed, oldest first: lines with what Decider made of them, Egg Head, the agent, the quiet calls. */
+/** One feed, oldest first: what was said, whether a claim held up, what the agent did, what Egg Head said. */
 function renderFeed(s) {
   const items = []
   for (const l of s.lines) {
     if (!l?.speaker) continue
     const main = l.events.find((e) => e.speaker === l.speaker && e.route)
-    const chips = []
-    if (main) {
-      const rt = main.route
-      const claim = rt.scores?.claim
-      chips.push(`<span class="chip">Decider <b>${Math.round(main.deciderMs)} ms</b></span>`)
-      if (rt.action === "check" && main.verdict) {
-        chips.push(`<span class="chip info">claim ${pct(claim)} → ${esc(rt.check)} · ${esc(rt.resource)}</span>`)
-        chips.push(main.verdict === "contradicts" ? `<span class="chip bad">✗ contradicted</span>` : main.verdict === "supports" ? `<span class="chip good">✓ true</span>` : `<span class="chip">inconclusive</span>`)
-      } else if (rt.action === "escalate") chips.push(`<span class="chip info">claim ${pct(claim)}, could not route</span>`)
-      else chips.push(`<span class="chip">not a claim</span>`)
-      const req = l.events.find((e) => e.request && e.request.turn === main.turn)?.request
-      if (req?.kind === "addressed") chips.push(`<span class="chip ask">talking to Egg Head ${pct(main.gateScores?.addressed)}</span>`)
-      if (req?.kind === "open") chips.push(`<span class="chip ask">question to the call ${pct(main.gateScores?.asks)}</span>`)
-      if (main.gateScores?.finished !== undefined && req) chips.push(`<span class="chip">finished ${pct(main.gateScores.finished)}</span>`)
-    }
+    const req = main && l.events.find((e) => e.request && e.request.turn === main.turn)?.request
+    const tag = main?.verdict === "contradicts" ? '<span class="chip bad">wrong</span>'
+      : main?.verdict === "supports" ? '<span class="chip good">checks out</span>'
+      : req?.kind === "addressed" ? '<span class="chip ask">to Egg Head</span>'
+      : ""
     const text = l.cut ? `${l.cut}—` : l.text
-    items.push({ at: l.at, html: `<div class="item${main && main.route.action === "ignore" ? " dim" : ""}"><span class="who">${esc(l.speaker)}</span><span class="txt">${esc(text)}</span>${chips.length ? `<div class="chips">${chips.join("")}</div>` : ""}</div>` })
+    items.push({ at: l.at, html: `<div class="item"><span class="who">${esc(l.speaker)}</span><span class="txt">${esc(text)}</span>${tag ? ` ${tag}` : ""}</div>` })
   }
   for (const t of s.tasks.values()) {
-    if (t.dispatchedAt !== undefined) {
-      items.push({ at: t.dispatchedAt + 1, html: `<div class="item agent"><span class="who">⚙ LLM agent · task ${t.task}</span><span class="txt">${t.job === "confirm" ? "verify" : "answer"}: ${esc(t.detail ?? "")}</span></div>` })
-    }
-    if (t.reportedAt !== undefined) {
-      items.push({ at: t.reportedAt, html: `<div class="item agent"><span class="who">✓ task ${t.task} reported${t.ms ? ` in ${secs(t.ms)}` : ""}</span><span class="txt">${esc(t.result ?? "")}</span></div>` })
-    }
+    if (t.dispatchedAt === undefined) continue
+    const what = t.job === "confirm" ? `Checking ${t.detail?.split(":")[0]}'s claim` : "Looking into the question"
+    items.push({ at: t.dispatchedAt + 1, html: `<div class="item agent"><span class="who">Agent</span><span class="txt">${t.result ? esc(t.result.replace(/^confirmed: /, "")) : `${esc(what)}…`}</span></div>` })
   }
   for (const e of s.egg) {
-    items.push({ at: e.at + 2, html: `<div class="item egg"><span class="kind">${KIND_LABEL[e.kind] ?? "Said"}</span><span class="who">Egg Head</span><span class="txt">${esc(e.text)}</span></div>` })
+    items.push({ at: e.at + 2, html: `<div class="item egg"><span class="who">Egg Head</span><span class="txt">${esc(e.text)}</span></div>` })
   }
   for (const q of s.quiet) {
-    items.push({ at: q.at + 1, html: `<div class="item quiet"><span class="who">Stays quiet.</span>${esc(q.why)}</div>` })
+    items.push({ at: q.at + 1, html: `<div class="item quiet"><span class="who">Stayed quiet:</span>${esc(q.why)}</div>` })
   }
   if (!items.length) return
   items.sort((a, b) => a.at - b.at)
   const feed = $("feed")
   feed.innerHTML = items.map((i) => i.html).join("")
   if (Date.now() - feedTouched > 8000) feed.scrollTop = feed.scrollHeight // follow the call unless you scrolled
-
 }
 
 $("start").onclick = () => {

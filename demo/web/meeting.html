@@ -81,22 +81,18 @@
   .term header { display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #1a1a20; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
   .term header .dots { display: flex; gap: 6px; } .term header .dots i { width: 10px; height: 10px; border-radius: 50%; background: #3a3a44; }
   .term header b { color: var(--text); font-weight: 600; }
-  .term header .pill { margin-left: auto; padding: 2px 9px; border-radius: 10px; background: #26262e; }
-  .term header .pill.busy { background: #1e3350; color: #9cc6ff; }
+  .term header .pill { margin-left: auto; padding: 2px 9px; border-radius: 10px; background: #26262e; display: none; }
+  .term header .pill.busy { background: #1e3350; color: #9cc6ff; display: inline; }
   .term .screen { padding: 6px 8px; min-height: 0; }
   .term .screen .xterm { height: 100%; }
 
   /* Egg Head panel */
-  .panel { display: grid; grid-template-rows: auto auto minmax(0, 1fr); background: var(--panel); border-left: 1px solid #111; min-height: 0; }
+  .panel { display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--panel); border-left: 1px solid #111; min-height: 0; }
   .panel .head { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
   .panel .head .mini { width: 38px; height: 38px; }
   .panel .head .mini svg { width: 100%; height: 100%; }
   .panel .head h2 { margin: 0; font-size: 15px; }
   .panel .head p { margin: 0; color: var(--muted); font-size: 12px; }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
-  .stats div { background: var(--chip); border-radius: 8px; padding: 7px 9px; }
-  .stats b { display: block; font-size: 17px; font-variant-numeric: tabular-nums; }
-  .stats span { color: var(--muted); font-size: 11px; }
   .feed { overflow-y: auto; padding: 10px 12px 18px; display: flex; flex-direction: column; gap: 8px; }
   .feed .empty { color: var(--muted); font-size: 13px; padding: 8px 2px; }
   .item { border-radius: 8px; padding: 7px 10px; background: #26252d; font-size: 12.8px; }
@@ -149,7 +145,6 @@
     <div class="timer" id="timer">00:00</div>
     <div class="live" id="live">Live</div>
     <div class="grow"></div>
-    <div class="sub" id="status"></div>
     <a href="/dashboard" target="_blank">Open dashboard ↗</a>
     <button id="start">Start call</button>
   </div>
@@ -162,8 +157,8 @@
       <section class="term">
         <header>
           <div class="dots"><i></i><i></i><i></i></div>
-          <span><b>Investigator</b> · Egg Head's coding agent · <span id="agent-label"></span></span>
-          <span class="pill" id="agent-pill">idle</span>
+          <span><b>Egg Head's agent</b> · <span id="agent-label"></span></span>
+          <span class="pill" id="agent-pill"></span>
         </header>
         <div class="screen" id="screen"></div>
       </section>
@@ -172,22 +167,13 @@
     <aside class="panel">
       <div class="head">
         <div class="mini" id="mini"></div>
-        <div>
-          <h2>Egg Head</h2>
-          <p>Decider 2B decides every line · an LLM only when it must</p>
-        </div>
+        <h2>Egg Head</h2>
       </div>
-      <div class="stats">
-        <div><b id="s-decider">–</b><span>Decider p50</span></div>
-        <div><b id="s-llm">0</b><span>LLM calls</span></div>
-        <div><b id="s-every">0</b><span>LLM on every line</span></div>
-      </div>
-      <div class="feed" id="feed"><div class="empty">Press Start call. Every decision Egg Head makes shows up here.</div></div>
+      <div class="feed" id="feed"><div class="empty">Egg Head's activity shows up here.</div></div>
     </aside>
   </div>
 
   <div class="controls">
-    <div class="note" id="note"></div>
     <button class="off" title="Muted"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2zM3.3 2.3 2 3.6l18.4 18.4 1.3-1.3z"/></svg>Mic</button>
     <button id="cam-btn" title="Camera"><svg viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>Camera</button>
     <button title="Share"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6v2H8v2h8v-2h-2v-2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 12H4V6h16zM12 7l-4 4h3v4h2v-4h3z"/></svg>Share</button>

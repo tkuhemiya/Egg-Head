@@ -2,20 +2,8 @@
 // checks, agent tasks, questions and the moments Egg Head chose to stay quiet. Both the meeting
 // page and the dashboard render from this.
 
-export const pct = (p) => (p === undefined || p === null ? "–" : Number(p).toFixed(2))
 export const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
 export const secs = (ms) => `${(ms / 1000).toFixed(1)} s`
-
-export const GATE = {
-  persisted: "call moved on",
-  not_repaired: "not corrected",
-  min_silence: "silence ≥ 0.5 s",
-  floor_open: "floor open",
-  worth_it: "worth it",
-  cooldown: "cooldown"
-}
-
-export const KIND_LABEL = { flag: "Flag", ack: "Acknowledge", answer: "Answer", barge: "Barge-in", line: "Said" }
 
 export function createStore() {
   const listeners = new Set()
@@ -70,7 +58,7 @@ export function createStore() {
           state: ev.verdict === "contradicts" ? "contradicted" : "true"
         })
       }
-      if (ev.verdict === "supports") quiet(index, at, `${ev.speaker}'s claim checks out (${rt.check} on ${rt.resource}). No LLM call, nothing to say.`)
+      if (ev.verdict === "supports") quiet(index, at, `${ev.speaker}'s claim checks out.`)
     }
     if (ev.agent) {
       const a = ev.agent
@@ -85,7 +73,7 @@ export function createStore() {
         if (c && c.state === "checking") {
           if (/^overruled/.test(a.detail)) {
             c.state = "overruled"
-            quiet(index, at, `The agent found ${c.speaker}'s claim was right after all. Egg Head stays quiet.`)
+            quiet(index, at, `${c.speaker} was right after all.`)
           } else c.state = "confirmed"
         }
       }
@@ -94,26 +82,26 @@ export function createStore() {
       const r = ev.request
       const before = s.requests.get(r.id)
       s.requests.set(r.id, { ...r, index: before?.index ?? index })
-      if (r.state === "dropped" && before?.state !== "dropped") quiet(index, at, `${r.speaker} asked the call a question; ${r.note}.`)
+      if (r.state === "dropped" && before?.state !== "dropped") quiet(index, at, `Someone else answered ${r.speaker}.`)
     }
     if (ev.note) {
       l.notes = [...(l.notes ?? []), ev.note]
       if (/before any LLM call/.test(ev.note)) {
-        setClaim(ev, "corrected")
-        quiet(index, at, ev.note)
+        const c = setClaim(ev, "corrected")
+        quiet(index, at, `The call corrected ${c?.speaker ?? "the claim"} on its own.`)
       }
-      if (/has not finished|not an instruction/.test(ev.note)) quiet(index, at, ev.note)
+      if (/has not finished/.test(ev.note) && ev.request) quiet(index, at, `${ev.request.speaker} hasn't finished talking.`)
     }
     const g = ev.gate
     if (g) {
       l.gate = g
       l.gateScores = ev.gateScores
       if (g.repairedBy) {
-        setClaim(ev, "corrected")
-        quiet(index, at, `The call corrected the claim itself (${g.repairedBy}). Egg Head stays quiet.`)
+        const c = setClaim(ev, "corrected")
+        quiet(index, at, `The call corrected ${c?.speaker ?? "the claim"} on its own.`)
       } else if (!g.speak && g.blockedBy === "worth_it") {
         setClaim(ev, "parked")
-        quiet(index, at, "Not worth interrupting: the call parked the topic.")
+        quiet(index, at, "The call parked the topic.")
       }
     }
     if (ev.said && (ev.saidKind === "flag" || ev.saidKind === "barge" || !ev.saidKind)) {
@@ -171,7 +159,7 @@ export function eggState(s) {
   const ready = [...s.requests.values()].find((r) => r.state === "ready")
   const confirmed = [...s.claims.values()].find((c) => c.state === "confirmed")
   if (s.floor !== null) return { key: "floor", text: "Taking the floor…" }
-  if (running.length) return { key: "checking", text: `Checking with the agent (task ${running[0].task})` }
+  if (running.length) return { key: "checking", text: "Checking" }
   if (ready || confirmed) return { key: "gap", text: "Waiting for a gap to speak" }
   if (listening) return { key: "waiting", text: `Waiting for ${listening.speaker} to finish` }
   if (s.running) return { key: "listening", text: "Listening" }
