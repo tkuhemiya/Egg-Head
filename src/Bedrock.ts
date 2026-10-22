@@ -40,7 +40,8 @@ export const WRITER_PROMPT = "You are Egg Head, a quiet teammate on an incident 
   "contradicted by a live check. Say it in ONE spoken sentence of at most 20 words. Start with 'Quick flag:', " +
   "address the person by name (no pronouns for them), and give the numbers from the evidence in plain spoken " +
   "words, without check names or code identifiers. No markdown. Never invent numbers. Call run_check only if " +
-  "the evidence you were given is missing."
+  "the evidence you were given is missing. Example of the style (different facts): 'Quick flag, Lee: the " +
+  "payments API is returning errors on 7 percent of requests, against a normal 0.2 percent.'"
 
 export const ESCALATE_PROMPT = "You help Egg Head decide which live check can verify the LATEST utterance on an " +
   "incident call. Pick the one check and the one resource, and the state the speaker " +
@@ -101,7 +102,8 @@ export type AgentFactory = (spec: AgentSpec) => AgentLike
 
 export const bedrockAgentFactory = (modelId: Option.Option<string>): AgentFactory => (spec) =>
   new Agent({
-    model: new BedrockModel(Option.match(modelId, { onNone: () => ({}), onSome: (id) => ({ modelId: id }) })),
+    // Low temperature: one short factual sentence, the same on every run of the demo.
+    model: new BedrockModel({ temperature: 0.2, ...Option.match(modelId, { onNone: () => ({}), onSome: (id) => ({ modelId: id }) }) }),
     systemPrompt: spec.systemPrompt,
     tools: spec.tools,
     interventions: spec.interventions,
@@ -143,8 +145,9 @@ export class BedrockSupport extends Context.Service<BedrockSupport, {
         tools: [checkTool(source, run)],
         interventions: options.guard ? [options.guard] : []
       })
-      const prompt = `${item.speaker} said "${item.claim}". Check ${item.check} on ${item.resource} ` +
-        `returned ${item.status}: ${item.evidence}.`
+      // No check identifiers in the prompt: a small model repeats them aloud.
+      const prompt = `${item.speaker} said "${item.claim}". A live check of ${item.resource} shows it is ` +
+        `${item.status}: ${item.evidence}.`
       const result = yield* invoke("write", agent, prompt)
       return String(result).trim()
     })

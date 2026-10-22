@@ -118,7 +118,8 @@ function onEvent(i, ev) {
   if (ev.speaker !== "(silence)" && rt) {
     const chips = [`<span class="chip">Decider <b>${Math.round(ev.deciderMs)} ms</b></span>`,
       `<span class="chip claim">claim <b>${pct(rt.scores.claim)}</b></span>`]
-    if (rt.action === "check") chips.push(`<span class="chip">check <b>${esc(rt.check)}</b> on <b>${esc(rt.resource)}</b> · res ${pct(rt.scores.resource)} · check ${pct(rt.scores.check)}</span>`)
+    if (rt.action === "check" && rt.scores.bedrock !== undefined) chips.push(`<span class="chip">Decider could not route it; <b>Bedrock</b> picked <b>${esc(rt.check)}</b> on <b>${esc(rt.resource)}</b></span>`)
+    else if (rt.action === "check") chips.push(`<span class="chip">check <b>${esc(rt.check)}</b> on <b>${esc(rt.resource)}</b> · res ${pct(rt.scores.resource)} · check ${pct(rt.scores.check)}</span>`)
     if (rt.action === "escalate") chips.push(`<span class="chip">${bedrock ? "a claim Decider could not route: escalated to Bedrock" : "a claim Decider could not route (no Bedrock in this run)"}</span>`)
     if (ev.verdict) chips.push(`<span class="chip ${ev.verdict}">${ev.verdict === "contradicts" ? "✗ contradicted" : ev.verdict === "supports" ? "✓ matches" : "inconclusive"}${ev.checkEvidence ? `: ${esc(ev.checkEvidence)}` : ""}</span>`)
     c.decision.innerHTML = chips.join("")
@@ -160,9 +161,17 @@ function onMessage(m) {
     }
     case "heard": { const c = card(m.index); if (c.root.firstChild.textContent.indexOf(m.text) < 0) c.root.querySelector(".heard").textContent = `heard: “${m.text}”`; break }
     case "event": onEvent(m.index, m.event); break
+    case "floor": {
+      if (document.querySelector(".egg.pending")) break
+      const e = el("div", "egg pending", `<span class="who">Egg Head</span><span class="note">taking the floor… ${bedrock ? "Bedrock is writing the line" : "writing the line"}</span>`)
+      card(m.index).root.after(e); e.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      break
+    }
     case "egghead": {
       const e = el("div", "egg", `<span class="who">Egg Head</span>${esc(m.text)}`)
-      card(m.index).root.after(e); play(m.audio); e.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      const pending = document.querySelector(".egg.pending")
+      if (pending) pending.replaceWith(e); else card(m.index).root.after(e)
+      play(m.audio); e.scrollIntoView({ behavior: "smooth", block: "nearest" })
       break
     }
     case "stats": {

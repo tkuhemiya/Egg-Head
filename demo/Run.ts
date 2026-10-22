@@ -33,6 +33,7 @@ export type Message =
   | { readonly type: "line"; readonly index: number; readonly speaker: string; readonly text: string; readonly audio: string; readonly durationS: number; readonly expect: string }
   | { readonly type: "heard"; readonly index: number; readonly speaker: string; readonly text: string }
   | { readonly type: "event"; readonly index: number; readonly event: unknown }
+  | { readonly type: "floor"; readonly index: number }
   | { readonly type: "egghead"; readonly index: number; readonly text: string; readonly audio: string; readonly durationS: number }
   | { readonly type: "stats"; readonly stats: Stats }
   | { readonly type: "done" }
@@ -122,9 +123,13 @@ export const run = Effect.fnUntraced(function*(call: Call, options: RunOptions) 
   })
 
   // Every Bridge decision goes to the dashboard; when Egg Head speaks, voice it and hold the humans.
+  const lineOfTurn = yield* Ref.make<ReadonlyArray<number>>([]) // Bridge turn -> call line
+  const hear = (i: number, speaker: string, text: string, silenceS: number) =>
+    Ref.update(lineOfTurn, (t) => [...t, i]).pipe(Effect.andThen(bridge.hear(speaker, text, silenceS)))
+
   const onEvent = (ev: Event) =>
     Effect.gen(function*() {
-      const index = yield* Ref.get(current)
+      const index = (yield* Ref.get(lineOfTurn))[ev.turn] ?? (yield* Ref.get(current))
       yield* publish({ type: "event", index, event: encodeEvent(ev) })
       if (Option.isSome(ev.said)) {
         yield* Ref.set(humansWaitUntil, (yield* now) + 30) // hold the next line while the voice is made
@@ -137,6 +142,19 @@ export const run = Effect.fnUntraced(function*(call: Call, options: RunOptions) 
     })
   yield* bridge.changes.pipe(Stream.runForEach(onEvent), Effect.forkScoped)
   yield* Effect.yieldNow
+
+  // Announce when Egg Head takes the floor (the gate opened; the line is being written).
+  let announced = 0
+  const floorWatch = yield* Effect.gen(function*() {
+    while (true) {
+      yield* Effect.sleep("100 millis")
+      const hold = yield* Ref.get(humansWaitUntil)
+      if (hold !== announced && hold - (yield* now) > 20) {
+        announced = hold
+        yield* publish({ type: "floor", index: yield* Ref.get(current) })
+      }
+    }
+  }).pipe(Effect.forkScoped)
 
   // VAD-style silence ticks between lines
   const ticker = yield* Effect.gen(function*() {
@@ -166,16 +184,16 @@ export const run = Effect.fnUntraced(function*(call: Call, options: RunOptions) 
 
   yield* publish({ type: "meta", title: call.title, mode: options.mode, writer: options.writer, lines: call.lines.length })
 
+  const hearing: Array<Fiber.Fiber<unknown, unknown>> = []
   if (options.mode === "text") {
     for (let i = 0; i < call.lines.length; i++) {
       const l = call.lines[i]!
       yield* startLine(i)
       yield* Effect.sleep(`${ASR_DELAY_S * 1000} millis`)
       yield* publish({ type: "heard", index: i, speaker: l.speaker, text: l.text })
-      const started = yield* now
-      yield* bridge.hear(l.speaker, l.text, (yield* now) - (yield* Ref.get(lastEnd)))
-      const left = l.pause - ((yield* now) - started) - ASR_DELAY_S
-      if (left > 0) yield* Effect.sleep(`${Math.round(left * 1000)} millis`)
+      // the call does not wait for Egg Head to think (the Bridge takes one utterance at a time)
+      hearing.push(yield* Effect.forkScoped(hear(i, l.speaker, l.text, (yield* now) - (yield* Ref.get(lastEnd)))))
+      if (l.pause > ASR_DELAY_S) yield* Effect.sleep(`${Math.round((l.pause - ASR_DELAY_S) * 1000)} millis`)
     }
   } else {
     // Audio for Transcribe: each line's PCM, then silence for the pause (and while Egg Head talks).
@@ -224,14 +242,16 @@ export const run = Effect.fnUntraced(function*(call: Call, options: RunOptions) 
           const speaker = call.lines[i]!.speaker
           yield* publish({ type: "heard", index: i, speaker, text: seg.text })
           const end = yield* Ref.get(lastEnd)
-          yield* bridge.hear(speaker, seg.text, Number.isFinite(end) ? (yield* now) - end : 0)
+          yield* hear(i, speaker, seg.text, Number.isFinite(end) ? (yield* now) - end : 0)
         })
       )
     )
   }
 
+  yield* Fiber.joinAll(hearing)
   yield* Effect.sleep("1500 millis")
   yield* Fiber.interrupt(ticker)
+  yield* Fiber.interrupt(floorWatch)
   yield* publish({ type: "stats", stats: yield* stats })
   yield* publish({ type: "done" })
   return yield* bridge.state

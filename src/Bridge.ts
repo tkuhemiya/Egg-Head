@@ -174,7 +174,9 @@ export class Bridge extends Context.Service<Bridge, {
           s = { ...s, escalations: s.escalations + 1 }
           ev = { ...ev, escalations: s.escalations }
           if (Option.isSome(escalator)) {
+            const decided = rt
             rt = yield* escalator.value.route(window)
+            rt = { ...rt, scores: { ...decided.scores, ...rt.scores } } // keep Decider's scores beside the escalator's
             ev = { ...ev, route: Option.some(rt) }
           }
         }

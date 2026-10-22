@@ -1,7 +1,9 @@
 /**
  * Demo audio: Amazon Polly voices (cached on disk, so a re-run costs nothing) and Amazon
  * Transcribe streaming. Both use the default AWS credential chain (e.g. `aws login`); a
- * Bedrock API key does not work for them. Transcribe seconds are appended to
+ * Bedrock API key does not work for them. EGGHEAD_VOICE_REGION picks their region (default:
+ * AWS_REGION): use the one nearest you, since Egg Head's line is synthesised mid-call (from
+ * Colombo, ap-south-1 answered in ~0.3 s and us-east-1 in ~2.2 s). Transcribe seconds are appended to
  * spike/out/transcribe-seconds.log so scripts/aws-usage.sh can count them.
  */
 import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly"
@@ -11,6 +13,7 @@ import { createHash } from "node:crypto"
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 
 export const SAMPLE_RATE = 16000
+const voiceRegion = process.env.EGGHEAD_VOICE_REGION ? { region: process.env.EGGHEAD_VOICE_REGION } : {}
 const OUT = new URL("./out/audio/", import.meta.url)
 const TRANSCRIBE_LOG = new URL("../spike/out/transcribe-seconds.log", import.meta.url)
 
@@ -54,7 +57,10 @@ export class Voice extends Context.Service<Voice, {
   readonly charactersBilled: Effect.Effect<number>
 }>()("egghead/demo/Voice") {
   static readonly layer = Layer.sync(Voice, () => {
-    const polly = new PollyClient({})
+    const polly = new PollyClient(voiceRegion)
+    // Resolve credentials now: the first resolution (e.g. an `aws login` session) can take
+    // seconds, and the first uncached line is usually Egg Head's, mid-call.
+    void polly.config.credentials().catch(() => {})
     let billed = 0
     mkdirSync(OUT, { recursive: true })
     return Voice.of({
@@ -104,7 +110,7 @@ export interface Segment {
 export const transcribe = (audio: AsyncIterable<Uint8Array>): Stream.Stream<Segment, AudioError> =>
   Stream.fromAsyncIterable(
     (async function*() {
-      const client = new TranscribeStreamingClient({})
+      const client = new TranscribeStreamingClient(voiceRegion)
       const started = Date.now()
       let sent = 0
       const events = (async function*() {

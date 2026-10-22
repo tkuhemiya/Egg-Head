@@ -59,9 +59,11 @@ for m in $models; do
 done
 
 chars=0
-for op in SynthesizeSpeech StartSpeechSynthesisTask; do
-  c=$(sum AWS/Polly RequestCharacters Operation "$op")
-  chars=$(awk -v a="$chars" -v b="$c" 'BEGIN { print a + b }')
+for region in $(echo "$REGION ${EGGHEAD_VOICE_REGION:-}" | tr ' ' '\n' | sort -u); do
+  for op in SynthesizeSpeech StartSpeechSynthesisTask; do
+    c=$(REGION=$region; sum AWS/Polly RequestCharacters Operation "$op")
+    chars=$(awk -v a="$chars" -v b="$c" 'BEGIN { print a + b }')
+  done
 done
 polly_usd=$(awk -v c="$chars" 'BEGIN { printf "%.5f", c * 16 / 1e6 }') # neural, before free tier
 

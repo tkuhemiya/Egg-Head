@@ -39,12 +39,14 @@ const page = new URL("./index.html", import.meta.url) // read per request, so ed
 const AUDIO = new URL("./out/audio/", import.meta.url)
 const RUNS = new URL("./out/runs/", import.meta.url)
 
-const history: Array<Message> = []
+const history: Array<Message & { readonly at: number }> = [] // `at`: ms since the run started
 const clients = new Set<ServerResponse>()
+let runStarted = 0
 const publish = (m: Message) =>
   Effect.sync(() => {
-    history.push(m)
-    const data = `data: ${JSON.stringify(m)}\n\n`
+    const stamped = { ...m, at: Date.now() - runStarted }
+    history.push(stamped)
+    const data = `data: ${JSON.stringify(stamped)}\n\n`
     for (const c of clients) c.write(data)
   })
 
@@ -63,6 +65,7 @@ let running = false
 const start = () => {
   if (running) return
   running = true
+  runStarted = Date.now()
   history.length = 0
   for (const c of clients) c.write(`data: ${JSON.stringify({ type: "reset" })}\n\n`)
   const program = Effect.gen(function*() {
