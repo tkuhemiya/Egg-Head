@@ -51,10 +51,13 @@ export const directiveQuestions = Decision.make({
   decisions: { act: Decision.probability({ instructions: DIRECTIVE }) }
 })
 
-export const T_ADDRESSED = 0.5
-export const T_ASKS = 0.5
-export const T_FINISHED = 0.5
-export const T_DIRECTIVE = 0.5
+// Uncalibrated. Decider's raw yes/no probabilities run low (raw `finished` sat below 0.5 on every
+// research line before Platt scaling), and each of these already passed a code check (Egg Head
+// named, a "?", a resource with a wrong claim), so Decider only has to not say no.
+export const T_ADDRESSED = 0.25
+export const T_ASKS = 0.3
+export const T_FINISHED = 0.5 // Platt-scaled (research exp 6)
+export const T_DIRECTIVE = 0.3
 export const REPLY_MAX_WAIT_S = 4.0
 export const OPEN_SILENCE_S = 2.5
 
