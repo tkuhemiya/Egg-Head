@@ -1,6 +1,6 @@
 # Agent guide (Egg Head)
 
-Hackathon agent: incident-call bridge that uses **Strands Decider 2B** for fast judgments and **Amazon Bedrock** only when it must speak or escalate. See `PROJECT.md` for design; `NextSteps.md` for status.
+Hackathon agent: incident-call bridge that uses **Strands Decider 2B** for fast judgments and **Amazon Bedrock** only when it must speak or escalate. See [`README.md`](README.md) for the problem, the design, results and the open to-do list.
 
 ## Layout
 
@@ -9,9 +9,9 @@ Hackathon agent: incident-call bridge that uses **Strands Decider 2B** for fast 
 | `src/` | Runtime, TypeScript on [Effect 4](https://effect.website): Decider provider, questions, gate, checks, `Bridge`, Bedrock (Strands TS) |
 | `test/` | Vitest + `@effect/vitest` (`ScriptedDecider` layer; no live Decider or AWS). `test/fixtures/` holds the Python parity oracles |
 | `data/world.json` | Mock check world for the demo (`MockSource`); `data/aws.json` is the same incident in AWS CLI shapes, for the agent's stand-in `aws` |
-| `scripts/` | `smoke-decider.ts` (short live call), `replay-research.ts` (router vs the research numbers), `probe-bedrock.ts`, `aws-usage.sh` (spend from CloudWatch) |
+| `scripts/` | `smoke-decider.ts` (short live call), `replay-research.ts` (router vs the research numbers), `probe-bedrock.ts` (two live Bedrock calls), `record-demo.ts` (film the meeting page to an mp4), `aws-usage.sh` (spend from CloudWatch) |
 | `demo/` | The demo: meeting page and dashboard (`web/`), real-time call runner, Polly voices (with viseme marks) and Transcribe streaming, the terminal agent (`Agent.ts`, `agent/`: pi extension, system prompt, stand-in `aws` CLI and `egghead` report command). Call scripts are in `data/calls/`; [`demo/RECORDING.md`](demo/RECORDING.md) is the video run sheet |
-| `spike/` | Python. Day-1 eval harness, labeled snippets, saved reports under `spike/out/`; `egghead_gate.py` is the frozen Python gate the research scripts import |
+| `spike/` | Python, frozen. What is left of the Day-1 go/no-go spike: `egghead_gate.py` (the Python gate the research scripts import and `src/Gate.ts` is held to), the pass-2 answers and reports, and the gate parity export |
 | `research/decider/` | Decider 2B research campaign (prompting, bias, routing, calibration); see [`FINDINGS.md`](research/decider/FINDINGS.md) |
 
 **Decider research (Oct 2026):** Prefer separate yes/no questions in one batch over N-way choices; rotate or average `choice` option order; use the latest utterance (kv format) for claim detection and Platt-calibrate probabilities on dev before thresholding. Full methods and held-out numbers are in [`research/decider/FINDINGS.md`](research/decider/FINDINGS.md).
@@ -44,12 +44,11 @@ Effect idioms used throughout (follow them in new code; `node_modules/effect/AGE
 
 **Agent mode (`src/Investigator.ts`, `src/Conversation.ts`):** give the Bridge an `Investigator` and it (1) sends a contradicted claim that survives one turn uncorrected to the Investigator before the gate may raise it, so a claim the call corrects itself costs no model call; (2) answers when spoken to, once the speaker has finished (`finished` Platt ≥ 0.5 and the words do not trail off; 4 s of silence otherwise), and takes a question to the call that nobody answers in 2.5 s; (3) barges in from `Bridge.partial` (live partial transcripts) when the line names a resource with an open wrong claim and Decider says the speaker is telling someone to act now. Three new yes/no questions (`addr`, `ask` with the gate batch; `act` on partials) have no research numbers yet. Without an Investigator the Bridge is unchanged, so the parity fixtures did not move. `test/Conversation.test.ts` covers it with `Investigator.direct`.
 
-Spike pipeline (optional, hits a real Decider):
+Regenerate the gate fixture after an intentional gate change (no Decider calls, standard library only):
 
 ```bash
-cd spike && pip install -r requirements.txt
-python3 run.py --url https://api.decider.cloud --limit 3
-python3 eval.py
+python3 spike/gate_eval.py            # must still print REPORT-gate.md's numbers
+python3 spike/export_gate_parity.py   # writes test/fixtures/gate-parity.json
 ```
 
 ## Strands Decider 2B (hosted API)

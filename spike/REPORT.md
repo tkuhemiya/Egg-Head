@@ -1,6 +1,6 @@
 # Spike report: Decider go/no-go
 
-**Human verdict: GO-with-changes.** See [NextSteps.md](../NextSteps.md) §3. Do not gate on conf ≥ 0.9 for these noul questions.
+**Human verdict: GO-with-changes.** See [README.md](README.md) for what was kept and what moved into code. Do not gate on conf ≥ 0.9 for these noul questions.
 
 - Model: `StrandsAgents/strands-decider-2B-qwen3.5-v1-2610`
 - Run: 2026-10-17 01:18:23 +0000
