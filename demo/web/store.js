@@ -87,7 +87,7 @@ export function createStore() {
     if (ev.note) {
       l.notes = [...(l.notes ?? []), ev.note]
       if (/before any LLM call/.test(ev.note)) {
-        const c = setClaim(ev, "corrected")
+        const c = setClaim(ev, "corrected", { repairedBy: /\((\w+)\)/.exec(ev.note)?.[1] })
         quiet(index, at, `The call corrected ${c?.speaker ?? "the claim"} on its own.`)
       }
       if (/has not finished/.test(ev.note) && ev.request) quiet(index, at, `${ev.request.speaker} hasn't finished talking.`)
@@ -96,8 +96,10 @@ export function createStore() {
     if (g) {
       l.gate = g
       l.gateScores = ev.gateScores
+      const gc = claimOf(ev)
+      if (gc) gc.gate = g
       if (g.repairedBy) {
-        const c = setClaim(ev, "corrected")
+        const c = setClaim(ev, "corrected", { repairedBy: g.repairedBy })
         quiet(index, at, `The call corrected ${c?.speaker ?? "the claim"} on its own.`)
       } else if (!g.speak && g.blockedBy === "worth_it") {
         setClaim(ev, "parked")
@@ -105,7 +107,7 @@ export function createStore() {
       }
     }
     if (ev.said && (ev.saidKind === "flag" || ev.saidKind === "barge" || !ev.saidKind)) {
-      setClaim(ev, ev.saidKind === "barge" ? "barged" : "raised")
+      setClaim(ev, ev.saidKind === "barge" ? "barged" : "raised", { said: ev.said, directive: ev.gateScores?.directive })
     }
   }
 

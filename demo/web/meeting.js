@@ -1,6 +1,7 @@
 // The meeting page: cartoon teammates who lip-sync to their Polly voices, your camera, Egg Head
 // with what it is doing right now, its coding agent's live terminal, and a feed of every decision.
 import { drawEggHead, drawPerson, personOf } from "./avatars.js"
+import { enter, flash, morph, pop, reconcile, roll, shake } from "./motion.js"
 import { connect, createStore, eggState, esc } from "./store.js"
 
 const $ = (id) => document.getElementById(id)
@@ -34,7 +35,7 @@ function tile(name, cls = "") {
   const p = personOf(name, tiles.size)
   if (p.bg && !cls.includes("egg")) t.style.cssText = `--bg1:${p.bg[0]};--bg2:${p.bg[1]}`
   const art = h("div", "art")
-  const badge = h("div", "badge")
+  const badge = h("div", "bubble")
   const label = h("div", "name", `${cls.includes("me") ? MIC_OFF : MIC_ON}<span>${esc(name)}</span>${p.role && !cls ? `<span class="role">${esc(p.role)}</span>` : ""}`)
   t.append(art, badge, label)
   grid.insertBefore(t, $("captions"))
@@ -83,7 +84,7 @@ const egg = tile("Egg Head", "egg")
 egg.label.innerHTML = `${MIC_ON}<span>Egg Head</span><span class="role">AI teammate</span>`
 const eggToon = drawEggHead()
 egg.art.append(eggToon.svg)
-const mind = h("div", "mind", '<div class="state listening" id="egg-state"><i></i><span>Ready</span></div><div class="detail" id="egg-detail"></div>')
+const mind = h("div", "mind", '<div class="node state idle" id="egg-state"><i></i><span>Ready</span></div><div class="detail" id="egg-detail"></div>')
 egg.t.append(mind)
 tiles.set("Egg Head", { ...egg, toon: eggToon })
 $("mini").append(drawEggHead().svg)
@@ -108,14 +109,10 @@ function caption(name, marks, durationS, isEgg, text) {
   const box = $("captions")
   box.className = `captions on${isEgg ? " egg" : ""}`
   const words = marks?.words?.length ? marks.words : null
-  if (!words) {
-    box.innerHTML = `<b>${esc(name)}</b>${esc(text)}`
-  } else {
-    box.innerHTML = `<b>${esc(name)}</b>`
-    words.forEach((w, k) => captionTimers.push(setTimeout(() => {
-      box.innerHTML = `<b>${esc(name)}</b>${esc(words.slice(0, k + 1).map((x) => x.value).join(" "))}`
-    }, w.time)))
-  }
+  box.innerHTML = `<b>${esc(name)}</b>`
+  if (!words) box.insertAdjacentHTML("beforeend", esc(text))
+  // each word arrives out of a blur as Polly says it
+  else words.forEach((w) => captionTimers.push(setTimeout(() => box.insertAdjacentHTML("beforeend", `<span class="w">${esc(w.value)}</span> `), w.time)))
   captionTimers.push(setTimeout(() => box.classList.remove("on"), durationS * 1000 + 1400))
 }
 function cutCaption(name, text) {
@@ -123,6 +120,7 @@ function cutCaption(name, text) {
   captionTimers = []
   $("captions").className = "captions on"
   $("captions").innerHTML = `<b>${esc(name)}</b>${esc(text)}—`
+  shake($("captions"), { intensity: 6, count: 5, rotate: 1 })
 }
 
 const speaking = (name, on, ms = 0) => {
@@ -134,8 +132,11 @@ const speaking = (name, on, ms = 0) => {
 const badge = (name, text, cls, ms = 2500) => {
   const t = tiles.get(name)
   if (!t) return
-  t.badge.className = `badge on ${cls}`
+  const was = t.badge.classList.contains("on")
+  t.badge.className = `bubble on ${cls}`
   t.badge.textContent = text
+  if (cls === "cut") setTimeout(() => shake(t.badge, { intensity: 4, count: 4 }), 100)
+  else if (!was) pop(t.badge)
   if (ms) setTimeout(() => t.badge.classList.remove("on"), ms)
 }
 
@@ -150,7 +151,7 @@ const term = new window.Terminal({
   cursorBlink: false,
   disableStdin: true,
   scrollback: 4000,
-  theme: { background: "#0e0e12", foreground: "#e6e6ee", cursor: "#8b8cf7", selectionBackground: "#3a3a55" }
+  theme: { background: "#0a0a0a", foreground: "#e5e5e5", cursor: "#3b82f6", selectionBackground: "#262626" }
 })
 const fit = new window.FitAddon.FitAddon()
 term.loadAddon(fit)
@@ -172,7 +173,7 @@ let clockBase = null // { at: ms into the run (server), t: when it arrived here 
 setInterval(() => {
   if (!clockBase) return
   const s = Math.floor((clockBase.at + Date.now() - clockBase.t) / 1000)
-  $("timer").textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`
+  roll($("timer"), `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`)
 }, 500)
 
 // Messages replayed when the page connects mid-run are state only: no voices, lips or captions.
@@ -200,6 +201,8 @@ store.subscribe((s, m) => {
       tiles.get(m.speaker)?.toon.stop()
       speaking(m.speaker, false)
       badge(m.speaker, "interrupted by Egg Head", "cut")
+      shake(tiles.get(m.speaker)?.t ?? $("grid"), { intensity: 8, count: 6, rotate: 1.5 })
+      if (tiles.get(m.speaker)) flash(tiles.get(m.speaker).t, "rgba(239,68,68,.6)")
       cutCaption(m.speaker, m.text)
       break
     }
@@ -207,6 +210,7 @@ store.subscribe((s, m) => {
       eggSpeakingUntil = Date.now() + m.durationS * 1000
       setTimeout(() => renderEgg(store.get()), m.durationS * 1000 + 50)
       speaking("Egg Head", true, m.durationS * 1000)
+      flash(egg.t, "rgba(245,200,76,.5)")
       eggToon.say(m.marks, m.durationS)
       play(m.audio)
       caption("Egg Head", m.marks, m.durationS, true, m.text)
@@ -231,19 +235,29 @@ store.subscribe((s, m) => {
 let eggSpeakingUntil = 0
 function renderEgg(s) {
   const st = Date.now() < eggSpeakingUntil ? { key: "floor", text: "Speaking" } : eggState(s)
-  $("egg-state").className = `state ${st.key}`
-  $("egg-state").querySelector("span").textContent = st.text
+  const node = $("egg-state")
+  if (node.dataset.key !== st.key) {
+    // checking is a running node: blue, a sweep of light and a nervous jitter
+    node.className = `node state ${st.key}${st.key === "checking" ? " running jitter" : ""}`
+    if (node.dataset.key && ["gap", "floor", "listening"].includes(st.key)) (pop(node), flash(node))
+    node.dataset.key = st.key
+  }
+  morph(node.querySelector("span"), st.text)
   eggToon.svg.classList.toggle("thinking", st.key === "checking")
   const running = [...s.tasks.values()].find((t) => t.state === "running")
   const listening = [...s.requests.values()].find((r) => r.state === "listening" && r.kind === "addressed")
   const confirmed = [...s.claims.values()].find((c) => c.state === "confirmed")
   const ready = [...s.requests.values()].find((r) => r.state === "ready")
   const answering = [...s.requests.values()].find((r) => r.state === "checking")
-  $("egg-detail").textContent = running
+  const detail = running
     ? running.job === "confirm" ? `Checking ${running.detail?.split(":")[0]}'s claim` : `Looking into ${answering?.speaker ?? "a"}'s question`
     : confirmed ? `${confirmed.speaker}'s claim is wrong`
     : ready ? `Has an answer for ${ready.speaker}`
     : ""
+  if ($("egg-detail").textContent !== detail) {
+    $("egg-detail").textContent = detail
+    if (detail) enter($("egg-detail"), { y: 6, scale: 1 })
+  }
   const busy = !!running
   // the terminal grows while the agent works, and stays big a moment after it reports
   if (busy) {
@@ -256,8 +270,7 @@ function renderEgg(s) {
       document.body.classList.remove("agent-busy")
     }, 3000)
   }
-  $("agent-pill").className = `pill${busy ? " busy" : ""}`
-  $("agent-pill").textContent = busy ? "working" : ""
+  $("agent-pill").classList.toggle("on", busy)
 }
 
 let feedTouched = 0
@@ -270,33 +283,40 @@ function renderFeed(s) {
     if (!l?.speaker) continue
     const main = l.events.find((e) => e.speaker === l.speaker && e.route)
     const req = main && l.events.find((e) => e.request && e.request.turn === main.turn)?.request
-    const tag = main?.verdict === "contradicts" ? '<span class="chip bad">wrong</span>'
-      : main?.verdict === "supports" ? '<span class="chip good">checks out</span>'
-      : req?.kind === "addressed" ? '<span class="chip ask">to Egg Head</span>'
+    const tag = main?.verdict === "contradicts" ? '<span class="chip bad" data-k="bad">wrong</span>'
+      : main?.verdict === "supports" ? '<span class="chip good" data-k="good">checks out</span>'
+      : req?.kind === "addressed" ? '<span class="chip ask" data-k="ask">to Egg Head</span>'
       : ""
     const text = l.cut ? `${l.cut}—` : l.text
-    items.push({ at: l.at, html: `<div class="item"><span class="who">${esc(l.speaker)}</span><span class="txt">${esc(text)}</span>${tag ? ` ${tag}` : ""}</div>` })
+    items.push({ at: l.at, key: `l${l.index}`, cls: "item", html: `<span class="who">${esc(l.speaker)}</span><span class="txt">${esc(text)}</span>${tag ? ` ${tag}` : ""}` })
   }
   for (const t of s.tasks.values()) {
     if (t.dispatchedAt === undefined) continue
     const what = t.job === "confirm" ? `Checking ${t.detail?.split(":")[0]}'s claim` : "Looking into the question"
-    items.push({ at: t.dispatchedAt + 1, html: `<div class="item agent"><span class="who">Agent</span><span class="txt">${t.result ? esc(t.result.replace(/^confirmed: /, "")) : `${esc(what)}…`}</span></div>` })
+    items.push({ at: t.dispatchedAt + 1, key: `t${t.task}`, cls: `item agent ${t.state}`, html: `<span class="who">Agent</span><span class="txt">${t.result ? esc(t.result.replace(/^confirmed: /, "")) : `${esc(what)}…`}</span>` })
   }
-  for (const e of s.egg) {
-    items.push({ at: e.at + 2, html: `<div class="item egg"><span class="who">Egg Head</span><span class="txt">${esc(e.text)}</span></div>` })
-  }
-  for (const q of s.quiet) {
-    items.push({ at: q.at + 1, html: `<div class="item quiet"><span class="who">Stayed quiet:</span>${esc(q.why)}</div>` })
-  }
+  s.egg.forEach((e, i) => items.push({ at: e.at + 2, key: `e${i}`, cls: "item egg", html: `<span class="who">Egg Head</span><span class="txt">${esc(e.text)}</span>` }))
+  s.quiet.forEach((q, i) => items.push({ at: q.at + 1, key: `q${i}`, cls: "item quiet", html: `<span class="who">Stayed quiet</span> ${esc(q.why)}` }))
   if (!items.length) return
   items.sort((a, b) => a.at - b.at)
   const feed = $("feed")
-  feed.innerHTML = items.map((i) => i.html).join("")
-  if (Date.now() - feedTouched > 8000) feed.scrollTop = feed.scrollHeight // follow the call unless you scrolled
+  feed.querySelector(".empty")?.remove()
+  reconcile(feed, items, {
+    onEnter: (el, o) => (el.classList.contains("egg") ? (enter(el, o), setTimeout(() => (pop(el, 0.9), flash(el, "rgba(245,200,76,.5)")), 60)) : enter(el, o)),
+    onChange: (el, added) => {
+      // the agent reported: a white flash and a bouncy settle; a claim found wrong: a shake
+      if (el.classList.contains("done") || el.classList.contains("failed")) (flash(el), pop(el, 0.94))
+      if (el.classList.contains("failed")) shake(el)
+      if (added.some((a) => a.classList.contains("bad"))) (shake(el, { intensity: 5, count: 5, rotate: 1 }), flash(el, "rgba(239,68,68,.55)"))
+      if (added.some((a) => a.classList.contains("good"))) flash(el, "rgba(34,197,94,.45)")
+    }
+  })
+  if (Date.now() - feedTouched > 8000) feed.scrollTo({ top: feed.scrollHeight, behavior: "smooth" }) // follow the call unless you scrolled
 }
 
 $("start").onclick = () => {
   audioOn = true
+  pop($("start"), 0.9)
   $("start").disabled = true
   fetch("/start", { method: "POST" })
 }
