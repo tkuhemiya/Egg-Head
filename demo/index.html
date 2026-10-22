@@ -84,6 +84,7 @@ const pct = (p) => p === undefined || p === null ? "–" : p.toFixed(2)
 const GATE = { persisted: "call moved on", not_repaired: "not corrected", min_silence: "silence ≥ 0.5 s", floor_open: "floor open", worth_it: "worth it", cooldown: "cooldown" }
 
 let audioOn = false
+let bedrock = false
 const cards = new Map()   // line index -> { root, decision, gate }
 const claims = new Map()  // turn -> { text, state }
 let stats = { lines: 0 }
@@ -105,8 +106,9 @@ function renderLedger() {
   const box = $("ledger"); box.innerHTML = ""
   if (claims.size === 0) { box.append(el("div", "empty", "None yet.")); return }
   for (const c of claims.values()) {
-    const label = { open: "flagged, waiting", raised: "raised by Egg Head", closed: "call corrected it", supports: "true" }[c.state]
-    box.append(el("div", "", `<span class="state ${c.state === "supports" ? "closed" : c.state}">${label}</span>${esc(c.text)}`))
+    const label = { open: "flagged, waiting", raised: "raised by Egg Head", closed: "call corrected it", parked: "parked by the call", supports: "true" }[c.state]
+    const cls = { supports: "closed", parked: "closed" }[c.state] ?? c.state
+    box.append(el("div", "", `<span class="state ${cls}">${label}</span>${esc(c.text)}`))
   }
 }
 
@@ -117,7 +119,7 @@ function onEvent(i, ev) {
     const chips = [`<span class="chip">Decider <b>${Math.round(ev.deciderMs)} ms</b></span>`,
       `<span class="chip claim">claim <b>${pct(rt.scores.claim)}</b></span>`]
     if (rt.action === "check") chips.push(`<span class="chip">check <b>${esc(rt.check)}</b> on <b>${esc(rt.resource)}</b> · res ${pct(rt.scores.resource)} · check ${pct(rt.scores.check)}</span>`)
-    if (rt.action === "escalate") chips.push(`<span class="chip">escalated to Bedrock${ev.escalations ? ` <b>#${ev.escalations}</b>` : ""}</span>`)
+    if (rt.action === "escalate") chips.push(`<span class="chip">${bedrock ? "a claim Decider could not route: escalated to Bedrock" : "a claim Decider could not route (no Bedrock in this run)"}</span>`)
     if (ev.verdict) chips.push(`<span class="chip ${ev.verdict}">${ev.verdict === "contradicts" ? "✗ contradicted" : ev.verdict === "supports" ? "✓ matches" : "inconclusive"}${ev.checkEvidence ? `: ${esc(ev.checkEvidence)}` : ""}</span>`)
     c.decision.innerHTML = chips.join("")
     if (ev.verdict === "contradicts") claims.set(ev.turn, { text: `${ev.speaker}: “${ev.text}”`, state: "open" })
@@ -132,6 +134,7 @@ function onEvent(i, ev) {
       for (const cl of claims.values()) if (cl.state === "open") cl.state = "closed"
       c.root.querySelector(".note").textContent = `Stays quiet: the call corrected it (${g.repairedBy}).`
     } else if (!g.speak && g.blockedBy === "worth_it") {
+      for (const cl of claims.values()) if (cl.state === "open") cl.state = "parked"
       c.root.querySelector(".note").textContent = "Stays quiet: not worth interrupting (the topic was parked)."
     }
   }
@@ -144,6 +147,7 @@ function onMessage(m) {
     case "reset": cards.clear(); claims.clear(); $("call").innerHTML = ""; renderLedger(); break
     case "meta":
       $("title").textContent = m.title
+      bedrock = m.writer === "bedrock"
       $("mode").textContent = `${m.mode === "transcribe" ? "Amazon Transcribe hears the call" : "transcript mode"} · writer: ${m.writer === "bedrock" ? "Bedrock (Strands agent)" : "template"}`
       if ($("call").querySelector(".empty")) $("call").innerHTML = ""
       break
@@ -174,7 +178,9 @@ function onMessage(m) {
 }
 
 $("start").onclick = () => { audioOn = true; $("start").disabled = true; fetch("/start", { method: "POST" }) }
-new EventSource("/events").onmessage = (e) => onMessage(JSON.parse(e.data))
+// ?replay shows the last run without a live connection (screenshots, reviewing a run)
+if (new URLSearchParams(location.search).has("replay")) fetch("/history").then((r) => r.json()).then((ms) => ms.forEach(onMessage))
+else new EventSource("/events").onmessage = (e) => onMessage(JSON.parse(e.data))
 </script>
 </body>
 </html>

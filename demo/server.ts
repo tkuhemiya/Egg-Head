@@ -35,7 +35,7 @@ const { values: args } = parseArgs({
 const mode = args.mode === "transcribe" ? "transcribe" : "text"
 const writer = args.writer === "bedrock" ? "bedrock" : "template"
 const call = Schema.decodeUnknownSync(Call)(JSON.parse(readFileSync(args.call!, "utf8")))
-const html = readFileSync(new URL("./index.html", import.meta.url))
+const page = new URL("./index.html", import.meta.url) // read per request, so edits show on reload
 const AUDIO = new URL("./out/audio/", import.meta.url)
 const RUNS = new URL("./out/runs/", import.meta.url)
 
@@ -88,7 +88,9 @@ const start = () => {
 createServer((req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost")
   if (url.pathname === "/") {
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html)
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(readFileSync(page))
+  } else if (url.pathname === "/history") {
+    res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(history))
   } else if (url.pathname === "/events") {
     res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", connection: "keep-alive" })
     for (const m of history) res.write(`data: ${JSON.stringify(m)}\n\n`)
