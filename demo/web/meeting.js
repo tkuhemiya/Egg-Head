@@ -237,7 +237,7 @@ function renderEgg(s) {
   const st = Date.now() < eggSpeakingUntil ? { key: "floor", text: "Speaking" } : eggState(s)
   const node = $("egg-state")
   if (node.dataset.key !== st.key) {
-    // checking is visual-effect's running node: blue, a sweep of light and a nervous jitter
+    // checking is a running node: blue, a sweep of light and a nervous jitter
     node.className = `node state ${st.key}${st.key === "checking" ? " running jitter" : ""}`
     if (node.dataset.key && ["gap", "floor", "listening"].includes(st.key)) (pop(node), flash(node))
     node.dataset.key = st.key

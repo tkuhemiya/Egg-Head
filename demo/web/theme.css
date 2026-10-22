@@ -1,6 +1,6 @@
-/* Shared look for the demo pages, after Kit Langton's visual-effect: near-black neutrals, hairline
-   borders, mono labels, and one colour per state — slate idle, blue running (with a light sweep and
-   a breathing border), green done, red wrong. Spring easings come from motion.js. */
+/* Shared look for the demo pages: near-black neutrals, hairline borders, mono labels, and one
+   colour per state — slate idle, blue running (with a light sweep and a breathing border), green
+   done, red wrong. Spring easings come from motion.js. */
 
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap");
 
@@ -36,7 +36,7 @@
   transition: background-color .12s ease, color .12s ease, border-color .2s ease, box-shadow var(--spring-default-ms) var(--spring-default); }
 .node > i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
 
-/* running: a sweep of light and a breathing inset border (visual-effect's RunningOverlay) */
+/* running: a sweep of light and a breathing inset border */
 .running { background-color: var(--run) !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 0 24px rgba(59, 130, 246, .25); }
 .running::before { content: ""; position: absolute; inset: 0; width: 200%; pointer-events: none; mix-blend-mode: lighten; filter: blur(4px);
   background: linear-gradient(90deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.45) 50%, rgba(255,255,255,.1) 55%, transparent 60%);
@@ -46,7 +46,7 @@
 @keyframes sweep { from { transform: translateX(-66%); } to { transform: translateX(50%); } }
 @keyframes breathe { 50% { opacity: .3; } }
 
-/* a nervous little jitter while working (visual-effect's running shake, toned down) */
+/* a nervous little jitter while working */
 .jitter { animation: jitter .32s steps(2, jump-none) infinite; }
 @keyframes jitter {
   0% { transform: translate(.4px, 0) rotate(.5deg); } 25% { transform: translate(-.6px, .2px) rotate(-.7deg); }

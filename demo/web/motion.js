@@ -1,7 +1,7 @@
-// Motion for the demo pages, after Kit Langton's visual-effect: critically damped springs for
-// layout, a bouncy spring when something completes, a shake when something goes wrong, a white
-// flash on a state change, blur-in for anything new and rolling digits for numbers. No library:
-// springs are simulated once and handed to the browser as CSS `linear()` easings.
+// Motion for the demo pages: critically damped springs for layout, a bouncy spring when
+// something completes, a shake when something goes wrong, a white flash on a state change,
+// blur-in for anything new and rolling digits for numbers. No library: springs are simulated
+// once and handed to the browser as CSS `linear()` easings.
 
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches
 
@@ -23,7 +23,7 @@ export function spring({ stiffness = 180, damping = 25, mass = 0.8 } = {}) {
   return { easing: `linear(${pts.join(", ")})`, duration: Math.round(t * 1000) }
 }
 
-// The presets visual-effect uses: `default` for movement, `bouncy` for completion
+// Presets: `default` for movement, `bouncy` for completion, `snappy` for drawing edges
 export const springs = {
   default: spring({ stiffness: 180, damping: 25, mass: 0.8 }),
   bouncy: spring({ stiffness: 260, damping: 18, mass: 1 }),
