@@ -1,0 +1,1556 @@
+{
+ "source": "research/decider/scripts/export_runtime_parity.py (exp9 frozen claim combo, final_eval routing and gate)",
+ "wording": {
+  "claim": {
+   "short": "Does the latest speaker state a fact about the current state of a computer system or service?",
+   "repo": "Is the LATEST utterance a factual statement about how a system is behaving right now, or about a recent deploy or change? Guesses, questions, plans, actions, and statements about the past are not. Ignore earlier turns except to resolve references.",
+   "fact": "Is the latest speaker saying how something is right now, as a fact rather than a guess, plan or question?",
+   "names": "Does the latest utterance mention a specific system, service, database, API, queue or metric?",
+   "status": "Does the latest utterance report a status, number or observation, such as fine, down, slow, errors, CPU, or a deploy?",
+   "hedge": "Is the latest speaker unsure, guessing, asking, or saying what they will do, rather than stating what is true now?"
+  },
+  "resource": "Which single named resource is the latest utterance about? Use earlier turns to resolve words like 'it' or 'the database'.",
+  "unknown": "unknown: unclear which single resource, or several, or none",
+  "none_check": "None of these checks can verify it",
+  "check_orders_db": "Which check would verify what the latest utterance says about orders-db?",
+  "self_repaired": "After the flagged claim, did someone on the call already say it was wrong, or question whether it was right? Agreeing with it is not a correction.",
+  "finished": "Has the latest speaker finished their turn, so that someone else could start talking now?"
+ },
+ "checks": {
+  "orders-db": [
+   "db_health",
+   "alarm_state"
+  ],
+  "payments-db": [
+   "db_health"
+  ],
+  "orders-api": [
+   "service_error_rate",
+   "latency_p99",
+   "recent_deploys",
+   "alarm_state"
+  ],
+  "payments-api": [
+   "service_error_rate",
+   "latency_p99",
+   "recent_deploys",
+   "alarm_state"
+  ],
+  "checkout-queue": [
+   "queue_depth"
+  ],
+  "auth-service": [
+   "service_error_rate",
+   "latency_p99",
+   "alarm_state"
+  ]
+ },
+ "combo": [
+  {
+   "p": [
+    0.5829969044604073,
+    0.061862048336140396,
+    0.5855414226403868,
+    0.04958931338977146
+   ],
+   "out": 0.24393899579894318
+  },
+  {
+   "p": [
+    0.22108182345764837,
+    0.5566648979370926,
+    0.13317481644160512,
+    0.41913904357146525
+   ],
+   "out": 0.0052352493969860985
+  },
+  {
+   "p": [
+    0.5406858855321425,
+    0.5709136896467344,
+    0.5602572770128127,
+    0.6820026947612046
+   ],
+   "out": 0.2792000282207385
+  },
+  {
+   "p": [
+    0.10305571244359135,
+    0.5712043914117922,
+    0.1878710267871435,
+    0.09743057599473337
+   ],
+   "out": 0.007092400559073651
+  },
+  {
+   "p": [
+    0.7121107657461536,
+    0.5643682931333867,
+    0.6190095931735539,
+    0.4964144951134918
+   ],
+   "out": 0.7433317313030393
+  },
+  {
+   "p": [
+    0.5317202465801857,
+    0.777228774980807,
+    0.465601865839674,
+    0.9234413836388615
+   ],
+   "out": 0.16334293983576317
+  },
+  {
+   "p": [
+    0.36158235594456634,
+    0.24842658485754932,
+    0.1797667495831432,
+    0.7798296305842437
+   ],
+   "out": 0.0023470306128479082
+  },
+  {
+   "p": [
+    0.08185501079576984,
+    0.3002491185456253,
+    0.49511635955525557,
+    0.3434756899583733
+   ],
+   "out": 0.003122506490831756
+  },
+  {
+   "p": [
+    0.44883419042779327,
+    0.6089590190364036,
+    0.07320086745966803,
+    0.5119328306475491
+   ],
+   "out": 0.012831530698080998
+  },
+  {
+   "p": [
+    0.16496210364357322,
+    0.34205580615985787,
+    0.9332702121806375,
+    0.4216983544767443
+   ],
+   "out": 0.22949806915629842
+  },
+  {
+   "p": [
+    0.9620190834121097,
+    0.07762048218079554,
+    0.5580757526533747,
+    0.7890941714903549
+   ],
+   "out": 0.7279109546173261
+  },
+  {
+   "p": [
+    0.8183533423673176,
+    0.3401223621911955,
+    0.3501783877191683,
+    0.4966747952989876
+   ],
+   "out": 0.44395124937081576
+  },
+  {
+   "p": [
+    0.7968919758215943,
+    0.06876294940686056,
+    0.09359599608690361,
+    0.2699392771281177
+   ],
+   "out": 0.021964125533252804
+  },
+  {
+   "p": [
+    0.6970420678269282,
+    0.06499997571609484,
+    0.7311593346408904,
+    0.30960737650937475
+   ],
+   "out": 0.2979730373277172
+  },
+  {
+   "p": [
+    0.5779462307177181,
+    0.6812371747339128,
+    0.4456407672509217,
+    0.7166277943983036
+   ],
+   "out": 0.29055322084447865
+  },
+  {
+   "p": [
+    0.8870402922380918,
+    0.34700525568845064,
+    0.9406485666460938,
+    0.355464109540346
+   ],
+   "out": 0.994805118755798
+  },
+  {
+   "p": [
+    0.6109195434830769,
+    0.49369299455698146,
+    0.21820777481967946,
+    0.28743192649886173
+   ],
+   "out": 0.17480354058108516
+  },
+  {
+   "p": [
+    0.7383633795947941,
+    0.3978976785462327,
+    0.9168162261800614,
+    0.4965066990299619
+   ],
+   "out": 0.950325125563422
+  },
+  {
+   "p": [
+    0.16636628247192053,
+    0.4016442563343041,
+    0.27783913078445066,
+    0.13692614301502581
+   ],
+   "out": 0.012807389084005865
+  },
+  {
+   "p": [
+    0.4305216510890757,
+    0.5502195528031965,
+    0.7063967094965019,
+    0.9864670810011861
+   ],
+   "out": 0.03569223306284062
+  },
+  {
+   "p": [
+    0.6827230593874516,
+    0.38044130025603773,
+    0.23075150810868217,
+    0.08298469466133207
+   ],
+   "out": 0.39450993684378044
+  },
+  {
+   "p": [
+    0.15129838311640065,
+    0.6585166769723302,
+    0.012063059843798851,
+    0.8310935615682863
+   ],
+   "out": 4.7796600992763965e-05
+  },
+  {
+   "p": [
+    0.1823428739811973,
+    0.28193072232673766,
+    0.14567639245798059,
+    0.5345909623001036
+   ],
+   "out": 0.0009154657704211039
+  },
+  {
+   "p": [
+    0.6098124352569969,
+    0.31861168111188654,
+    0.125491512495977,
+    0.8592019492051857
+   ],
+   "out": 0.0074297528190255275
+  },
+  {
+   "p": [
+    0.9502239496826584,
+    0.6549664637163287,
+    0.7397847477644152,
+    0.45664372220287475
+   ],
+   "out": 0.9964176662348877
+  },
+  {
+   "p": [
+    0.8709795011577717,
+    0.9518862208315222,
+    0.68057510106171,
+    0.5592717408566095
+   ],
+   "out": 0.9964690054103853
+  },
+  {
+   "p": [
+    0.3980696305556508,
+    0.39412001597536417,
+    0.4815228181651947,
+    0.4004426305163489
+   ],
+   "out": 0.09536562543440207
+  },
+  {
+   "p": [
+    0.19060953756680787,
+    0.9846676007566093,
+    0.4406268683247505,
+    0.10992830500046646
+   ],
+   "out": 0.8276023899343578
+  },
+  {
+   "p": [
+    0.6007272605044812,
+    0.1023795977252221,
+    0.5667836081330845,
+    0.5366186879684356
+   ],
+   "out": 0.07036653091350058
+  },
+  {
+   "p": [
+    0.9489487585694336,
+    0.6137372629754311,
+    0.07031557615348971,
+    0.20795268277875323
+   ],
+   "out": 0.8479666488374092
+  },
+  {
+   "p": [
+    0.37622936180644095,
+    0.6344095785339009,
+    0.9554680239214713,
+    0.6022791889620083
+   ],
+   "out": 0.8700135567097109
+  },
+  {
+   "p": [
+    0.47415146323175894,
+    0.11535351610881772,
+    0.48806805903541084,
+    0.9778230001478602
+   ],
+   "out": 0.0023142874680143243
+  },
+  {
+   "p": [
+    0.4803951046156485,
+    0.3118523142180194,
+    0.1441174902184874,
+    0.7496739204424309
+   ],
+   "out": 0.005853194779681322
+  },
+  {
+   "p": [
+    0.7403512244280941,
+    0.4786219435099912,
+    0.6920567688453093,
+    0.5163345189623215
+   ],
+   "out": 0.7854334357220988
+  },
+  {
+   "p": [
+    0.2052150067015407,
+    0.9520209471006497,
+    0.36175245900901054,
+    0.6900675858793588
+   ],
+   "out": 0.14687769141502258
+  },
+  {
+   "p": [
+    0.9141457827913946,
+    0.7581429595359372,
+    0.29808969034627997,
+    0.6429170806953686
+   ],
+   "out": 0.9117200374159665
+  },
+  {
+   "p": [
+    0.09101055336145147,
+    0.8454475943827271,
+    0.5183968571327611,
+    0.90825854366304
+   ],
+   "out": 0.008007717970503056
+  },
+  {
+   "p": [
+    0.3556961698229455,
+    0.22279275605523874,
+    0.5415671227801955,
+    0.5026970232253148
+   ],
+   "out": 0.03385093826213423
+  },
+  {
+   "p": [
+    0.6364419253397112,
+    0.613228222813541,
+    0.7883992641041133,
+    0.758322424088633
+   ],
+   "out": 0.7217821024348333
+  },
+  {
+   "p": [
+    0.19514603023289578,
+    0.2393876747662793,
+    0.4006843696525172,
+    0.8033260645474455
+   ],
+   "out": 0.0019571883074887613
+  },
+  {
+   "p": [
+    0.0,
+    1.0,
+    0.5,
+    1e-06
+   ],
+   "out": 0.21962259938127796
+  },
+  {
+   "p": [
+    1.0,
+    1.0,
+    1.0,
+    0.0
+   ],
+   "out": 1.0
+  }
+ ],
+ "platt_fin": [
+  {
+   "p": 0.0,
+   "out": 6.762110185129683e-05
+  },
+  {
+   "p": 0.01,
+   "out": 0.04380554255215864
+  },
+  {
+   "p": 0.2,
+   "out": 0.8098279296227919
+  },
+  {
+   "p": 0.5,
+   "out": 0.9679186235088485
+  },
+  {
+   "p": 0.8,
+   "out": 0.9953436313792061
+  },
+  {
+   "p": 0.99,
+   "out": 0.9999496743630057
+  },
+  {
+   "p": 1.0,
+   "out": 0.999999925708372
+  }
+ ],
+ "samples": [
+  {
+   "id": "x237",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Sam",
+     "The DB is fine, it's the API."
+    ],
+    [
+     "Priya",
+     "Okay, so let's focus on the API then."
+    ],
+    [
+     "Jordan",
+     "I'll get the rollback for orders-api ready. Give me a minute."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Jordan\nlatest_utterance: I'll get the rollback for orders-api ready. Give me a minute.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: The DB is fine, it's the API. | Priya: Okay, so let's focus on the API then.\nlatest_speaker: Jordan\nlatest_utterance: I'll get the rollback for orders-api ready. Give me a minute.",
+   "aliases": [
+    "orders-api"
+   ],
+   "shortlist": [
+    "orders-api"
+   ],
+   "silence_s": 1.6,
+   "ledger": [
+    {
+     "speaker": "Sam",
+     "claim": "The DB is fine, it's the API",
+     "evidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM"
+    }
+   ],
+   "gate_state": "Live group call. The AI assistant on the call is named Egg Head.\nTranscript (oldest first):\nPriya: Okay, checkout is failing for about a third of users. What are we seeing?\nSam: The DB is fine, it's the API.\nPriya: Okay, so let's focus on the API then.\nLATEST >>> Jordan: I'll get the rollback for orders-api ready. Give me a minute.\nSilence since the latest speaker stopped: 1.6 s\nFlagged claim (checked by Egg Head, not yet raised): Sam said \"The DB is fine, it's the API\"; live check shows CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM"
+  },
+  {
+   "id": "x238",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Sam",
+     "The DB is fine, it's the API."
+    ],
+    [
+     "Lee",
+     "Wait Sam, I'm looking at orders-db right now, CPU's at ninety-eight."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: Wait Sam, I'm looking at orders-db right now, CPU's at ninety-eight.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing? | Sam: The DB is fine, it's the API.\nlatest_speaker: Lee\nlatest_utterance: Wait Sam, I'm looking at orders-db right now, CPU's at ninety-eight.",
+   "aliases": [
+    "orders-db"
+   ],
+   "shortlist": [
+    "orders-db"
+   ],
+   "silence_s": 0.8,
+   "ledger": [
+    {
+     "speaker": "Sam",
+     "claim": "The DB is fine, it's the API",
+     "evidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM"
+    }
+   ],
+   "gate_state": "Live group call. The AI assistant on the call is named Egg Head.\nTranscript (oldest first):\nPriya: Okay, checkout is failing for about a third of users. What are we seeing?\nSam: The DB is fine, it's the API.\nLATEST >>> Lee: Wait Sam, I'm looking at orders-db right now, CPU's at ninety-eight.\nSilence since the latest speaker stopped: 0.8 s\nFlagged claim (checked by Egg Head, not yet raised): Sam said \"The DB is fine, it's the API\"; live check shows CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM"
+  },
+  {
+   "id": "x239",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Sam",
+     "The DB is fine, it's the API."
+    ],
+    [
+     "Jordan",
+     "No, the API is just a symptom, the"
+    ],
+    [
+     "Sam",
+     "It is not a symptom, look at the"
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Sam\nlatest_utterance: It is not a symptom, look at the",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: The DB is fine, it's the API. | Jordan: No, the API is just a symptom, the\nlatest_speaker: Sam\nlatest_utterance: It is not a symptom, look at the",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ],
+   "silence_s": 0.1,
+   "ledger": [
+    {
+     "speaker": "Sam",
+     "claim": "The DB is fine, it's the API",
+     "evidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM"
+    }
+   ],
+   "gate_state": "Live group call. The AI assistant on the call is named Egg Head.\nTranscript (oldest first):\nPriya: Okay, checkout is failing for about a third of users. What are we seeing?\nSam: The DB is fine, it's the API.\nJordan: No, the API is just a symptom, the\nLATEST >>> Sam: It is not a symptom, look at the\nSilence since the latest speaker stopped: 0.1 s\nFlagged claim (checked by Egg Head, not yet raised): Sam said \"The DB is fine, it's the API\"; live check shows CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM"
+  },
+  {
+   "id": "x240",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "We didn't deploy orders-api today."
+    ],
+    [
+     "Priya",
+     "Okay, so not a deploy issue. Let's look at infra."
+    ],
+    [
+     "Mei",
+     "I'll check the load balancer."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: I'll check the load balancer.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Jordan: We didn't deploy orders-api today. | Priya: Okay, so not a deploy issue. Let's look at infra.\nlatest_speaker: Mei\nlatest_utterance: I'll check the load balancer.",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ],
+   "silence_s": 2.0,
+   "ledger": [
+    {
+     "speaker": "Jordan",
+     "claim": "We didn't deploy orders-api today",
+     "evidence": "orders-api v2.14 deployed 40 min ago"
+    }
+   ],
+   "gate_state": "Live group call. The AI assistant on the call is named Egg Head.\nTranscript (oldest first):\nPriya: Okay, checkout is failing for about a third of users. What are we seeing?\nJordan: We didn't deploy orders-api today.\nPriya: Okay, so not a deploy issue. Let's look at infra.\nLATEST >>> Mei: I'll check the load balancer.\nSilence since the latest speaker stopped: 2.0 s\nFlagged claim (checked by Egg Head, not yet raised): Jordan said \"We didn't deploy orders-api today\"; live check shows orders-api v2.14 deployed 40 min ago"
+  },
+  {
+   "id": "x241",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "We didn't deploy orders-api today."
+    ],
+    [
+     "Mei",
+     "Hmm, are you sure? I see a 2.14 tag in the pipeline from this morning."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: Hmm, are you sure? I see a 2.14 tag in the pipeline from this morning.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing? | Jordan: We didn't deploy orders-api today.\nlatest_speaker: Mei\nlatest_utterance: Hmm, are you sure? I see a 2.14 tag in the pipeline from this morning.",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ],
+   "silence_s": 1.0,
+   "ledger": [
+    {
+     "speaker": "Jordan",
+     "claim": "We didn't deploy orders-api today",
+     "evidence": "orders-api v2.14 deployed 40 min ago"
+    }
+   ],
+   "gate_state": "Live group call. The AI assistant on the call is named Egg Head.\nTranscript (oldest first):\nPriya: Okay, checkout is failing for about a third of users. What are we seeing?\nJordan: We didn't deploy orders-api today.\nLATEST >>> Mei: Hmm, are you sure? I see a 2.14 tag in the pipeline from this morning.\nSilence since the latest speaker stopped: 1.0 s\nFlagged claim (checked by Egg Head, not yet raised): Jordan said \"We didn't deploy orders-api today\"; live check shows orders-api v2.14 deployed 40 min ago"
+  },
+  {
+   "id": "x242",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Lee",
+     "Queue depth is around fifty, that's normal for us."
+    ],
+    [
+     "Priya",
+     "Good. Who's writing up the timeline doc?"
+    ],
+    [
+     "Sam",
+     "I can do it."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Sam\nlatest_utterance: I can do it.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Lee: Queue depth is around fifty, that's normal for us. | Priya: Good. Who's writing up the timeline doc?\nlatest_speaker: Sam\nlatest_utterance: I can do it.",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ],
+   "silence_s": 1.4,
+   "ledger": [
+    {
+     "speaker": "Lee",
+     "claim": "Queue depth is around 50, that's normal for us",
+     "evidence": "12,400 visible messages (normal < 100)"
+    }
+   ],
+   "gate_state": "Live group call. The AI assistant on the call is named Egg Head.\nTranscript (oldest first):\nPriya: Okay, checkout is failing for about a third of users. What are we seeing?\nLee: Queue depth is around fifty, that's normal for us.\nPriya: Good. Who's writing up the timeline doc?\nLATEST >>> Sam: I can do it.\nSilence since the latest speaker stopped: 1.4 s\nFlagged claim (checked by Egg Head, not yet raised): Lee said \"Queue depth is around 50, that's normal for us\"; live check shows 12,400 visible messages (normal < 100)"
+  },
+  {
+   "id": "x082",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Sam",
+     "Jordan, did you deploy anything today?"
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Sam\nlatest_utterance: Jordan, did you deploy anything today?",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing?\nlatest_speaker: Sam\nlatest_utterance: Jordan, did you deploy anything today?",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x038",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Priya",
+     "Let's go service by service."
+    ],
+    [
+     "Jordan",
+     "There's an alarm firing on the payments API."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Jordan\nlatest_utterance: There's an alarm firing on the payments API.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: Payments looks quiet from my side. | Priya: Let's go service by service.\nlatest_speaker: Jordan\nlatest_utterance: There's an alarm firing on the payments API.",
+   "aliases": [
+    "payments-api"
+   ],
+   "shortlist": [
+    "payments-api"
+   ]
+  },
+  {
+   "id": "x101",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Priya",
+     "Hold on, the orders-api 5xx graph just spiked again."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Priya\nlatest_utterance: Hold on, the orders-api 5xx graph just spiked again.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Jordan: Orders API is throwing a lot of 500s. | Mei: I'm on the dashboards now, give me a sec.\nlatest_speaker: Priya\nlatest_utterance: Hold on, the orders-api 5xx graph just spiked again.",
+   "aliases": [
+    "orders-api"
+   ],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x166",
+   "turns": [
+    [
+     "Project Manager",
+     "Okay, so today is the conceptual design meeting for the remote control."
+    ],
+    [
+     "Industrial Designer",
+     "I looked at the case materials, plastic or rubber."
+    ],
+    [
+     "Marketing",
+     "Our research says people want it to look fancy."
+    ],
+    [
+     "Marketing",
+     "Sorry, I was wrong, it's twenty-five euro, not twelve fifty."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Marketing\nlatest_utterance: Sorry, I was wrong, it's twenty-five euro, not twelve fifty.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Industrial Designer: I looked at the case materials, plastic or rubber. | Marketing: Our research says people want it to look fancy.\nlatest_speaker: Marketing\nlatest_utterance: Sorry, I was wrong, it's twenty-five euro, not twelve fifty.",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x012",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Priya",
+     "Payments-api is throwing a lot of 500s."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Priya\nlatest_utterance: Payments-api is throwing a lot of 500s.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing?\nlatest_speaker: Priya\nlatest_utterance: Payments-api is throwing a lot of 500s.",
+   "aliases": [
+    "payments-api"
+   ],
+   "shortlist": [
+    "payments-api"
+   ]
+  },
+  {
+   "id": "x018",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Priya",
+     "Let's go service by service."
+    ],
+    [
+     "Priya",
+     "Latency on the orders API is fine."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Priya\nlatest_utterance: Latency on the orders API is fine.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: Payments looks quiet from my side. | Priya: Let's go service by service.\nlatest_speaker: Priya\nlatest_utterance: Latency on the orders API is fine.",
+   "aliases": [
+    "orders-api"
+   ],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x210",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Mei",
+     "Payments API error rate is flat, under half a percent."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: Payments API error rate is flat, under half a percent.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing?\nlatest_speaker: Mei\nlatest_utterance: Payments API error rate is flat, under half a percent.",
+   "aliases": [
+    "payments-api"
+   ],
+   "shortlist": [
+    "payments-api"
+   ]
+  },
+  {
+   "id": "x137",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Lee",
+     "Maybe it's the database? Just a hunch."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: Maybe it's the database? Just a hunch.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Mei: I'm on the dashboards now, give me a sec. | Sam: Payments looks quiet from my side.\nlatest_speaker: Lee\nlatest_utterance: Maybe it's the database? Just a hunch.",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x024",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Lee",
+     "Payments-api is super slow, latency spiked."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: Payments-api is super slow, latency spiked.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing?\nlatest_speaker: Lee\nlatest_utterance: Payments-api is super slow, latency spiked.",
+   "aliases": [
+    "payments-api"
+   ],
+   "shortlist": [
+    "payments-api"
+   ]
+  },
+  {
+   "id": "x093",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Anyone seeing errors on login?"
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Sam\nlatest_utterance: Anyone seeing errors on login?",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Jordan: Orders API is throwing a lot of 500s. | Mei: I'm on the dashboards now, give me a sec.\nlatest_speaker: Sam\nlatest_utterance: Anyone seeing errors on login?",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x149",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Lee",
+     "No, listen, it's not the queue, because if the queue were"
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: No, listen, it's not the queue, because if the queue were",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing? | Jordan: Orders API is throwing a lot of 500s.\nlatest_speaker: Lee\nlatest_utterance: No, listen, it's not the queue, because if the queue were",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x014",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Mei",
+     "Auth is erroring badly."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: Auth is erroring badly.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Mei: I'm on the dashboards now, give me a sec. | Sam: Payments looks quiet from my side.\nlatest_speaker: Mei\nlatest_utterance: Auth is erroring badly.",
+   "aliases": [
+    "auth-service"
+   ],
+   "shortlist": [
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x129",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Priya",
+     "Let's go service by service."
+    ],
+    [
+     "Lee",
+     "Thanks Mei."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: Thanks Mei.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: Payments looks quiet from my side. | Priya: Let's go service by service.\nlatest_speaker: Lee\nlatest_utterance: Thanks Mei.",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x054",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Lee",
+     "Hey Egg Head, can you check the orders database?"
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: Hey Egg Head, can you check the orders database?",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing? | Jordan: Orders API is throwing a lot of 500s.\nlatest_speaker: Lee\nlatest_utterance: Hey Egg Head, can you check the orders database?",
+   "aliases": [
+    "orders-db"
+   ],
+   "shortlist": [
+    "orders-db"
+   ]
+  },
+  {
+   "id": "x009",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Priya",
+     "Let's go service by service."
+    ],
+    [
+     "Mei",
+     "The payments API isn't throwing errors, 5xx is basically zero."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: The payments API isn't throwing errors, 5xx is basically zero.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: Payments looks quiet from my side. | Priya: Let's go service by service.\nlatest_speaker: Mei\nlatest_utterance: The payments API isn't throwing errors, 5xx is basically zero.",
+   "aliases": [
+    "payments-api"
+   ],
+   "shortlist": [
+    "payments-api"
+   ]
+  },
+  {
+   "id": "x022",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Priya",
+     "Let's go service by service."
+    ],
+    [
+     "Lee",
+     "Latency on the auth service is fine."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: Latency on the auth service is fine.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: Payments looks quiet from my side. | Priya: Let's go service by service.\nlatest_speaker: Lee\nlatest_utterance: Latency on the auth service is fine.",
+   "aliases": [
+    "auth-service"
+   ],
+   "shortlist": [
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x111",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Mei",
+     "Sorry, I misread that."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: Sorry, I misread that.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Jordan: Orders API is throwing a lot of 500s. | Mei: I'm on the dashboards now, give me a sec.\nlatest_speaker: Mei\nlatest_utterance: Sorry, I misread that.",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x107",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Lee",
+     "That doesn't match what I'm seeing."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: That doesn't match what I'm seeing.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Jordan: Orders API is throwing a lot of 500s. | Mei: I'm on the dashboards now, give me a sec.\nlatest_speaker: Lee\nlatest_utterance: That doesn't match what I'm seeing.",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x017",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Lee",
+     "The payments API is completely down, nothing is getting through."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Lee\nlatest_utterance: The payments API is completely down, nothing is getting through.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Mei: I'm on the dashboards now, give me a sec. | Sam: Payments looks quiet from my side.\nlatest_speaker: Lee\nlatest_utterance: The payments API is completely down, nothing is getting through.",
+   "aliases": [
+    "payments-api"
+   ],
+   "shortlist": [
+    "payments-api"
+   ]
+  },
+  {
+   "id": "x061",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Mei",
+     "Egg Head, give us a quick recap."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: Egg Head, give us a quick recap.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Mei: I'm on the dashboards now, give me a sec. | Sam: Payments looks quiet from my side.\nlatest_speaker: Mei\nlatest_utterance: Egg Head, give us a quick recap.",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x023",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Jordan",
+     "P99 on the payments API is way up, like four seconds."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Jordan\nlatest_utterance: P99 on the payments API is way up, like four seconds.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing? | Jordan: Orders API is throwing a lot of 500s.\nlatest_speaker: Jordan\nlatest_utterance: P99 on the payments API is way up, like four seconds.",
+   "aliases": [
+    "payments-api"
+   ],
+   "shortlist": [
+    "payments-api"
+   ]
+  },
+  {
+   "id": "x141",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Jordan",
+     "I wonder if payments is involved."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Jordan\nlatest_utterance: I wonder if payments is involved.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Jordan: Orders API is throwing a lot of 500s. | Mei: I'm on the dashboards now, give me a sec.\nlatest_speaker: Jordan\nlatest_utterance: I wonder if payments is involved.",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x108",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Mei",
+     "Wait, let me recheck that."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: Wait, let me recheck that.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Jordan: Orders API is throwing a lot of 500s. | Mei: I'm on the dashboards now, give me a sec.\nlatest_speaker: Mei\nlatest_utterance: Wait, let me recheck that.",
+   "aliases": [],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x015",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Sam",
+     "The orders API is completely down, nothing is getting through."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Sam\nlatest_utterance: The orders API is completely down, nothing is getting through.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing?\nlatest_speaker: Sam\nlatest_utterance: The orders API is completely down, nothing is getting through.",
+   "aliases": [
+    "orders-api"
+   ],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x211",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "I bounced two of the orders-api pods."
+    ],
+    [
+     "Sam",
+     "Error rate on the orders API is back to normal now."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Sam\nlatest_utterance: Error rate on the orders API is back to normal now.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing? | Jordan: I bounced two of the orders-api pods.\nlatest_speaker: Sam\nlatest_utterance: Error rate on the orders API is back to normal now.",
+   "aliases": [
+    "orders-api"
+   ],
+   "shortlist": [
+    "orders-api"
+   ]
+  },
+  {
+   "id": "x144",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Sam",
+     "Last week orders-db had the same CPU spike."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Sam\nlatest_utterance: Last week orders-db had the same CPU spike.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing? | Jordan: Orders API is throwing a lot of 500s.\nlatest_speaker: Sam\nlatest_utterance: Last week orders-db had the same CPU spike.",
+   "aliases": [
+    "orders-db"
+   ],
+   "shortlist": [
+    "orders-db"
+   ]
+  },
+  {
+   "id": "x031",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Jordan",
+     "Orders API is throwing a lot of 500s."
+    ],
+    [
+     "Mei",
+     "I'm on the dashboards now, give me a sec."
+    ],
+    [
+     "Sam",
+     "Payments looks quiet from my side."
+    ],
+    [
+     "Priya",
+     "Let's go service by service."
+    ],
+    [
+     "Priya",
+     "No alarms are firing on orders-db."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Priya\nlatest_utterance: No alarms are firing on orders-db.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Sam: Payments looks quiet from my side. | Priya: Let's go service by service.\nlatest_speaker: Priya\nlatest_utterance: No alarms are firing on orders-db.",
+   "aliases": [
+    "orders-db"
+   ],
+   "shortlist": [
+    "orders-db"
+   ]
+  },
+  {
+   "id": "x057",
+   "turns": [
+    [
+     "Priya",
+     "Okay, checkout is failing for about a third of users. What are we seeing?"
+    ],
+    [
+     "Mei",
+     "Egg Head, which alarms are firing?"
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Mei\nlatest_utterance: Egg Head, which alarms are firing?",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Priya: Okay, checkout is failing for about a third of users. What are we seeing?\nlatest_speaker: Mei\nlatest_utterance: Egg Head, which alarms are firing?",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x161",
+   "turns": [
+    [
+     "Project Manager",
+     "Okay, so today is the conceptual design meeting for the remote control."
+    ],
+    [
+     "Industrial Designer",
+     "I looked at the case materials, plastic or rubber."
+    ],
+    [
+     "Marketing",
+     "Our research says people want it to look fancy."
+    ],
+    [
+     "Project Manager",
+     "Egg Head, what did we decide last meeting?"
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Project Manager\nlatest_utterance: Egg Head, what did we decide last meeting?",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Industrial Designer: I looked at the case materials, plastic or rubber. | Marketing: Our research says people want it to look fancy.\nlatest_speaker: Project Manager\nlatest_utterance: Egg Head, what did we decide last meeting?",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  },
+  {
+   "id": "x160",
+   "turns": [
+    [
+     "Project Manager",
+     "Okay, so today is the conceptual design meeting for the remote control."
+    ],
+    [
+     "Industrial Designer",
+     "I looked at the case materials, plastic or rubber."
+    ],
+    [
+     "Industrial Designer",
+     "I'll send the cost spreadsheet after the meeting."
+    ]
+   ],
+   "kv1": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: (none)\nlatest_speaker: Industrial Designer\nlatest_utterance: I'll send the cost spreadsheet after the meeting.",
+   "kv3": "setting: live group call; AI assistant name: Egg Head\nprevious_turns: Project Manager: Okay, so today is the conceptual design meeting for the remote control. | Industrial Designer: I looked at the case materials, plastic or rubber.\nlatest_speaker: Industrial Designer\nlatest_utterance: I'll send the cost spreadsheet after the meeting.",
+   "aliases": [],
+   "shortlist": [
+    "orders-db",
+    "payments-db",
+    "orders-api",
+    "payments-api",
+    "checkout-queue",
+    "auth-service"
+   ]
+  }
+ ]
+}

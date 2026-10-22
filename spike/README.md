@@ -43,7 +43,7 @@ Pass 1 (PROJECT.md wording, T_ROUTE=0.9) is archived in `out/pass1/` and `REPORT
 
 ## Held-out gate set
 
-`dataset_heldout.jsonl`: 20 gate snippets (h01-h20) labelled before any model run, about half built to break the keyword rules in `egghead/gate.py`.
+`dataset_heldout.jsonl`: 20 gate snippets (h01-h20) labelled before any model run, about half built to break the keyword rules in the gate (`egghead_gate.py` here, `src/Gate.ts` in the runtime).
 
 ```bash
 python spike/run.py --checkpoint --device cpu --dataset dataset_heldout.jsonl --out out/heldout --prefix-check 0

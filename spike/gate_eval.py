@@ -16,10 +16,10 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import egghead_gate as G  # noqa: E402
 import questions as Q  # noqa: E402
-from egghead import gate as G  # noqa: E402
 
 
 def claim_index(s: dict) -> int:
@@ -81,7 +81,7 @@ def main() -> None:
 
     md = [f"# {args.title}", "", f"> {args.note}", ""]
     for name, key in (("Pass-2 gate (questions.speak_gate)", lambda r: r[1]),
-                      ("Reworked gate (egghead.gate)", lambda r: r[2].speak)):
+                      ("Reworked gate (spike/egghead_gate.py)", lambda r: r[2].speak)):
         tp, fp, fn, p, r_ = prf([(key(r), r[0]["labels"]["should_speak"]) for r in rows])
         md.append(f"- {name}: precision **{pct(p)}**, recall **{pct(r_)}** "
                   f"(TP {tp}, FP {fp}, FN {fn}, n {len(rows)})")

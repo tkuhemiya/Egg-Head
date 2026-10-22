@@ -1,0 +1,19 @@
+{
+  "_note": "Scripted incident call for the demo, against data/world.json (checkout failing after orders-api v2.14; orders-db CPU 98%). `pause` is the silence after the line, in seconds. `expect` is what Egg Head should do on that line, for the run report.",
+  "title": "Checkout failures after the orders-api deploy",
+  "voices": { "Priya": "Ruth", "Jordan": "Stephen", "Sam": "Gregory", "Lee": "Danielle", "Mei": "Kajal", "Egg Head": "Matthew" },
+  "lines": [
+    { "speaker": "Priya", "text": "Okay everyone, checkout is failing for about a third of users. What are we seeing?", "pause": 0.8, "expect": "silent" },
+    { "speaker": "Jordan", "text": "Orders API is throwing a lot of 500s.", "pause": 0.6, "expect": "silent: true claim" },
+    { "speaker": "Sam", "text": "The orders DB is fine, CPU is normal.", "pause": 0.4, "expect": "flag: false claim, gate waits" },
+    { "speaker": "Priya", "text": "Okay, so let's focus on the API then.", "pause": 2.0, "expect": "speak: false claim, gap" },
+    { "speaker": "Sam", "text": "Oh, good catch. I was looking at the payments database.", "pause": 0.6, "expect": "silent" },
+    { "speaker": "Lee", "text": "We didn't deploy orders-api today.", "pause": 0.5, "expect": "flag: false claim" },
+    { "speaker": "Mei", "text": "Hold on, are you sure? I think v2.14 went out this morning.", "pause": 0.7, "expect": "silent: the call corrected it" },
+    { "speaker": "Lee", "text": "Oh, right, it did.", "pause": 0.8, "expect": "silent" },
+    { "speaker": "Jordan", "text": "The auth service is completely down.", "pause": 0.5, "expect": "flag: false claim" },
+    { "speaker": "Priya", "text": "Auth isn't in the checkout path, let's park that.", "pause": 1.5, "expect": "silent: parked" },
+    { "speaker": "Priya", "text": "Jordan, roll back orders-api to v2.13.", "pause": 0.6, "expect": "silent" },
+    { "speaker": "Jordan", "text": "Rolling back now.", "pause": 2.0, "expect": "silent" }
+  ]
+}
