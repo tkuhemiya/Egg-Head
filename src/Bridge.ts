@@ -65,7 +65,9 @@ export const Event = Schema.Struct({
   saidKind: Schema.optionalKey(Schema.Literals(["flag", "ack", "answer", "barge"])),
   agent: Schema.optionalKey(AgentNote),
   request: Schema.optionalKey(C.Request),
-  note: Schema.optionalKey(Schema.String)
+  note: Schema.optionalKey(Schema.String),
+  /** The turn of the claim this step was about (with an Investigator). */
+  claim: Schema.optionalKey(Schema.Int)
 })
 export type Event = typeof Event.Type
 
@@ -180,7 +182,7 @@ export class Bridge extends Context.Service<Bridge, {
         laterClaimSupportsCheck: supportsOpen,
         secondsSinceLastSpoke: now - s.lastSpokeS
       })
-      const decided = { ...ev, gate: Option.some(gate) }
+      const decided = { ...ev, gate: Option.some(gate), ...(agentMode ? { claim: item.turn } : {}) }
       if (gate.speak) {
         const said = item.fact !== undefined ? C.flagLine(item.speaker, item.fact) : yield* writer.write(item)
         return [
@@ -209,7 +211,7 @@ export class Bridge extends Context.Service<Bridge, {
       done: (s: BridgeState, result: A, by: string, ms: number) => Effect.Effect<readonly [BridgeState, Event], SupportError>
     ) =>
       Effect.timed(job.pipe(
-        Effect.map((a) => [a, "agent"] as const),
+        Effect.map((a) => [a, Option.match(investigator, { onNone: () => "direct", onSome: (i) => i.name })] as const),
         Effect.catch(() => Effect.map(fallback, (a) => [a, "direct (agent failed)"] as const))
       )).pipe(
         Effect.flatMap(([elapsed, [result, by]]) =>
@@ -247,6 +249,7 @@ export class Bridge extends Context.Service<Bridge, {
           const ev: Event = {
             ...blankEvent(now.turns.length - 1, "(agent)", ""),
             agent: note,
+            claim: item.turn,
             note: current?.raised
               ? "Already raised or corrected by the time the agent reported."
               : stillWrong
@@ -414,12 +417,12 @@ export class Bridge extends Context.Service<Bridge, {
             })
             if (Option.isSome(rep)) {
               s = { ...s, ledger: L.update(s.ledger, item, { agent: "skipped", raised: true }) }
-              ev = { ...ev, note: `${item.speaker}'s claim was corrected by the call (${rep.value}) before any LLM call. Staying quiet.` }
+              ev = { ...ev, claim: item.turn, note: `${item.speaker}'s claim was corrected by the call (${rep.value}) before any LLM call. Staying quiet.` }
             } else {
               const [next, job] = confirmClaim(s, item, investigator.value)
               yield* job
               s = next
-              ev = { ...ev, agent: dispatched(s.tasks, "confirm", `${item.speaker}: "${item.claim}" (fast check: ${item.check} on ${item.resource} is ${item.status})`) }
+              ev = { ...ev, claim: item.turn, agent: dispatched(s.tasks, "confirm", `${item.speaker}: "${item.claim}" (fast check: ${item.check} on ${item.resource} is ${item.status})`) }
             }
           }
         }
@@ -534,7 +537,7 @@ export class Bridge extends Context.Service<Bridge, {
           gateScores: { directive: act }
         }
         if (act < C.T_DIRECTIVE) {
-          return Option.some(yield* commit(s, { ...ev, note: `Mentions ${item.resource} (open claim) but Decider says it is not an instruction to act (${act.toFixed(2)}).` }))
+          return Option.some(yield* commit(s, { ...ev, claim: item.turn, note: `Mentions ${item.resource} (open claim) but Decider says it is not an instruction to act (${act.toFixed(2)}).` }))
         }
         const fact = item.fact ?? C.factOf(item)
         const now = yield* nowS
@@ -544,6 +547,7 @@ export class Bridge extends Context.Service<Bridge, {
             ...ev,
             said: Option.some(C.bargeLine(speaker, fact)),
             saidKind: "barge",
+            claim: item.turn,
             note: `${speaker} is about to act on ${item.resource} (Decider ${act.toFixed(2)}), but ${item.speaker}'s claim about it is wrong. Interrupting is cheaper than waiting.`
           }
         ))

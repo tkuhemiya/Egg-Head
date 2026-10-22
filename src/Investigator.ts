@@ -31,6 +31,8 @@ export interface Question {
 }
 
 export class Investigator extends Context.Service<Investigator, {
+  /** Who investigates, for the dashboard ("direct", or the agent and its model). */
+  readonly name: string
   /** Re-check a contradicted claim. `task` numbers the job for the terminal and the dashboard. */
   confirm(task: number, item: LedgerItem): Effect.Effect<Finding, SupportError>
   /** One spoken sentence that answers the question. */
@@ -44,6 +46,7 @@ export class Investigator extends Context.Service<Investigator, {
 
 export const direct = (source: CheckSource["Service"]): Investigator["Service"] =>
   Investigator.of({
+    name: "direct",
     confirm: (_task, item) =>
       Effect.map(source.run(item.check, item.resource), (res) =>
         Option.match(res, {

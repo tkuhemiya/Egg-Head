@@ -82,6 +82,7 @@ describe("Bridge with an Investigator", () => {
     }).pipe(Effect.provide(layer(
       { "The orders DB is fine, CPU is normal.": falseDb },
       Layer.succeed(Investigator, Investigator.of({
+        name: "stub",
         confirm: () => Effect.succeed({ status: "healthy", fact: "orders-db CPU 30%", by: "stub" }),
         answer: () => Effect.succeed("")
       }))
