@@ -35,7 +35,10 @@ class HttpBackend:
             return {"backend": "http", "url": self.url, "server": json.load(r)}
 
     def ask(self, state: str, qs: dict) -> tuple[dict, dict]:
-        body = json.dumps({"state": state, "questions": qs}).encode()
+        payload = {"state": state, "questions": qs}
+        if "api.decider.cloud" in self.url:
+            payload = {"model": "strands-decider-2b", **payload}  # hosted API: 422 without it (22 Oct 2026)
+        body = json.dumps(payload).encode()
         req = urllib.request.Request(
             self.url + "/v1/systemone",
             body,

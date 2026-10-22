@@ -1,0 +1,114 @@
+{
+ "source": "egghead/questions.py + egghead/speaker.py at 64cd96e",
+ "resources": {
+  "orders-db": "orders-db: the orders database (PostgreSQL) behind the orders API",
+  "payments-db": "payments-db: the payments database behind the payments API",
+  "orders-api": "orders-api: the orders / checkout API service",
+  "payments-api": "payments-api: the payments API service",
+  "checkout-queue": "checkout-queue: the SQS queue of checkout jobs",
+  "auth-service": "auth-service: login and authentication service"
+ },
+ "questions_routing": {
+  "is_claim": {
+   "type": "noul",
+   "instructions": "Is the LATEST utterance a factual statement about how a system is behaving right now, or about a recent deploy or change? Guesses, questions, plans, actions, and statements about the past are not. Ignore the flagged claim."
+  },
+  "which_check": {
+   "type": "choice",
+   "instructions": "Which one check would verify the LATEST utterance? If that utterance is not a checkable claim, choose none. Ignore the flagged claim.",
+   "criteria": {
+    "db_health": "Database health: CPU, connections and alarm state for a database",
+    "service_error_rate": "Error rate (5xx) of a service or API, including whether it is up or down",
+    "latency_p99": "Latency / response time (p99) of a service or API",
+    "recent_deploys": "Recent deploys, releases or config changes to a service",
+    "alarm_state": "Which CloudWatch alarms are currently firing",
+    "queue_depth": "Backlog / number of waiting messages in a queue",
+    "none": "None of these: the utterance cannot be verified by any check"
+   }
+  },
+  "which_resource": {
+   "type": "choice",
+   "instructions": "Which single named resource does the LATEST utterance refer to? Use earlier turns to resolve words like 'it' or 'the database'. If it is unclear, several, or none, choose unknown. Ignore the flagged claim.",
+   "criteria": {
+    "orders-db": "orders-db: the orders database (PostgreSQL) behind the orders API",
+    "payments-db": "payments-db: the payments database behind the payments API",
+    "orders-api": "orders-api: the orders / checkout API service",
+    "payments-api": "payments-api: the payments API service",
+    "checkout-queue": "checkout-queue: the SQS queue of checkout jobs",
+    "auth-service": "auth-service: login and authentication service",
+    "unknown": "unknown: it is unclear which single resource is meant, or it is several / none"
+   }
+  },
+  "asserted_state": {
+   "type": "choice",
+   "instructions": "What does the speaker of the LATEST utterance claim about that resource? Ignore the flagged claim.",
+   "criteria": {
+    "healthy": "The speaker says it is fine, normal, working or not the problem",
+    "degraded": "The speaker says it is slow, erroring, elevated, backed up or struggling",
+    "down": "The speaker says it is completely down or unreachable",
+    "changed": "The speaker says something was deployed, released or changed",
+    "unchanged": "The speaker says nothing was deployed, released or changed",
+    "unclear": "The speaker does not say what state it is in"
+   }
+  }
+ },
+ "questions_policy": {
+  "is_claim": {
+   "type": "noul",
+   "instructions": "Is the LATEST utterance a factual statement about how a system is behaving right now, or about a recent deploy or change? Guesses, questions, plans, actions, and statements about the past are not. Ignore the flagged claim."
+  },
+  "which_check": {
+   "type": "choice",
+   "instructions": "Which one check would verify the LATEST utterance? If that utterance is not a checkable claim, choose none. Ignore the flagged claim.",
+   "criteria": {
+    "db_health": "Database health: CPU, connections and alarm state for a database",
+    "service_error_rate": "Error rate (5xx) of a service or API, including whether it is up or down",
+    "latency_p99": "Latency / response time (p99) of a service or API",
+    "recent_deploys": "Recent deploys, releases or config changes to a service",
+    "alarm_state": "Which CloudWatch alarms are currently firing",
+    "queue_depth": "Backlog / number of waiting messages in a queue",
+    "none": "None of these: the utterance cannot be verified by any check"
+   }
+  },
+  "which_resource": {
+   "type": "choice",
+   "instructions": "Which single named resource does the LATEST utterance refer to? Use earlier turns to resolve words like 'it' or 'the database'. If it is unclear, several, or none, choose unknown. Ignore the flagged claim.",
+   "criteria": {
+    "orders-db": "orders-db: the orders database (PostgreSQL) behind the orders API",
+    "payments-db": "payments-db: the payments database behind the payments API",
+    "orders-api": "orders-api: the orders / checkout API service",
+    "payments-api": "payments-api: the payments API service",
+    "checkout-queue": "checkout-queue: the SQS queue of checkout jobs",
+    "auth-service": "auth-service: login and authentication service",
+    "unknown": "unknown: it is unclear which single resource is meant, or it is several / none"
+   }
+  },
+  "asserted_state": {
+   "type": "choice",
+   "instructions": "What does the speaker of the LATEST utterance claim about that resource? Ignore the flagged claim.",
+   "criteria": {
+    "healthy": "The speaker says it is fine, normal, working or not the problem",
+    "degraded": "The speaker says it is slow, erroring, elevated, backed up or struggling",
+    "down": "The speaker says it is completely down or unreachable",
+    "changed": "The speaker says something was deployed, released or changed",
+    "unchanged": "The speaker says nothing was deployed, released or changed",
+    "unclear": "The speaker does not say what state it is in"
+   }
+  },
+  "self_repaired": {
+   "type": "noul",
+   "instructions": "After the flagged claim, did someone on the call already say it was wrong, or ask whether it was right? Agreeing with the claim is not a correction."
+  },
+  "open_question": {
+   "type": "noul",
+   "instructions": "Did someone ask a question in the recent conversation that is still waiting for an answer?"
+  },
+  "floor_free": {
+   "type": "noul",
+   "instructions": "Would speaking right now interrupt someone in the middle of a sentence or an argument?"
+  }
+ },
+ "state_open": "Incident bridge call transcript (oldest first).\nRouting questions (is_claim, which_check, which_resource, asserted_state) apply ONLY to the utterance marked LATEST, not to the flagged claim.\nPriya: What are we seeing?\nSam: The DB is fine, it's the API.\n>>> LATEST Priya: Okay, let's focus on the API then.\n\nFlagged claim (already checked by Egg Head, not yet raised on the call). Use this only for self_repaired, open_question, floor_free:\n- Sam said \"The DB is fine, it's the API.\". Check db_health on orders-db: CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM.",
+ "state_none": "Incident bridge call transcript (oldest first).\nRouting questions (is_claim, which_check, which_resource, asserted_state) apply ONLY to the utterance marked LATEST, not to the flagged claim.\n>>> LATEST Priya: What are we seeing?\n\nFlagged claim: none.",
+ "template_line": "Quick flag on Sam's point: orders-db CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM."
+}

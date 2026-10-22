@@ -3,8 +3,9 @@ Run on dev to sanity-check, then ONCE on heldout."""
 import json, math, os, re, statistics as S, sys
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if _REPO_ROOT not in sys.path:
-    sys.path.insert(0, _REPO_ROOT)
+_SPIKE = os.path.join(_REPO_ROOT, "spike")  # frozen Python reference gate (runtime is TypeScript now)
+if _SPIKE not in sys.path:
+    sys.path.insert(0, _SPIKE)
 from lib import ask_many, load, STATS, prf, ROOT
 from common import render, CLAIM_Q, ADDR_Q, FIN_Q, CHECKS, RES, W, alias_hits, gold_route
 split = sys.argv[1]
@@ -87,7 +88,7 @@ STATE_W = re.compile(r"\b(is|are|was|isn't|didn't|has|have|looks?|seeing)\b.*\b(
 res["is_claim"] = {"pipeline": bin_score(lambda it: pid[it["id"]]["pc"] >= 0.5, lambda it: it["labels"]["is_claim"]),
                    "keyword_rule": bin_score(lambda it: bool(alias_hits(it["latest"]["text"]) and STATE_W.search(it["latest"]["text"])) or bool(re.search(r"\b(database|db|api|queue)\b", it["latest"]["text"], re.I) and STATE_W.search(it["latest"]["text"])), lambda it: it["labels"]["is_claim"])}
 # ---------- speak gate on Egg-Head gate snippets ----------
-from egghead import gate as G
+import egghead_gate as G
 gate_items = [it for it in items if it["kind"] == "repo_gate"]
 REP = "After the flagged claim, did someone on the call already say it was wrong, or question whether it was right? Agreeing with it is not a correction."
 gj = [(render(it, "tagged", 6, pause=True, ledger=True), {"rep": {"type": "noul", "instructions": REP}, "fin": {"type": "noul", "instructions": FIN_Q["repo"]}}, "final:gate") for it in gate_items]

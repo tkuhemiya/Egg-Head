@@ -18,4 +18,4 @@ python3 exp6_calibration.py dev              # fits Platt params -> results/exp6
 python3 final_eval.py dev                    # sanity check
 python3 final_eval.py heldout                # already run once; do not tune on it
 ```
-`final_eval.py` imports `egghead.gate` from the repository root when run from this checkout. Cached requests cost nothing. New ones go to the public API with concurrency 2 and a named User-Agent. Python 3.10+, standard library only.
+`final_eval.py` and `exp10_prompting.py` import the frozen Python gate from `spike/egghead_gate.py` (the runtime is TypeScript now; `src/Gate.ts` is held to it by a parity test). Cached requests cost nothing. New ones go to the public API with concurrency 2 and a named User-Agent. Python 3.10+, standard library only.

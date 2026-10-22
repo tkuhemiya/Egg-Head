@@ -1,0 +1,2840 @@
+{
+ "source": "egghead/bridge.py at 64cd96e",
+ "escalatorRoute": {
+  "check": "db_health",
+  "resource": "orders-db",
+  "asserted": "healthy"
+ },
+ "scenarios": {
+  "catches_false_db_claim_and_speaks_in_gap": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Priya",
+     "text": "What are we seeing?",
+     "silenceS": 0.5,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "silenceS": 0.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Priya",
+     "text": "Okay, let's focus on the API then.",
+     "silenceS": 1.6,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Priya",
+     "text": "What are we seeing?",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": null,
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 1,
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 2,
+     "speaker": "Priya",
+     "text": "Okay, let's focus on the API then.",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": true,
+      "blockedBy": null,
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": "Quick flag on Sam's point: orders-db CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM.",
+     "escalations": 0
+    }
+   ],
+   "ledger": [
+    {
+     "check": "db_health",
+     "resource": "orders-db",
+     "raised": true
+    }
+   ],
+   "escalationCount": 0
+  },
+  "stays_silent_when_the_call_corrects_itself": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "silenceS": 0.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Lee",
+     "text": "Wait Sam, orders-db CPU is at ninety-eight.",
+     "silenceS": 0.8,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "degraded",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.9,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.3
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 1,
+     "speaker": "Lee",
+     "text": "Wait Sam, orders-db CPU is at ninety-eight.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "degraded",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "supports",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "not_repaired",
+      "repairedBy": "ledger",
+      "costLevel": 3,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": false,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    }
+   ],
+   "ledger": [
+    {
+     "check": "db_health",
+     "resource": "orders-db",
+     "raised": true
+    }
+   ],
+   "escalationCount": 0
+  },
+  "keyword_repair_when_router_misses_the_correction": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "silenceS": 0.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Mei",
+     "text": "Hold on, are you sure about that?",
+     "silenceS": 0.9,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 1,
+     "speaker": "Mei",
+     "text": "Hold on, are you sure about that?",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "not_repaired",
+      "repairedBy": "keyword",
+      "costLevel": 3,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": false,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    }
+   ],
+   "ledger": [
+    {
+     "check": "db_health",
+     "resource": "orders-db",
+     "raised": true
+    }
+   ],
+   "escalationCount": 0
+  },
+  "waits_for_a_gap_then_speaks_on_silence_tick": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "silenceS": 0.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Jordan",
+     "text": "No, the API is just a symptom, the",
+     "silenceS": 0.1,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.8
+      }
+     }
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 2.0
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Sam",
+     "text": "The DB is fine, it's the API.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 1,
+     "speaker": "Jordan",
+     "text": "No, the API is just a symptom, the",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "min_silence",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.19999999999999996,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": false,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 1,
+     "speaker": "(silence)",
+     "text": "",
+     "route": null,
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": true,
+      "blockedBy": null,
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.19999999999999996,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": "Quick flag on Sam's point: orders-db CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM.",
+     "escalations": 0
+    }
+   ],
+   "ledger": [
+    {
+     "check": "db_health",
+     "resource": "orders-db",
+     "raised": true
+    }
+   ],
+   "escalationCount": 0
+  },
+  "true_claims_never_enter_the_ledger": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Mei",
+     "text": "Queue depth is huge.",
+     "silenceS": 1.0,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "queue_depth",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.9,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "checkout-queue",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.9,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "degraded",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.9,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 2.0
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Mei",
+     "text": "Queue depth is huge.",
+     "route": {
+      "action": "check",
+      "check": "queue_depth",
+      "resource": "checkout-queue",
+      "asserted": "degraded",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "supports",
+     "checkEvidence": "12,400 visible messages (normal < 100)",
+     "gate": null,
+     "said": null,
+     "escalations": 0
+    },
+    null
+   ],
+   "ledger": [],
+   "escalationCount": 0
+  },
+  "unclear_state_falls_back_to_wording": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Jordan",
+     "text": "We didn't deploy orders-api today.",
+     "silenceS": 0.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "recent_deploys",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.9,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-api",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.9,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      }
+     }
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Jordan",
+     "text": "We didn't deploy orders-api today.",
+     "route": {
+      "action": "check",
+      "check": "recent_deploys",
+      "resource": "orders-api",
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "orders-api v2.14 deployed 40 min ago",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    }
+   ],
+   "ledger": [
+    {
+     "check": "recent_deploys",
+     "resource": "orders-api",
+     "raised": false
+    }
+   ],
+   "escalationCount": 0
+  },
+  "escalations_are_counted": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "The DB is fine.",
+     "silenceS": 0.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.6
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      }
+     }
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Sam",
+     "text": "The DB is fine.",
+     "route": {
+      "action": "escalate",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.6,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": null,
+     "said": null,
+     "escalations": 1
+    }
+   ],
+   "ledger": [],
+   "escalationCount": 1
+  },
+  "long_call": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Priya",
+     "text": "Checkout is failing for some users, what are we seeing?",
+     "silenceS": 0.6,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Jordan",
+     "text": "We didn't deploy orders-api today.",
+     "silenceS": 0.3,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "recent_deploys",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.9,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-api",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.9,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Mei",
+     "text": "Payments API looks fine to me.",
+     "silenceS": 0.7,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "service_error_rate",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.9,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "payments-api",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.9,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.6
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "And the DB is fine too, it's the API.",
+     "silenceS": 0.2,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.7
+      }
+     }
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 0.4
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 1.5
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Priya",
+     "text": "Okay. Auth isn't in the checkout path, let's park that.",
+     "silenceS": 0.9,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Lee",
+     "text": "Orders DB is fine, I checked.",
+     "silenceS": 1.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.6
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Lee",
+     "text": "Latency on orders-api is normal.",
+     "silenceS": 1.3,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "latency_p99",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.9,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-api",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.9,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.4
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 3.0
+    }
+   ],
+   "escalate": false,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Priya",
+     "text": "Checkout is failing for some users, what are we seeing?",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": null,
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 1,
+     "speaker": "Jordan",
+     "text": "We didn't deploy orders-api today.",
+     "route": {
+      "action": "check",
+      "check": "recent_deploys",
+      "resource": "orders-api",
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "orders-api v2.14 deployed 40 min ago",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 2,
+     "speaker": "Mei",
+     "text": "Payments API looks fine to me.",
+     "route": {
+      "action": "check",
+      "check": "service_error_rate",
+      "resource": "payments-api",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "supports",
+     "checkEvidence": "5xx rate 0.3%",
+     "gate": {
+      "speak": false,
+      "blockedBy": "floor_open",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.4,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": false,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 3,
+     "speaker": "Sam",
+     "text": "And the DB is fine too, it's the API.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "min_silence",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.30000000000000004,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": false,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 3,
+     "speaker": "(silence)",
+     "text": "",
+     "route": null,
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "min_silence",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.30000000000000004,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": false,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 3,
+     "speaker": "(silence)",
+     "text": "",
+     "route": null,
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": true,
+      "blockedBy": null,
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.30000000000000004,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": "Quick flag on Jordan's point: orders-api orders-api v2.14 deployed 40 min ago.",
+     "escalations": 0
+    },
+    {
+     "turn": 4,
+     "speaker": "Priya",
+     "text": "Okay. Auth isn't in the checkout path, let's park that.",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 5,
+     "speaker": "Lee",
+     "text": "Orders DB is fine, I checked.",
+     "route": {
+      "action": "escalate",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.6,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 1
+    },
+    {
+     "turn": 6,
+     "speaker": "Lee",
+     "text": "Latency on orders-api is normal.",
+     "route": {
+      "action": "ignore",
+      "check": "latency_p99",
+      "resource": "orders-api",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.4
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 6,
+     "speaker": "(silence)",
+     "text": "",
+     "route": null,
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 0
+    }
+   ],
+   "ledger": [
+    {
+     "check": "recent_deploys",
+     "resource": "orders-api",
+     "raised": true
+    },
+    {
+     "check": "db_health",
+     "resource": "orders-db",
+     "raised": false
+    }
+   ],
+   "escalationCount": 1
+  },
+  "escalation_hands_the_utterance_to_bedrock_support": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "The DB is fine.",
+     "silenceS": 0.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.6
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      }
+     }
+    }
+   ],
+   "escalate": true,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Sam",
+     "text": "The DB is fine.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 1
+    }
+   ],
+   "ledger": [
+    {
+     "check": "db_health",
+     "resource": "orders-db",
+     "raised": false
+    }
+   ],
+   "escalationCount": 1
+  },
+  "long_call_with_bedrock_support": {
+   "steps": [
+    {
+     "_tag": "Utterance",
+     "speaker": "Priya",
+     "text": "Checkout is failing for some users, what are we seeing?",
+     "silenceS": 0.6,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Jordan",
+     "text": "We didn't deploy orders-api today.",
+     "silenceS": 0.3,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "recent_deploys",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.9,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-api",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.9,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Mei",
+     "text": "Payments API looks fine to me.",
+     "silenceS": 0.7,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "service_error_rate",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.9,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "payments-api",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.9,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.6
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Sam",
+     "text": "And the DB is fine too, it's the API.",
+     "silenceS": 0.2,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.7
+      }
+     }
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 0.4
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 1.5
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Priya",
+     "text": "Okay. Auth isn't in the checkout path, let's park that.",
+     "silenceS": 0.9,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "none",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "unknown",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.9
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "unclear",
+       "probabilities": {
+        "healthy": 0.02,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.9
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Lee",
+     "text": "Orders DB is fine, I checked.",
+     "silenceS": 1.4,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "db_health",
+       "probabilities": {
+        "db_health": 0.9,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.016667,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.6
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-db",
+       "probabilities": {
+        "orders-db": 0.9,
+        "payments-db": 0.016667,
+        "orders-api": 0.016667,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    },
+    {
+     "_tag": "Utterance",
+     "speaker": "Lee",
+     "text": "Latency on orders-api is normal.",
+     "silenceS": 1.3,
+     "answers": {
+      "is_claim": {
+       "type": "noul",
+       "noul": 0.85
+      },
+      "which_check": {
+       "type": "choice",
+       "choice": "latency_p99",
+       "probabilities": {
+        "db_health": 0.016667,
+        "service_error_rate": 0.016667,
+        "latency_p99": 0.9,
+        "recent_deploys": 0.016667,
+        "alarm_state": 0.016667,
+        "queue_depth": 0.016667,
+        "none": 0.016667
+       },
+       "confidence": 0.883333
+      },
+      "which_resource": {
+       "type": "choice",
+       "choice": "orders-api",
+       "probabilities": {
+        "orders-db": 0.016667,
+        "payments-db": 0.016667,
+        "orders-api": 0.9,
+        "payments-api": 0.016667,
+        "checkout-queue": 0.016667,
+        "auth-service": 0.016667,
+        "unknown": 0.016667
+       },
+       "confidence": 0.4
+      },
+      "asserted_state": {
+       "type": "choice",
+       "choice": "healthy",
+       "probabilities": {
+        "healthy": 0.9,
+        "degraded": 0.02,
+        "down": 0.02,
+        "changed": 0.02,
+        "unchanged": 0.02,
+        "unclear": 0.02
+       },
+       "confidence": 0.88
+      },
+      "self_repaired": {
+       "type": "noul",
+       "noul": 0.2
+      },
+      "open_question": {
+       "type": "noul",
+       "noul": 0.1
+      },
+      "floor_free": {
+       "type": "noul",
+       "noul": 0.2
+      }
+     }
+    },
+    {
+     "_tag": "Silence",
+     "silenceS": 3.0
+    }
+   ],
+   "escalate": true,
+   "events": [
+    {
+     "turn": 0,
+     "speaker": "Priya",
+     "text": "Checkout is failing for some users, what are we seeing?",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": null,
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 1,
+     "speaker": "Jordan",
+     "text": "We didn't deploy orders-api today.",
+     "route": {
+      "action": "check",
+      "check": "recent_deploys",
+      "resource": "orders-api",
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "orders-api v2.14 deployed 40 min ago",
+     "gate": {
+      "speak": false,
+      "blockedBy": "persisted",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.5,
+      "reasons": {
+       "persisted": false,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 2,
+     "speaker": "Mei",
+     "text": "Payments API looks fine to me.",
+     "route": {
+      "action": "check",
+      "check": "service_error_rate",
+      "resource": "payments-api",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "supports",
+     "checkEvidence": "5xx rate 0.3%",
+     "gate": {
+      "speak": false,
+      "blockedBy": "floor_open",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.4,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": false,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 3,
+     "speaker": "Sam",
+     "text": "And the DB is fine too, it's the API.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "min_silence",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.30000000000000004,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": false,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 3,
+     "speaker": "(silence)",
+     "text": "",
+     "route": null,
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "min_silence",
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.30000000000000004,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": false,
+       "floor_open": false,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 3,
+     "speaker": "(silence)",
+     "text": "",
+     "route": null,
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": true,
+      "blockedBy": null,
+      "repairedBy": null,
+      "costLevel": 3,
+      "floorP": 0.30000000000000004,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": true,
+       "cooldown": true
+      }
+     },
+     "said": "Quick flag on Jordan's point: orders-api orders-api v2.14 deployed 40 min ago.",
+     "escalations": 0
+    },
+    {
+     "turn": 4,
+     "speaker": "Priya",
+     "text": "Okay. Auth isn't in the checkout path, let's park that.",
+     "route": {
+      "action": "ignore",
+      "check": null,
+      "resource": null,
+      "asserted": "unclear",
+      "scores": {
+       "is_claim": 0.1,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 5,
+     "speaker": "Lee",
+     "text": "Orders DB is fine, I checked.",
+     "route": {
+      "action": "check",
+      "check": "db_health",
+      "resource": "orders-db",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.883333
+      }
+     },
+     "verdict": "contradicts",
+     "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 1
+    },
+    {
+     "turn": 6,
+     "speaker": "Lee",
+     "text": "Latency on orders-api is normal.",
+     "route": {
+      "action": "ignore",
+      "check": "latency_p99",
+      "resource": "orders-api",
+      "asserted": "healthy",
+      "scores": {
+       "is_claim": 0.85,
+       "which_check": 0.883333,
+       "which_resource": 0.4
+      }
+     },
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 0
+    },
+    {
+     "turn": 6,
+     "speaker": "(silence)",
+     "text": "",
+     "route": null,
+     "verdict": null,
+     "checkEvidence": null,
+     "gate": {
+      "speak": false,
+      "blockedBy": "worth_it",
+      "repairedBy": null,
+      "costLevel": 1,
+      "floorP": 0.8,
+      "reasons": {
+       "persisted": true,
+       "not_repaired": true,
+       "min_silence": true,
+       "floor_open": true,
+       "worth_it": false,
+       "cooldown": false
+      }
+     },
+     "said": null,
+     "escalations": 0
+    }
+   ],
+   "ledger": [
+    {
+     "check": "recent_deploys",
+     "resource": "orders-api",
+     "raised": true
+    },
+    {
+     "check": "db_health",
+     "resource": "orders-db",
+     "raised": false
+    }
+   ],
+   "escalationCount": 1
+  }
+ }
+}

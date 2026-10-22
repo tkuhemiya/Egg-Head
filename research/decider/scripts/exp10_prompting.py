@@ -1,8 +1,8 @@
 """Exp 10: prompt-engineering techniques for Decider (dev tuning; `heldout` arg runs the frozen choice once).
 Techniques: definition-in-question, contrastive framing, negated question pairs, persona prefix, contextual calibration
 (content-free prior), paraphrase ensembles; option wording for the check choice; contrastive repair question for the gate."""
-import json, sys, math, statistics as S
-sys.path.insert(0, "/tmp/eh")
+import json, os, sys, math, statistics as S
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "spike"))  # frozen Python reference gate
 from lib import ask_many, load, auc, ROOT, binary_metrics_at, best_threshold
 from common import render, CLAIM_Q, CHECKS, W, gold_route
 split = sys.argv[1]; items = load(split)
@@ -52,7 +52,7 @@ for name, od in OPTS.items():
         for lab, v in x["answers"]["c"]["probabilities"].items(): agg.setdefault(iid, {}).setdefault(lab, 0); agg[iid][lab] += v / n
     out["check_acc"][name] = round(S.mean(max(agg[it["id"]], key=agg[it["id"]].get) == gold_route(it)[0] for it in gi), 3)
 # repair question for the speak gate
-from egghead import gate as G
+import egghead_gate as G
 from final_platt import platt
 REPQ = {"base": "After the flagged claim, did someone on the call already say it was wrong, or question whether it was right? Agreeing with it is not a correction.",
         "contrast": "After the flagged claim, did anyone doubt, question or contradict it, as opposed to agreeing with it, building on it or changing the subject?",
