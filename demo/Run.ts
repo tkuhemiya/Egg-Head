@@ -34,6 +34,7 @@ export type Message =
   | { readonly type: "heard"; readonly index: number; readonly speaker: string; readonly text: string }
   | { readonly type: "event"; readonly index: number; readonly event: unknown }
   | { readonly type: "floor"; readonly index: number }
+  | { readonly type: "status"; readonly text: string }
   | { readonly type: "egghead"; readonly index: number; readonly text: string; readonly audio: string; readonly durationS: number }
   | { readonly type: "stats"; readonly stats: Stats }
   | { readonly type: "done" }

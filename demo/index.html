@@ -54,6 +54,7 @@
 <header>
   <h1><span>Egg Head</span> · <span id="title" style="color:var(--text)">incident call</span></h1>
   <div class="sub" id="mode"></div>
+  <div class="sub" id="status"></div>
   <button id="start">Start call</button>
 </header>
 <main>
@@ -145,6 +146,7 @@ function onEvent(i, ev) {
 
 function onMessage(m) {
   switch (m.type) {
+    case "status": $("mode").dataset.status = m.text; $("status").textContent = m.text; break
     case "reset": cards.clear(); claims.clear(); $("call").innerHTML = ""; renderLedger(); break
     case "meta":
       $("title").textContent = m.title

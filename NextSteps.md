@@ -11,7 +11,8 @@ Status as of Thu 22 Oct 2026. **Scope reminder:** the project is the turn-taking
 - **Demo (`npm run demo`):** dashboard + real-time call with Polly voices; transcript or Transcribe mode; template or Bedrock writer. On the checkout call Egg Head speaks once (false orders-DB claim, in the gap), stays silent when Mei corrects the deploy claim, when auth is parked, and on true claims. Bedrock: 2 calls for 12 lines (1 write, 1 escalation).
 - **Transcribe mode** works but shows real ASR errors ("Auth" heard as "Office"); those lines escalate. Transcript mode is the reliable one for recording; show Transcribe as a short segment.
 - **Spend so far** (scripts/aws-usage.sh, worst case ignoring free tier): Bedrock $0.0003, Polly $0.014, Transcribe $0.020.
-- **Open:** record the video; write the article; held-out gate snippets still unscored; "park that" quiets every open claim (kept for parity).
+- **Cold start bites mid-demo:** the hosted Decider sleeps when idle; one run started minutes after the server warmed it, the first request took 13.7 s, every decision then lagged the audio ~10 s, and Sam's "I was looking at…" was heard before Egg Head's gap, so the gate (correctly, given that order) treated it as a self-correction. The demo now wakes Decider when Start is pressed and waits for it.
+- **Open:** live-mic mode so real people can run the demo (judges can verify it is not AI-voiced); record the video; write the article; held-out gate snippets still unscored; "park that" quiets every open claim (kept for parity).
 
 ## 0. Runtime migrated to TypeScript + Effect 4 (Thu 22 Oct)
 

@@ -61,6 +61,12 @@ const runLayer = () => {
   return Bridge.layer.pipe(Layer.provideMerge(Layer.mergeAll(decider, source, writing, Voice.layer)))
 }
 
+/** One uncached Decider request (the hosted API sleeps when idle; this wakes it). */
+const warmUp = DecisionModel.decide(
+  Decision.make({ input: Schema.String, decisions: { ok: Decision.probability({ instructions: "Is this a warm-up?" }) } }),
+  { input: `warm-up ${Date.now()}` }
+).pipe(Effect.provide(Decider.layerFromEnv), Effect.orDie)
+
 let running = false
 const start = () => {
   if (running) return
@@ -69,6 +75,11 @@ const start = () => {
   history.length = 0
   for (const c of clients) c.write(`data: ${JSON.stringify({ type: "reset" })}\n\n`)
   const program = Effect.gen(function*() {
+    // The hosted Decider sleeps when idle and the first request then takes ~15-30 s. Wake it
+    // before the call starts, or every decision lags the audio and the script's order breaks.
+    yield* publish({ type: "status", text: "Waking up Decider…" })
+    const [woke] = yield* Effect.timed(warmUp)
+    yield* publish({ type: "status", text: `Decider ready (${Math.round(Duration.toMillis(woke))} ms)` })
     const support = yield* Effect.serviceOption(BedrockSupport)
     const bedrockCalls = support._tag === "Some"
       ? Effect.map(support.value.calls, (c) => c.write + c.route)
@@ -113,12 +124,7 @@ createServer((req, res) => {
   }
 }).listen(Number(args.port), () => {
   console.log(`Egg Head demo: http://localhost:${args.port}  (mode ${mode}, writer ${writer})`)
-  // The hosted Decider runs on serverless GPUs: the first request after a while can take ~30 s.
-  const warm = DecisionModel.decide(
-    Decision.make({ input: Schema.String, decisions: { ok: Decision.probability({ instructions: "Is this a warm-up?" }) } }),
-    { input: "warm-up" }
-  )
-  Effect.runPromise(Effect.timed(warm).pipe(Effect.provide(Decider.layerFromEnv)))
+  Effect.runPromise(Effect.timed(warmUp))
     .then(([d]) => console.log(`Decider warm (${Math.round(Duration.toMillis(d))} ms)`), (e) => console.error("Decider warm-up failed", e))
     .finally(() => args.autostart && start())
 })
