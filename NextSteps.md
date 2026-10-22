@@ -2,6 +2,13 @@
 
 Status as of Thu 22 Oct 2026. **Scope reminder:** the project is the turn-taking / when-to-speak / what-action-to-take decision pattern; the incident call is only the demo.
 
+## 000. Meeting demo, agent mode (Thu 22 Oct, night)
+
+- **Meeting page** (`npm run demo`, http://localhost:8787): cartoon teammates that lip-sync to Polly visemes, the presenter's camera tile, Egg Head's tile with its current state, live captions, a decision feed, and the coding agent's live terminal. **Dashboard** reworked (`/dashboard`): transcript with what each line triggered, claims, agent tasks, questions, reasons for silence.
+- **Agent mode:** pi on Bedrock (cheap model, `--agent-model`) in a real pseudo-terminal is Egg Head's Investigator. A contradicted claim gets a second look before Egg Head interrupts (only if the call did not correct it first); questions to Egg Head and unanswered questions to the call go to the agent too. The agent uses a stand-in `aws` CLI over `data/aws.json` and reports with `egghead report|answer`. Any terminal agent works (`--agent-cmd`).
+- **New behaviour:** replies when spoken to (waits for the speaker to finish), takes questions nobody answers, barges in when someone is about to act on a wrong claim. New Decider questions (`addr`, `ask`, `act`) are **untested against the hosted Decider** (the cloud session cannot reach it); `--rehearsal` runs everything offline with the expected answers. First live run: check each line's `expect` on the dashboard.
+- Recording run sheet: `demo/RECORDING.md`.
+
 ## 00. Router = research pipeline, live demo (Thu 22 Oct, later)
 
 - **Router:** the runtime now asks the frozen research pipeline (exp 9 + final_eval) instead of the pass-2 questions. `npm run replay -- heldout` on the hosted Decider reproduced the published held-out numbers exactly: claim P 0.884 R 0.905 F1 0.894, routing P 0.806 R 0.806 (36 fired). Dev routing also matched (P 0.909 R 0.732). Per-line p50 ~500 ms from Colombo.

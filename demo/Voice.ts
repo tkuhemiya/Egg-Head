@@ -113,7 +113,7 @@ export class Voice extends Context.Service<Voice, {
           const file = `${createHash("sha256").update(`${voice}\n${text}`).digest("hex").slice(0, 16)}.wav`
           const path = new URL(file, OUT)
           const marksPath = new URL(file.replace(/\.wav$/, ".marks.json"), OUT)
-          const marksFor = (pcm: Uint8Array) =>
+          const marked =
             existsSync(marksPath)
               ? Effect.succeed(JSON.parse(readFileSync(marksPath, "utf8")) as Marks)
               : Effect.tryPromise({
@@ -136,7 +136,7 @@ export class Voice extends Context.Service<Voice, {
               }).pipe(Effect.orElseSucceed(() => estimateMarks(text).marks)) // lip sync is not worth failing a line
           if (existsSync(path)) {
             const pcm = readFileSync(path).subarray(44)
-            return { file, pcm, durationS: pcm.length / 2 / SAMPLE_RATE, marks: yield* marksFor(pcm) }
+            return { file, pcm, durationS: pcm.length / 2 / SAMPLE_RATE, marks: yield* marked }
           }
           const pcm = yield* Effect.tryPromise({
             try: async (signal) => {
@@ -156,7 +156,7 @@ export class Voice extends Context.Service<Voice, {
           })
           billed += text.length
           writeFileSync(path, wav(pcm))
-          return { file, pcm, durationS: pcm.length / 2 / SAMPLE_RATE, marks: yield* marksFor(pcm) }
+          return { file, pcm, durationS: pcm.length / 2 / SAMPLE_RATE, marks: yield* marked }
         }),
       charactersBilled: Effect.sync(() => billed)
     })

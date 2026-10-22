@@ -16,7 +16,9 @@ const cfg = await fetch("/config").then((r) => r.json())
 $("title").textContent = `Incident bridge · ${cfg.title}`
 $("agent-label").textContent = cfg.agent === "none" ? "no agent in this run" : cfg.agent
 if (cfg.rehearsal) $("note").textContent = "Rehearsal: scripted Decider and model"
+// ?term=30%&busy=60%: terminal height when idle, and while the agent works (it grows so its commands show)
 if (params.has("term")) document.documentElement.style.setProperty("--term-h", params.get("term"))
+if (params.has("busy")) document.documentElement.style.setProperty("--term-busy", params.get("busy"))
 
 const MIC_ON = '<svg class="mic-on" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>'
 const MIC_OFF = '<svg class="mic-off" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2zM3.3 2.3 2 3.6l18.4 18.4 1.3-1.3z"/></svg>'
@@ -158,7 +160,7 @@ const resize = () => {
   try { fit.fit() } catch {}
   fetch("/pty/resize", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cols: term.cols, rows: term.rows }) })
 }
-new ResizeObserver(() => { clearTimeout(resize.t); resize.t = setTimeout(resize, 120) }).observe($("screen"))
+new ResizeObserver(() => { clearTimeout(resize.t); resize.t = setTimeout(resize, 450) }).observe($("screen"))
 resize()
 new EventSource("/pty").onmessage = (e) => term.write(JSON.parse(e.data).d)
 
@@ -167,23 +169,23 @@ new EventSource("/pty").onmessage = (e) => term.write(JSON.parse(e.data).d)
 // ---------------------------------------------------------------------------
 
 const store = createStore()
-let started = 0
+let clockBase = null // { at: ms into the run (server), t: when it arrived here }
 setInterval(() => {
-  if (!started) return
-  const s = Math.floor((Date.now() - started) / 1000)
+  if (!clockBase) return
+  const s = Math.floor((clockBase.at + Date.now() - clockBase.t) / 1000)
   $("timer").textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`
 }, 500)
 
 // Messages replayed when the page connects mid-run are state only: no voices, lips or captions.
 let live = false
 store.subscribe((s, m) => {
+  if (m.at !== undefined && s.running) clockBase = { at: m.at, t: Date.now() }
   if (!live && ["line", "cut", "egghead"].includes(m.type)) m = { type: "skip" }
   switch (m.type) {
     case "reset":
       $("feed").innerHTML = ""
       break
     case "meta":
-      started = Date.now() - (m.at ?? 0)
       $("live").classList.add("on")
       break
     case "line": {
@@ -203,6 +205,8 @@ store.subscribe((s, m) => {
       break
     }
     case "egghead":
+      eggSpeakingUntil = Date.now() + m.durationS * 1000
+      setTimeout(() => renderEgg(store.get()), m.durationS * 1000 + 50)
       speaking("Egg Head", true, m.durationS * 1000)
       eggToon.say(m.marks, m.durationS)
       play(m.audio)
@@ -211,7 +215,7 @@ store.subscribe((s, m) => {
       break
     case "done":
       $("live").classList.remove("on")
-      started = 0
+      clockBase = null
       $("start").disabled = false
       $("start").textContent = "Run again"
       break
@@ -228,8 +232,9 @@ store.subscribe((s, m) => {
   $("status").textContent = s.done ? "" : s.status
 })
 
+let eggSpeakingUntil = 0
 function renderEgg(s) {
-  const st = eggState(s)
+  const st = Date.now() < eggSpeakingUntil ? { key: "floor", text: "Speaking" } : eggState(s)
   $("egg-state").className = `state ${st.key}`
   $("egg-state").querySelector("span").textContent = st.text
   eggToon.svg.classList.toggle("thinking", st.key === "checking")
@@ -245,6 +250,17 @@ function renderEgg(s) {
     : s.hold ? "The call is giving Egg Head the floor."
     : ""
   const busy = !!running
+  // the terminal grows while the agent works, and stays big a moment after it reports
+  if (busy) {
+    clearTimeout(renderEgg.shrink)
+    renderEgg.shrink = 0
+    document.body.classList.add("agent-busy")
+  } else if (document.body.classList.contains("agent-busy") && !renderEgg.shrink) {
+    renderEgg.shrink = setTimeout(() => {
+      renderEgg.shrink = 0
+      document.body.classList.remove("agent-busy")
+    }, 3000)
+  }
   $("agent-pill").className = `pill${busy ? " busy" : ""}`
   $("agent-pill").textContent = busy ? `task ${running.task} running` : `${s.tasks.size} task${s.tasks.size === 1 ? "" : "s"} done`
 }
@@ -256,6 +272,9 @@ function renderStats(s) {
   $("s-llm").textContent = st.agentTasks + st.bedrockCalls
   $("s-every").textContent = st.lines
 }
+
+let feedTouched = 0
+$("feed").addEventListener("wheel", () => (feedTouched = Date.now()), { passive: true })
 
 /** One feed, oldest first: lines with what Decider made of them, Egg Head, the agent, the quiet calls. */
 function renderFeed(s) {
@@ -298,9 +317,9 @@ function renderFeed(s) {
   if (!items.length) return
   items.sort((a, b) => a.at - b.at)
   const feed = $("feed")
-  const atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60
   feed.innerHTML = items.map((i) => i.html).join("")
-  if (atBottom) feed.scrollTop = feed.scrollHeight
+  if (Date.now() - feedTouched > 8000) feed.scrollTop = feed.scrollHeight // follow the call unless you scrolled
+
 }
 
 $("start").onclick = () => {
