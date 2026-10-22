@@ -1,0 +1,80 @@
+/* Shared look for the demo pages, after Kit Langton's visual-effect: near-black neutrals, hairline
+   borders, mono labels, and one colour per state — slate idle, blue running (with a light sweep and
+   a breathing border), green done, red wrong. Spring easings come from motion.js. */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap");
+
+:root {
+  --n-950: #0a0a0a; --n-900: #171717; --n-850: #1c1c1c; --n-800: #262626; --n-700: #404040; --n-600: #525252;
+  --n-500: #737373; --n-400: #a3a3a3; --n-300: #d4d4d4; --n-200: #e5e5e5; --n-100: #f5f5f5;
+  --hair: rgba(255, 255, 255, .08); --hair-2: rgba(255, 255, 255, .14);
+  --idle: #475569; --run: #3b82f6; --run-soft: rgba(59, 130, 246, .14); --run-ink: #93c5fd;
+  --ok: #15803d; --ok-ink: #86efac; --ok-soft: rgba(34, 197, 94, .12);
+  --bad: #ef4444; --bad-ink: #fca5a5; --bad-soft: rgba(239, 68, 68, .13);
+  --egg: #f5c84c; --egg-soft: rgba(245, 200, 76, .12); --egg-ink: #fde68a;
+  --ask: #a5b4fc; --ask-soft: rgba(129, 140, 248, .14);
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* overwritten by motion.js with real springs */
+  --spring-default: cubic-bezier(.2, .8, .2, 1); --spring-default-ms: 500ms;
+  --spring-bouncy: cubic-bezier(.3, 1.4, .5, 1); --spring-bouncy-ms: 600ms;
+  --spring-snappy: cubic-bezier(.2, .8, .2, 1); --spring-snappy-ms: 400ms;
+}
+
+* { scrollbar-width: thin; scrollbar-color: var(--n-800) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-thumb { background: var(--n-800); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--n-700); }
+
+/* small caps label: `EGG HEAD`, `TRANSCRIPT` */
+.label { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .09em; color: var(--n-500); }
+
+/* a state node: a pill whose colour says where a thing is */
+.node { position: relative; display: inline-flex; align-items: center; gap: 7px; overflow: hidden; white-space: nowrap;
+  border-radius: 999px; border: 1px solid var(--hair-2); padding: 3px 10px; font: 500 12px/1.3 var(--mono);
+  background: var(--n-800); color: var(--n-300);
+  transition: background-color .12s ease, color .12s ease, border-color .2s ease, box-shadow var(--spring-default-ms) var(--spring-default); }
+.node > i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+
+/* running: a sweep of light and a breathing inset border (visual-effect's RunningOverlay) */
+.running { background-color: var(--run) !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 0 24px rgba(59, 130, 246, .25); }
+.running::before { content: ""; position: absolute; inset: 0; width: 200%; pointer-events: none; mix-blend-mode: lighten; filter: blur(4px);
+  background: linear-gradient(90deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.45) 50%, rgba(255,255,255,.1) 55%, transparent 60%);
+  animation: sweep .9s cubic-bezier(.5, 0, .1, 1) infinite; }
+.running::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(147, 197, 253, .9); animation: breathe 1.5s ease-in-out infinite; }
+@keyframes sweep { from { transform: translateX(-66%); } to { transform: translateX(50%); } }
+@keyframes breathe { 50% { opacity: .3; } }
+
+/* a nervous little jitter while working (visual-effect's running shake, toned down) */
+.jitter { animation: jitter .32s steps(2, jump-none) infinite; }
+@keyframes jitter {
+  0% { transform: translate(.4px, 0) rotate(.5deg); } 25% { transform: translate(-.6px, .2px) rotate(-.7deg); }
+  50% { transform: translate(.3px, -.2px) rotate(.3deg); } 75% { transform: translate(-.2px, .1px) rotate(-.4deg); }
+}
+
+.fx-flash { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; mix-blend-mode: overlay; z-index: 2; }
+
+/* rolling digits */
+.roll { display: inline-flex; height: 1em; line-height: 1; overflow: hidden; font-variant-numeric: tabular-nums; vertical-align: -.1em; }
+.roll-col { display: flex; flex-direction: column; transition: transform var(--spring-default-ms) var(--spring-default); }
+.roll-col > span { height: 1em; text-align: center; }
+
+/* a speech bubble that floats over a tile */
+.bubble { position: absolute; left: 50%; top: 10px; translate: -50% 0; z-index: 4; pointer-events: none; white-space: nowrap;
+  padding: 5px 11px; border-radius: 8px; font: 500 12px/1.2 var(--mono); color: #fff; background: rgba(23, 23, 23, .92);
+  border: 1px solid var(--hair-2); box-shadow: 0 0 16px rgba(0, 0, 0, .5); opacity: 0; scale: 0; filter: blur(10px);
+  transition: opacity .2s ease, scale var(--spring-bouncy-ms) var(--spring-bouncy), filter .25s ease; }
+.bubble.on { opacity: 1; scale: 1; filter: blur(0); animation: float 1.6s ease-in-out infinite alternate; }
+.bubble.cut { background: rgba(239, 68, 68, .95); border-color: transparent; }
+.bubble.ask { background: rgba(79, 70, 229, .92); border-color: transparent; }
+@keyframes float { to { translate: -50% -5px; } }
+
+/* word-timed captions: each word arrives out of a blur */
+.w { display: inline-block; animation: word .28s ease-out both; }
+@keyframes word { from { opacity: 0; filter: blur(6px); transform: translateY(4px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .running::before, .running::after, .jitter, .bubble.on, .w { animation: none; }
+  .roll-col { transition: none; }
+}
