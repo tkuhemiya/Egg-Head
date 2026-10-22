@@ -9,7 +9,7 @@ import type { LedgerItem } from "./Ledger.ts"
 
 /** Bedrock (or another support model) failed while writing or routing. */
 export class SupportError extends Schema.TaggedError<SupportError>()("SupportError", {
-  operation: Schema.Literals(["write", "route"]),
+  operation: Schema.Literals(["write", "route", "investigate"]),
   cause: Schema.Defect()
 }) {}
 

@@ -1,0 +1,51 @@
+{
+  "_note": "What the stand-in `aws` CLI (demo/agent/bin/aws) serves to the coding agent during the demo. Same incident as world.json (checkout failing after orders-api v2.14; orders-db CPU 98%), in the shapes the real AWS CLI returns. Times are minutes before now. test/AwsStandIn.test.ts holds it to world.json.",
+  "account": "123456789012",
+  "region": "us-east-1",
+  "cluster": "prod",
+  "databases": {
+    "orders-db": { "engine": "postgres", "class": "db.r6g.xlarge", "cpu": { "now": 98, "before": 34, "sinceMin": 6 }, "connections": 412 },
+    "payments-db": { "engine": "postgres", "class": "db.r6g.large", "cpu": { "now": 22, "before": 21, "sinceMin": 0 }, "connections": 40 }
+  },
+  "services": {
+    "orders-api": {
+      "loadBalancer": "app/orders-api-alb/7f3c2a9d1e0b4c11",
+      "requestsPerMin": 5400,
+      "error5xxPct": { "now": 7.2, "before": 0.2, "sinceMin": 38 },
+      "p99s": { "now": 4.1, "before": 0.35, "sinceMin": 38 },
+      "deployments": [
+        { "version": "v2.14", "revision": 214, "minutesAgo": 40 },
+        { "version": "v2.13", "revision": 213, "minutesAgo": 4380 }
+      ]
+    },
+    "payments-api": {
+      "loadBalancer": "app/payments-api-alb/0b2d8e4f6a1c3e57",
+      "requestsPerMin": 2100,
+      "error5xxPct": { "now": 0.3, "before": 0.3, "sinceMin": 0 },
+      "p99s": { "now": 0.28, "before": 0.27, "sinceMin": 0 },
+      "deployments": [
+        { "version": "v5.2", "revision": 52, "minutesAgo": 12960 }
+      ]
+    },
+    "auth-service": {
+      "loadBalancer": "app/auth-service-alb/5e9a1c7b3d2f4a68",
+      "requestsPerMin": 8800,
+      "error5xxPct": { "now": 0.1, "before": 0.1, "sinceMin": 0 },
+      "p99s": { "now": 0.12, "before": 0.12, "sinceMin": 0 },
+      "deployments": [
+        { "version": "v3.8", "revision": 38, "minutesAgo": 7200 }
+      ]
+    }
+  },
+  "queues": {
+    "checkout-queue": { "visible": 12400, "before": 60, "sinceMin": 30, "inFlight": 950, "oldestAgeS": 1740 }
+  },
+  "alarms": [
+    { "name": "OrdersDB-CPU", "state": "ALARM", "sinceMin": 6, "namespace": "AWS/RDS", "metric": "CPUUtilization", "dimension": ["DBInstanceIdentifier", "orders-db"], "threshold": 85, "reason": "Threshold Crossed: 3 datapoints [98.4, 98.1, 97.6] were greater than the threshold (85.0)." },
+    { "name": "OrdersAPI-5xx", "state": "ALARM", "sinceMin": 36, "namespace": "AWS/ApplicationELB", "metric": "HTTPCode_Target_5XX_Count", "dimension": ["LoadBalancer", "app/orders-api-alb/7f3c2a9d1e0b4c11"], "threshold": 50, "reason": "Threshold Crossed: 3 datapoints [391.0, 388.0, 402.0] were greater than the threshold (50.0)." },
+    { "name": "CheckoutQueue-Depth", "state": "ALARM", "sinceMin": 28, "namespace": "AWS/SQS", "metric": "ApproximateNumberOfMessagesVisible", "dimension": ["QueueName", "checkout-queue"], "threshold": 1000, "reason": "Threshold Crossed: 1 datapoint [12400.0] was greater than the threshold (1000.0)." },
+    { "name": "PaymentsDB-CPU", "state": "OK", "sinceMin": 20160, "namespace": "AWS/RDS", "metric": "CPUUtilization", "dimension": ["DBInstanceIdentifier", "payments-db"], "threshold": 85, "reason": "Threshold Crossed: 3 datapoints [22.1, 21.8, 22.4] were not greater than the threshold (85.0)." },
+    { "name": "PaymentsAPI-5xx", "state": "OK", "sinceMin": 12950, "namespace": "AWS/ApplicationELB", "metric": "HTTPCode_Target_5XX_Count", "dimension": ["LoadBalancer", "app/payments-api-alb/0b2d8e4f6a1c3e57"], "threshold": 50, "reason": "Threshold Crossed: 3 datapoints [6.0, 7.0, 6.0] were not greater than the threshold (50.0)." },
+    { "name": "AuthService-5xx", "state": "OK", "sinceMin": 7190, "namespace": "AWS/ApplicationELB", "metric": "HTTPCode_Target_5XX_Count", "dimension": ["LoadBalancer", "app/auth-service-alb/5e9a1c7b3d2f4a68"], "threshold": 50, "reason": "Threshold Crossed: 3 datapoints [9.0, 8.0, 9.0] were not greater than the threshold (50.0)." }
+  ]
+}

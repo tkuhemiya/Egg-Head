@@ -17,6 +17,9 @@ export interface Line {
   readonly rep?: number // gate: P(someone already corrected the flagged claim)
   readonly fin?: number // gate: raw P(the speaker has finished), before Platt scaling
   readonly p?: number // probability on the scripted label of every choice
+  readonly addr?: number // turn: P(talking to Egg Head)
+  readonly ask?: number // turn: P(a question to the call)
+  readonly act?: number // partial: P(telling someone to act on a system now)
 }
 
 export const noul = (p: number): SystemOneAnswer => ({ type: "noul", noul: p })
@@ -50,6 +53,9 @@ export const answerLine = (request: SystemOneRequest, line: Line): Record<string
     const labels = q.type === "choice" ? Object.keys(q.criteria) : []
     if (key === "rep") return [key, noul(line.rep ?? 0.1)]
     if (key === "fin") return [key, noul(line.fin ?? 0.5)]
+    if (key === "addr") return [key, noul(line.addr ?? 0.05)]
+    if (key === "ask") return [key, noul(line.ask ?? 0.05)]
+    if (key === "act") return [key, noul(line.act ?? 0.05)]
     switch (/^([arc])[\d_]+$/.exec(key)?.[1]) {
       case "a":
         return [key, choiceOver(labels, line.asserted ?? "unclear", line.p)]
