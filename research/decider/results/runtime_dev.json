@@ -1,0 +1,1813 @@
+{
+ "split": "dev",
+ "n": 138,
+ "claim": {
+  "P": 0.976,
+  "R": 0.911,
+  "F1": 0.943
+ },
+ "routing": {
+  "P": 0.909,
+  "R": 0.732,
+  "F1": 0.811,
+  "fired": 33,
+  "gold": 41
+ },
+ "escalated": 9,
+ "rows": [
+  {
+   "id": "x000",
+   "claim": 0.9865691260977243,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1106452750"
+   }
+  },
+  {
+   "id": "x001",
+   "claim": 0.9209955230296264,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "88792870292"
+   }
+  },
+  {
+   "id": "x006",
+   "claim": 0.9265915529561355,
+   "action": "check",
+   "fired": "db_health@payments-db",
+   "gold": "db_health@payments-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1092251875"
+   }
+  },
+  {
+   "id": "x008",
+   "claim": 0.9434589225793345,
+   "action": "check",
+   "fired": "service_error_rate@payments-api",
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1094162875"
+   }
+  },
+  {
+   "id": "x009",
+   "claim": 0.8755655133976349,
+   "action": "check",
+   "fired": "service_error_rate@payments-api",
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1173514000"
+   }
+  },
+  {
+   "id": "x010",
+   "claim": 0.9726492580347692,
+   "action": "check",
+   "fired": "service_error_rate@auth-service",
+   "gold": "service_error_rate@auth-service",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "952675709"
+   }
+  },
+  {
+   "id": "x011",
+   "claim": 0.9670026972205218,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@orders-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1085588791"
+   }
+  },
+  {
+   "id": "x012",
+   "claim": 0.9649092166309939,
+   "action": "check",
+   "fired": "service_error_rate@payments-api",
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "978581000"
+   }
+  },
+  {
+   "id": "x014",
+   "claim": 0.8439239275814256,
+   "action": "escalate",
+   "fired": null,
+   "gold": "service_error_rate@auth-service",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1025795625"
+   }
+  },
+  {
+   "id": "x017",
+   "claim": 0.9780690788995041,
+   "action": "check",
+   "fired": "service_error_rate@payments-api",
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "952333541"
+   }
+  },
+  {
+   "id": "x018",
+   "claim": 0.9568377257615008,
+   "action": "check",
+   "fired": "latency_p99@orders-api",
+   "gold": "latency_p99@orders-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "950363125"
+   }
+  },
+  {
+   "id": "x020",
+   "claim": 0.9673497968647741,
+   "action": "check",
+   "fired": "latency_p99@payments-api",
+   "gold": "latency_p99@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "927331083"
+   }
+  },
+  {
+   "id": "x023",
+   "claim": 0.8704581496975007,
+   "action": "check",
+   "fired": "latency_p99@payments-api",
+   "gold": "latency_p99@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "993294041"
+   }
+  },
+  {
+   "id": "x024",
+   "claim": 0.9810859994982177,
+   "action": "check",
+   "fired": "latency_p99@payments-api",
+   "gold": "latency_p99@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "973379334"
+   }
+  },
+  {
+   "id": "x027",
+   "claim": 0.8804810121426258,
+   "action": "escalate",
+   "fired": null,
+   "gold": "recent_deploys@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "955306917"
+   }
+  },
+  {
+   "id": "x028",
+   "claim": 0.7312862837292484,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1141024833"
+   }
+  },
+  {
+   "id": "x032",
+   "claim": 0.9432960560855816,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "alarm_state@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "936537083"
+   }
+  },
+  {
+   "id": "x035",
+   "claim": 0.8799274293668616,
+   "action": "escalate",
+   "fired": null,
+   "gold": "alarm_state@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "947793750"
+   }
+  },
+  {
+   "id": "x036",
+   "claim": 0.8221565965307109,
+   "action": "escalate",
+   "fired": null,
+   "gold": "alarm_state@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "945050500"
+   }
+  },
+  {
+   "id": "x037",
+   "claim": 0.8790417975898972,
+   "action": "check",
+   "fired": "alarm_state@orders-api",
+   "gold": "alarm_state@orders-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "979390500"
+   }
+  },
+  {
+   "id": "x039",
+   "claim": 0.9834409654078391,
+   "action": "escalate",
+   "fired": null,
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1436559167"
+   }
+  },
+  {
+   "id": "x040",
+   "claim": 0.9872386956700157,
+   "action": "escalate",
+   "fired": null,
+   "gold": "db_health@payments-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1400486334"
+   }
+  },
+  {
+   "id": "x045",
+   "claim": 0.6122731090769704,
+   "action": "check",
+   "fired": "latency_p99@orders-api",
+   "gold": "latency_p99@orders-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "958282500"
+   }
+  },
+  {
+   "id": "x046",
+   "claim": 0.12686984357573525,
+   "action": "ignore",
+   "fired": null,
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "456866500"
+   }
+  },
+  {
+   "id": "x048",
+   "claim": 0.9126178139949296,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": null,
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "932937250"
+   }
+  },
+  {
+   "id": "x049",
+   "claim": 0.9053217569974351,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": null,
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "942768541"
+   }
+  },
+  {
+   "id": "x051",
+   "claim": 0.9772805272376319,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1013954833"
+   }
+  },
+  {
+   "id": "x053",
+   "claim": 0.3040442979982765,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "457937584"
+   }
+  },
+  {
+   "id": "x054",
+   "claim": 0.049699099151451855,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "454985042"
+   }
+  },
+  {
+   "id": "x056",
+   "claim": 0.046611904335355496,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "459606542"
+   }
+  },
+  {
+   "id": "x057",
+   "claim": 0.050461988099692844,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "454777834"
+   }
+  },
+  {
+   "id": "x058",
+   "claim": 0.0633657010791033,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "454442792"
+   }
+  },
+  {
+   "id": "x059",
+   "claim": 0.10216498475807699,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "455531583"
+   }
+  },
+  {
+   "id": "x062",
+   "claim": 0.01609974320844598,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "462726875"
+   }
+  },
+  {
+   "id": "x065",
+   "claim": 0.030132741061929206,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "527653042"
+   }
+  },
+  {
+   "id": "x066",
+   "claim": 0.016674083675966712,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "458804916"
+   }
+  },
+  {
+   "id": "x070",
+   "claim": 0.15806414491511683,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461498458"
+   }
+  },
+  {
+   "id": "x071",
+   "claim": 0.42884193241511015,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461824333"
+   }
+  },
+  {
+   "id": "x074",
+   "claim": 0.01423397481866176,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "453389958"
+   }
+  },
+  {
+   "id": "x076",
+   "claim": 0.30856460457245993,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "463497542"
+   }
+  },
+  {
+   "id": "x079",
+   "claim": 0.03026306723361755,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "462950166"
+   }
+  },
+  {
+   "id": "x080",
+   "claim": 0.009546208486886067,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "472402209"
+   }
+  },
+  {
+   "id": "x082",
+   "claim": 0.16134131762025847,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "462148792"
+   }
+  },
+  {
+   "id": "x084",
+   "claim": 0.0120269702158005,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "496326208"
+   }
+  },
+  {
+   "id": "x085",
+   "claim": 0.009468245713631068,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "456732125"
+   }
+  },
+  {
+   "id": "x086",
+   "claim": 0.019518219342893852,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "462216875"
+   }
+  },
+  {
+   "id": "x089",
+   "claim": 0.026415903868998093,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461078500"
+   }
+  },
+  {
+   "id": "x092",
+   "claim": 0.2150396424832837,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "457888333"
+   }
+  },
+  {
+   "id": "x093",
+   "claim": 0.4384612953374669,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461760708"
+   }
+  },
+  {
+   "id": "x096",
+   "claim": 0.09552151149014543,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "467863500"
+   }
+  },
+  {
+   "id": "x098",
+   "claim": 0.9371596374324146,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "921634083"
+   }
+  },
+  {
+   "id": "x099",
+   "claim": 0.9301146162707027,
+   "action": "check",
+   "fired": "recent_deploys@orders-api",
+   "gold": "recent_deploys@orders-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "977010625"
+   }
+  },
+  {
+   "id": "x102",
+   "claim": 0.49099893461994626,
+   "action": "ignore",
+   "fired": null,
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "478020459"
+   }
+  },
+  {
+   "id": "x104",
+   "claim": 0.9496626480961687,
+   "action": "check",
+   "fired": "db_health@payments-db",
+   "gold": "db_health@payments-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "929241708"
+   }
+  },
+  {
+   "id": "x106",
+   "claim": 0.004299275730151761,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "466649875"
+   }
+  },
+  {
+   "id": "x108",
+   "claim": 0.004619609797844128,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "464153958"
+   }
+  },
+  {
+   "id": "x111",
+   "claim": 0.009976342100260858,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "456928458"
+   }
+  },
+  {
+   "id": "x116",
+   "claim": 0.025897647960177496,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1418569333"
+   }
+  },
+  {
+   "id": "x117",
+   "claim": 0.12241488619535912,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "456282125"
+   }
+  },
+  {
+   "id": "x119",
+   "claim": 0.12729688135465808,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "481257083"
+   }
+  },
+  {
+   "id": "x120",
+   "claim": 0.004084663323950983,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "459134125"
+   }
+  },
+  {
+   "id": "x123",
+   "claim": 0.08010734730342431,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "652223417"
+   }
+  },
+  {
+   "id": "x124",
+   "claim": 0.00869956148671145,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "454650083"
+   }
+  },
+  {
+   "id": "x125",
+   "claim": 0.05110510480134265,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "454381792"
+   }
+  },
+  {
+   "id": "x126",
+   "claim": 0.07482416272754915,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "474286709"
+   }
+  },
+  {
+   "id": "x127",
+   "claim": 0.05523882549498798,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "473854667"
+   }
+  },
+  {
+   "id": "x128",
+   "claim": 0.10461785435170164,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "458216708"
+   }
+  },
+  {
+   "id": "x132",
+   "claim": 0.010741949326058308,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "452819417"
+   }
+  },
+  {
+   "id": "x134",
+   "claim": 0.046156581405952295,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "451220416"
+   }
+  },
+  {
+   "id": "x136",
+   "claim": 0.03833915505809031,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "530637584"
+   }
+  },
+  {
+   "id": "x137",
+   "claim": 0.006689461009431717,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "452855250"
+   }
+  },
+  {
+   "id": "x139",
+   "claim": 0.025320480852220627,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "455206000"
+   }
+  },
+  {
+   "id": "x141",
+   "claim": 0.006336425165758741,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "483379291"
+   }
+  },
+  {
+   "id": "x145",
+   "claim": 0.030590717432926434,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "460181000"
+   }
+  },
+  {
+   "id": "x146",
+   "claim": 0.4480936642411517,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "452620375"
+   }
+  },
+  {
+   "id": "x147",
+   "claim": 0.010024361114665878,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "458718292"
+   }
+  },
+  {
+   "id": "x152",
+   "claim": 0.012684013655222901,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "475792000"
+   }
+  },
+  {
+   "id": "x154",
+   "claim": 0.37198098626129433,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "453580542"
+   }
+  },
+  {
+   "id": "x155",
+   "claim": 0.0048991723300837045,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "501098375"
+   }
+  },
+  {
+   "id": "x156",
+   "claim": 0.006945689094723438,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "450039167"
+   }
+  },
+  {
+   "id": "x157",
+   "claim": 0.11574849248599749,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "452221125"
+   }
+  },
+  {
+   "id": "x158",
+   "claim": 0.018317000687443793,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461288792"
+   }
+  },
+  {
+   "id": "x159",
+   "claim": 0.025281392713003933,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "453610541"
+   }
+  },
+  {
+   "id": "x160",
+   "claim": 0.005803794999035005,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "454131291"
+   }
+  },
+  {
+   "id": "x163",
+   "claim": 0.014093777742659349,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "462233125"
+   }
+  },
+  {
+   "id": "x165",
+   "claim": 0.01163968178553838,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "453995417"
+   }
+  },
+  {
+   "id": "x168",
+   "claim": 0.22693748504532485,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "456342959"
+   }
+  },
+  {
+   "id": "x170",
+   "claim": 0.0076153878850470464,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "549295042"
+   }
+  },
+  {
+   "id": "x171",
+   "claim": 0.021911275283524594,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "470042625"
+   }
+  },
+  {
+   "id": "x178",
+   "claim": 0.021469490520381062,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461545542"
+   }
+  },
+  {
+   "id": "x181",
+   "claim": 0.014723134363660668,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "475813000"
+   }
+  },
+  {
+   "id": "x182",
+   "claim": 0.12567005815022028,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461179125"
+   }
+  },
+  {
+   "id": "x183",
+   "claim": 0.06873733555694919,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "458336583"
+   }
+  },
+  {
+   "id": "x184",
+   "claim": 0.008862507733811541,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "453132958"
+   }
+  },
+  {
+   "id": "x185",
+   "claim": 0.012620764364888402,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "449320292"
+   }
+  },
+  {
+   "id": "x187",
+   "claim": 0.06228431954009541,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "463919584"
+   }
+  },
+  {
+   "id": "x190",
+   "claim": 0.026983290164322663,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "500272292"
+   }
+  },
+  {
+   "id": "x192",
+   "claim": 0.006131179850818656,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "457965750"
+   }
+  },
+  {
+   "id": "x193",
+   "claim": 0.009372398245691835,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "453792083"
+   }
+  },
+  {
+   "id": "x194",
+   "claim": 0.014288509211872935,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "491492709"
+   }
+  },
+  {
+   "id": "x195",
+   "claim": 0.009114737642976135,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "448301917"
+   }
+  },
+  {
+   "id": "x197",
+   "claim": 0.35379228555072934,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "466680583"
+   }
+  },
+  {
+   "id": "x200",
+   "claim": 0.011831833642236451,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "571052167"
+   }
+  },
+  {
+   "id": "x201",
+   "claim": 0.008268596469149469,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "467973792"
+   }
+  },
+  {
+   "id": "x202",
+   "claim": 0.07076600923443012,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "458337792"
+   }
+  },
+  {
+   "id": "x207",
+   "claim": 0.8823709882399138,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "909369291"
+   }
+  },
+  {
+   "id": "x209",
+   "claim": 0.828442420307805,
+   "action": "check",
+   "fired": "recent_deploys@orders-api",
+   "gold": "recent_deploys@orders-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "981509875"
+   }
+  },
+  {
+   "id": "x211",
+   "claim": 0.9742696421699979,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@orders-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "919519708"
+   }
+  },
+  {
+   "id": "x213",
+   "claim": 0.8690810287330915,
+   "action": "check",
+   "fired": "latency_p99@payments-api",
+   "gold": "latency_p99@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "937379584"
+   }
+  },
+  {
+   "id": "x214",
+   "claim": 0.965243465894798,
+   "action": "check",
+   "fired": "service_error_rate@auth-service",
+   "gold": "service_error_rate@auth-service",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "916928500"
+   }
+  },
+  {
+   "id": "x215",
+   "claim": 0.9590608322687807,
+   "action": "check",
+   "fired": "recent_deploys@payments-api",
+   "gold": "recent_deploys@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "968255667"
+   }
+  },
+  {
+   "id": "x219",
+   "claim": 0.9826611914062978,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "906682583"
+   }
+  },
+  {
+   "id": "x221",
+   "claim": 0.003503116173423916,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "464201291"
+   }
+  },
+  {
+   "id": "x222",
+   "claim": 0.017805615092193448,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "459583125"
+   }
+  },
+  {
+   "id": "x224",
+   "claim": 0.05641467820437149,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "458937875"
+   }
+  },
+  {
+   "id": "x226",
+   "claim": 0.8554767752694943,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "918826375"
+   }
+  },
+  {
+   "id": "x229",
+   "claim": 0.9495383487212006,
+   "action": "check",
+   "fired": "service_error_rate@payments-api",
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "987575042"
+   }
+  },
+  {
+   "id": "x230",
+   "claim": 0.012709092042555907,
+   "action": "ignore",
+   "fired": null,
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "458158375"
+   }
+  },
+  {
+   "id": "x234",
+   "claim": 0.9527665418242065,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "943932500"
+   }
+  },
+  {
+   "id": "x236",
+   "claim": 0.04174277991902083,
+   "action": "ignore",
+   "fired": null,
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "479714791"
+   }
+  },
+  {
+   "id": "x238",
+   "claim": 0.975176926300213,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "922362583"
+   }
+  },
+  {
+   "id": "x239",
+   "claim": 0.028623448169983256,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "468947250"
+   }
+  },
+  {
+   "id": "x240",
+   "claim": 0.12201308791717769,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "456467417"
+   }
+  },
+  {
+   "id": "x241",
+   "claim": 0.2577982765702377,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "540286000"
+   }
+  },
+  {
+   "id": "x243",
+   "claim": 0.041985279898707144,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "468573042"
+   }
+  },
+  {
+   "id": "x244",
+   "claim": 0.02229740560050043,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "489601542"
+   }
+  },
+  {
+   "id": "x246",
+   "claim": 0.012908406537760186,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "466970833"
+   }
+  },
+  {
+   "id": "x249",
+   "claim": 0.7937395427252545,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "961900167"
+   }
+  },
+  {
+   "id": "x250",
+   "claim": 0.09346774097130918,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "461114917"
+   }
+  },
+  {
+   "id": "x254",
+   "claim": 0.007078764394893891,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "685878917"
+   }
+  },
+  {
+   "id": "x258",
+   "claim": 0.07104403554209503,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "595314750"
+   }
+  },
+  {
+   "id": "x261",
+   "claim": 0.9514090389059132,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "1023362541"
+   }
+  },
+  {
+   "id": "x266",
+   "claim": 0.061312834324378514,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "565559583"
+   }
+  },
+  {
+   "id": "x267",
+   "claim": 0.028665881022883276,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "510248375"
+   }
+  },
+  {
+   "id": "x268",
+   "claim": 0.010649362523534883,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "460864459"
+   }
+  },
+  {
+   "id": "x269",
+   "claim": 0.013284205858325243,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "463262583"
+   }
+  },
+  {
+   "id": "x270",
+   "claim": 0.006631589361159069,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "634989750"
+   }
+  },
+  {
+   "id": "x272",
+   "claim": 0.014848211497666134,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": {
+    "_id": "Duration",
+    "_tag": "Nanos",
+    "nanos": "509660542"
+   }
+  }
+ ]
+}

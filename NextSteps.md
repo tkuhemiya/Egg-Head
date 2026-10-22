@@ -2,6 +2,17 @@
 
 Status as of Thu 22 Oct 2026. **Scope reminder:** the project is the turn-taking / when-to-speak / what-action-to-take decision pattern; the incident call is only the demo.
 
+## 00. Router = research pipeline, live demo (Thu 22 Oct, later)
+
+- **Router:** the runtime now asks the frozen research pipeline (exp 9 + final_eval) instead of the pass-2 questions. `npm run replay -- heldout` on the hosted Decider reproduced the published held-out numbers exactly: claim P 0.884 R 0.905 F1 0.894, routing P 0.806 R 0.806 (36 fired). Dev routing also matched (P 0.909 R 0.732). Per-line p50 ~500 ms from Colombo.
+- **Gate** now uses the research gate questions (`self_repaired` + Platt-scaled `finished`), not the "would I interrupt?" question exp 7 found useless (AUC 0.57).
+- **Hosted API limits found:** 3 concurrent requests -> 429; > 8 questions -> 422; ~30 s cold start. Provider queues and splits; demo warms up.
+- **Bedrock:** `nvidia.nemotron-nano-3-30b` via the Bedrock API key in `.env`. Tool use and structured output work through Strands. Writing a line takes ~2-3 s, so the demo has the humans pause when the gate opens.
+- **Demo (`npm run demo`):** dashboard + real-time call with Polly voices; transcript or Transcribe mode; template or Bedrock writer. On the checkout call Egg Head speaks once (false orders-DB claim, in the gap), stays silent when Mei corrects the deploy claim, when auth is parked, and on true claims. Bedrock: 2 calls for 12 lines (1 write, 1 escalation).
+- **Transcribe mode** works but shows real ASR errors ("Auth" heard as "Office"); those lines escalate. Transcript mode is the reliable one for recording; show Transcribe as a short segment.
+- **Spend so far** (scripts/aws-usage.sh, worst case ignoring free tier): Bedrock $0.0003, Polly $0.014, Transcribe $0.020.
+- **Open:** record the video; write the article; held-out gate snippets still unscored; "park that" quiets every open claim (kept for parity).
+
 ## 0. Runtime migrated to TypeScript + Effect 4 (Thu 22 Oct)
 
 The runtime (`egghead/`, `tests/`) is now TypeScript on Effect 4.0.5 in `src/` and `test/`; Python stays for `spike/` and `research/`. See AGENTS.md for layout and commands.

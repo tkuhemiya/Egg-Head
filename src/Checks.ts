@@ -8,6 +8,7 @@
  */
 import { Context, Effect, Layer, Option, Ref, Schema } from "effect"
 import world from "../data/world.json" with { type: "json" }
+import type { Inventory } from "./Router.ts"
 
 // check name -> description (the Decider option label).
 export const CHECKS = {
@@ -19,11 +20,6 @@ export const CHECKS = {
   queue_depth: "Backlog / number of waiting messages in a queue"
 } as const
 export type CheckName = keyof typeof CHECKS
-
-export const NONE_CHECK = "none"
-export const NONE_DESCRIPTION = "None of these: the utterance cannot be verified by any check"
-export const UNKNOWN_RESOURCE = "unknown"
-export const UNKNOWN_DESCRIPTION = "unknown: it is unclear which single resource is meant, or it is several / none"
 
 export const isCheck = (name: string): name is CheckName => Object.hasOwn(CHECKS, name)
 
@@ -46,8 +42,8 @@ export const World = Schema.Struct({
 export type World = typeof World.Type
 
 export class CheckSource extends Context.Service<CheckSource, {
-  /** Resource name -> one-line description, built from the live inventory. */
-  readonly resources: Effect.Effect<Readonly<Record<string, string>>>
+  /** Resource descriptions (Decider option labels) and each resource's checks, in order. */
+  readonly inventory: Effect.Effect<Inventory>
   /** Run a check. None when that check does not apply to that resource. */
   run(check: string, resource: string): Effect.Effect<Option.Option<CheckResult>>
 }>()("egghead/Checks/CheckSource") {}
@@ -60,7 +56,10 @@ export class MockSource extends Context.Service<MockSource, {
     const decoded = yield* Schema.decodeUnknownEffect(World)(input).pipe(Effect.orDie)
     const state = yield* Ref.make(decoded)
     const source = CheckSource.of({
-      resources: Effect.map(Ref.get(state), (w) => ({ ...w.resources })),
+      inventory: Effect.map(Ref.get(state), (w) => ({
+        resources: { ...w.resources },
+        checks: Object.fromEntries(Object.entries(w.checks).map(([r, cs]) => [r, Object.keys(cs)]))
+      })),
       run: (check, resource) =>
         Effect.map(Ref.get(state), (w) =>
           Option.map(

@@ -6,17 +6,18 @@
  * - Tool-calling agent: when the gate opens, the agent gets the contradicted claim and the
  *   registered checks as tools. It can re-run a check or read a related one, then writes the
  *   one spoken sentence from what the tools returned.
- * - Support during the call: when routing lands in the mid-confidence band (T_ESCALATE to
- *   T_ROUTE), the agent picks the check and resource for that one utterance. Each call is
- *   counted by the Bridge.
+ * - Support during the call: when Decider says the latest utterance is a claim but cannot
+ *   route it confidently, the agent picks the check and resource for that one utterance.
+ *   Each call is counted by the Bridge.
  *
  * `deny` in `beforeModelCall` was checked in the Strands TS source (agent.js): it sets
  * `event.cancel`, the loop skips the model entirely and returns an assistant message with the
  * reason and stopReason endTurn, so a closed gate costs no Bedrock call. Each agent call runs
  * under the fiber's AbortSignal, so interrupting the fiber cancels the Bedrock request.
  *
- * Nothing here runs without AWS credentials; `SpeakGuard` and the prompts are tested with
- * stubs. Set EGGHEAD_MODEL_ID (and AWS_REGION) to pick the Bedrock model.
+ * Tests use stubs and a counting model; `scripts/probe-bedrock.ts` makes real calls. Set
+ * EGGHEAD_MODEL_ID and AWS_REGION; auth is AWS_BEARER_TOKEN_BEDROCK (a Bedrock API key) or
+ * the usual AWS credential chain.
  */
 import {
   Agent,
@@ -36,9 +37,10 @@ import { Escalator, ignore, type Route } from "./Router.ts"
 import { SupportError, Writer } from "./Speaker.ts"
 
 export const WRITER_PROMPT = "You are Egg Head, a quiet teammate on an incident bridge call. A claim someone made was " +
-  "contradicted by a live check. Say it in ONE spoken sentence of at most 25 words, plain " +
-  "words, start with 'Quick flag', cite the numbers from the evidence, no markdown. You may " +
-  "call run_check once to confirm or to read a related check. Never invent numbers."
+  "contradicted by a live check. Say it in ONE spoken sentence of at most 20 words. Start with 'Quick flag:', " +
+  "address the person by name (no pronouns for them), and give the numbers from the evidence in plain spoken " +
+  "words, without check names or code identifiers. No markdown. Never invent numbers. Call run_check only if " +
+  "the evidence you were given is missing."
 
 export const ESCALATE_PROMPT = "You help Egg Head decide which live check can verify the LATEST utterance on an " +
   "incident call. Pick the one check and the one resource, and the state the speaker " +
@@ -48,7 +50,7 @@ export const RouteChoice = z.object({
   checkable: z.boolean(),
   check: z.string().nullish(),
   resource: z.string().nullish(),
-  asserted: z.string().nullish() // healthy / degraded / down / changed / unchanged
+  asserted: z.enum(["healthy", "degraded", "down", "changed", "unchanged", "unclear"]).nullish()
 })
 export type RouteChoice = z.infer<typeof RouteChoice>
 
@@ -149,8 +151,9 @@ export class BedrockSupport extends Context.Service<BedrockSupport, {
 
     const route = Effect.fn("BedrockSupport.route")(function*(turns: ReadonlyArray<Turn>) {
       const agent = factory({ systemPrompt: ESCALATE_PROMPT, tools: [], interventions: [] })
-      const resources = yield* source.resources
-      const known = Object.entries(resources).map(([n, d]) => `- ${n}: ${d}`).join("\n")
+      const { resources, checks: byResource } = yield* source.inventory
+      const known = Object.entries(resources)
+        .map(([n, d]) => `- ${n}: ${d} (checks: ${(byResource[n] ?? []).join(", ")})`).join("\n")
       const checks = Object.entries(CHECKS).map(([n, d]) => `- ${n}: ${d}`).join("\n")
       const talk = turns.slice(-6).map(([s, t]) => `${s}: ${t}`).join("\n")
       const result = yield* invoke(

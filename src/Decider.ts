@@ -10,7 +10,7 @@
  * In-process weights (the old Python `LocalDecider`) have no JavaScript runtime: run
  * `strands-decider serve` and point `EGGHEAD_DECIDER_BACKEND=http` at it.
  */
-import { Cache, Config, Context, Duration, Effect, Exit, Layer, Option, Redactable, Ref, Schedule, Schema } from "effect"
+import { Cache, Config, Context, Duration, Effect, Exit, Layer, Option, Redactable, Ref, Schedule, Schema, Semaphore } from "effect"
 import { AiError, DecisionModel } from "effect/ai"
 import type { Decision } from "effect/ai"
 import type { HttpClientError } from "effect/http"
@@ -142,6 +142,14 @@ export interface HttpOptions {
   readonly timeout?: Duration.Input | undefined
   /** Identical requests are answered from memory (the hosted API is best effort). */
   readonly cacheCapacity?: number | undefined
+  /**
+   * Requests in flight at once. The hosted API answers a third concurrent request from one
+   * client with 429 (measured 22 Oct 2026), so the default is 1: callers may ask in parallel
+   * and the provider queues them.
+   */
+  readonly maxConcurrent?: number | undefined
+  /** Questions per request; bigger batches are split. The hosted API rejects more than 8. */
+  readonly maxQuestions?: number | undefined
 }
 
 const deciderError = (reason: AiError.AiErrorReason) => AiError.make({ module: "StrandsDecider", method: "systemOne", reason })
@@ -192,13 +200,15 @@ export const makeHttp = Effect.fnUntraced(function*(options: HttpOptions) {
       )
     ),
     HttpClient.filterStatusOk,
-    HttpClient.retryTransient({ schedule: Schedule.exponential("200 millis"), times: 3 })
+    HttpClient.retryTransient({ schedule: Schedule.exponential("250 millis").pipe(Schedule.jittered), times: 5 })
   )
+  const inFlight = yield* Semaphore.make(options.maxConcurrent ?? 1)
   const post = (body: string) =>
     HttpClientRequest.post("/v1/systemone").pipe(
       HttpClientRequest.bodyText(body, "application/json"),
       client.execute,
       Effect.flatMap(HttpClientResponse.schemaBodyJson(SystemOneResponse)),
+      inFlight.withPermits(1),
       Effect.timeout(options.timeout ?? "300 seconds"),
       Effect.catchTags({
         HttpClientError: mapHttpError,
@@ -210,9 +220,25 @@ export const makeHttp = Effect.fnUntraced(function*(options: HttpOptions) {
     capacity: options.cacheCapacity ?? 512,
     timeToLive: (exit) => (Exit.isSuccess(exit) ? Duration.infinity : Duration.zero)
   })
-  return yield* make((request) =>
+  const ask = (request: SystemOneRequest) =>
     Cache.get(cache, JSON.stringify(options.model === undefined ? request : { model: options.model, ...request }))
-  )
+  const max = options.maxQuestions ?? 8
+  return yield* make((request) => {
+    const entries = Object.entries(request.questions)
+    if (entries.length <= max) return ask(request)
+    const chunks = Array.from({ length: Math.ceil(entries.length / max) }, (_, i) => entries.slice(i * max, (i + 1) * max))
+    return Effect.map(
+      Effect.forEach(chunks, (chunk) => ask({ ...request, questions: Object.fromEntries(chunk) })),
+      (parts): SystemOneResponse => ({
+        // each part answers only its own questions
+        answers: Object.fromEntries(parts.flatMap((p, i) => chunks[i]!.flatMap(([k]) => (p.answers[k] ? [[k, p.answers[k]]] : [])))),
+        usage: {
+          input_tokens: parts.reduce((n, p) => n + (p.usage?.input_tokens ?? 0), 0),
+          output_tokens: parts.reduce((n, p) => n + (p.usage?.output_tokens ?? 0), 0)
+        }
+      })
+    )
+  })
 })
 
 /** DecisionModel over HTTP. Needs an `HttpClient` (see `layerFetch`). */
@@ -265,34 +291,41 @@ export const layerFromEnv = Layer.unwrap(Effect.map(optionsFromEnv, layerFetch))
 // ---------------------------------------------------------------------------
 
 /**
- * Replays prepared Decider answers in order, one batch per call. Like a real server it
- * answers only the questions that were asked, so a script can carry extra answers.
- * `layer` provides both this service (to inspect the requests) and the DecisionModel.
+ * Scripted Decider answers. Like a real server it answers only the questions that were
+ * asked, so a script can carry extra answers. `layerWith` answers each request from a
+ * function of the request; `layer` replays batches in order, one per call. Both provide this
+ * service (to inspect the requests) and the DecisionModel.
  */
 export class ScriptedDecider extends Context.Service<ScriptedDecider, {
   /** Every request the model received, in order. */
   readonly calls: Effect.Effect<ReadonlyArray<SystemOneRequest>>
 }>()("egghead/Decider/ScriptedDecider") {
-  static readonly layer = (batches: ReadonlyArray<Readonly<Record<string, SystemOneAnswer>>>) =>
+  static readonly layerWith = (
+    respond: (request: SystemOneRequest) => Effect.Effect<Readonly<Record<string, SystemOneAnswer>>, AiError.AiError>
+  ) =>
     Layer.effectContext(Effect.gen(function*() {
-      const queue = yield* Ref.make(batches)
       const calls = yield* Ref.make<ReadonlyArray<SystemOneRequest>>([])
       const answer = (request: SystemOneRequest) =>
         Ref.update(calls, (cs) => [...cs, request]).pipe(
-          Effect.andThen(Ref.modify(queue, ([head, ...rest]) => [head, rest] as const)),
-          Effect.flatMap((batch) =>
-            batch === undefined
-              ? Effect.fail(deciderError(new AiError.InvalidOutputError({ description: "scripted Decider ran out of answers" })))
-              : Effect.succeed({
-                answers: Object.fromEntries(
-                  Object.keys(request.questions).flatMap((key) => (batch[key] ? [[key, batch[key]] as const] : []))
-                )
-              })
-          )
+          Effect.andThen(respond(request)),
+          Effect.map((batch) => ({
+            answers: Object.fromEntries(
+              Object.keys(request.questions).flatMap((key) => (batch[key] ? [[key, batch[key]] as const] : []))
+            )
+          }))
         )
       const model = yield* make(answer)
       return Context.make(DecisionModel.DecisionModel, model).pipe(
         Context.add(ScriptedDecider, ScriptedDecider.of({ calls: Ref.get(calls) }))
       )
     }))
+
+  static readonly layer = (batches: ReadonlyArray<Readonly<Record<string, SystemOneAnswer>>>) =>
+    Layer.unwrap(Effect.map(Ref.make(batches), (queue) =>
+      ScriptedDecider.layerWith(() =>
+        Effect.flatMap(Ref.modify(queue, ([head, ...rest]) => [head, rest] as const), (batch) =>
+          batch === undefined
+            ? Effect.fail(deciderError(new AiError.InvalidOutputError({ description: "scripted Decider ran out of answers" })))
+            : Effect.succeed(batch))
+      )))
 }

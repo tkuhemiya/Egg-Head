@@ -1,22 +1,22 @@
 /**
  * Parity with the Python runtime this port replaced. Fixtures were exported from the Python
- * code (spike/export_gate_parity.py for the gate; the questions and Bridge traces were
- * snapshotted from egghead/ before it was removed, see each fixture's `source`).
+ * code (spike/export_gate_parity.py for the gate; the Bridge traces were snapshotted from
+ * egghead/ before it was removed, see each fixture's `source`).
+ *
+ * The questions have since moved to the research pipeline (test/Questions.test.ts), so the
+ * Bridge traces are replayed as behaviour: each recorded Decider batch becomes the scripted
+ * route and gate signals it implied, and everything after routing must match.
  */
 import { assert, describe, it } from "@effect/vitest"
 import { Effect, Layer, Option, Stream } from "effect"
-import { DecisionModel } from "effect/ai"
 import gateFixture from "./fixtures/gate-parity.json" with { type: "json" }
-import questionsFixture from "./fixtures/questions-parity.json" with { type: "json" }
 import bridgeFixture from "./fixtures/bridge-parity.json" with { type: "json" }
 import { Bridge, type CallInput, type Event } from "../src/Bridge.ts"
 import { MockSource } from "../src/Checks.ts"
-import { ScriptedDecider, type SystemOneAnswer } from "../src/Decider.ts"
 import * as G from "../src/Gate.ts"
-import type { LedgerItem } from "../src/Ledger.ts"
-import { buildQuestions, renderState, type Turn } from "../src/Questions.ts"
 import { Escalator, type Route } from "../src/Router.ts"
-import { templateLine, Writer } from "../src/Speaker.ts"
+import { Writer } from "../src/Speaker.ts"
+import { finFor, type Line, scripted } from "./helpers.ts"
 
 const fromPython = (i: Record<string, any>): G.GateInput => ({
   check: i.check,
@@ -70,46 +70,6 @@ describe("gate parity with spike/egghead_gate.py", () => {
   })
 })
 
-describe("question parity with egghead/questions.py", () => {
-  const item: LedgerItem = {
-    speaker: "Sam",
-    claim: "The DB is fine, it's the API.",
-    check: "db_health",
-    resource: "orders-db",
-    status: "degraded",
-    evidence: "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
-    turn: 1,
-    raised: false
-  }
-  const turns: ReadonlyArray<Turn> = [
-    ["Priya", "What are we seeing?"],
-    ["Sam", "The DB is fine, it's the API."],
-    ["Priya", "Okay, let's focus on the API then."]
-  ]
-
-  // The request body the provider sends, captured from the scripted backend.
-  const requestFor = (withPolicy: boolean) =>
-    Effect.gen(function*() {
-      const def = buildQuestions(questionsFixture.resources, withPolicy)
-      yield* DecisionModel.decide(def, { input: "state" }).pipe(Effect.ignore)
-      const [call] = yield* (yield* ScriptedDecider).calls
-      return call!.questions
-    }).pipe(Effect.provide(ScriptedDecider.layer([])))
-
-  it.effect("sends the same questions, in the same option order", () =>
-    Effect.gen(function*() {
-      // JSON.stringify compares key order too: option order is part of the prompt.
-      assert.strictEqual(JSON.stringify(yield* requestFor(false)), JSON.stringify(questionsFixture.questions_routing))
-      assert.strictEqual(JSON.stringify(yield* requestFor(true)), JSON.stringify(questionsFixture.questions_policy))
-    }))
-
-  it("renders the same state and spoken template", () => {
-    assert.strictEqual(renderState(turns, [item]), questionsFixture.state_open)
-    assert.strictEqual(renderState(turns.slice(0, 1), []), questionsFixture.state_none)
-    assert.strictEqual(templateLine(item), questionsFixture.template_line)
-  })
-})
-
 describe("Bridge parity with egghead/bridge.py", () => {
   const er = bridgeFixture.escalatorRoute
   const escalator = Layer.succeed(Escalator, Escalator.of({
@@ -135,8 +95,7 @@ describe("Bridge parity with egghead/bridge.py", () => {
         action: rt.action,
         check: Option.getOrNull(rt.check),
         resource: Option.getOrNull(rt.resource),
-        asserted: Option.getOrNull(rt.asserted),
-        scores: rt.scores
+        asserted: Option.getOrNull(rt.asserted)
       },
       verdict: Option.getOrNull(ev.verdict),
       checkEvidence: Option.getOrNull(ev.checkEvidence),
@@ -160,39 +119,85 @@ describe("Bridge parity with egghead/bridge.py", () => {
         const events: Array<unknown> = []
         for (const step of sc.steps) {
           if (step._tag === "Utterance") {
-            events.push(toPythonEvent(yield* bridge.hear(step.speaker!, step.text!, step.silenceS)))
+            events.push(toPythonEvent(yield* bridge.hear(step.speaker!, reword(step.text!), step.silenceS)))
           } else {
             events.push(Option.getOrNull(Option.map(yield* bridge.tick(step.silenceS), toPythonEvent)))
           }
         }
         const s = yield* bridge.state
         // Python's scores carry rounded confidences from the fixture; compare them loosely.
-        assert.deepStrictEqual(roundScores(events), roundScores(sc.events), name)
+        assert.deepStrictEqual(roundScores(events.map(comparable)), roundScores(sc.events.map(comparable)), name)
         assert.deepStrictEqual(s.ledger.map(({ check, resource, raised }) => ({ check, resource, raised })), sc.ledger)
         assert.strictEqual(s.escalations, sc.escalationCount)
-      }).pipe(Effect.provide(layerFor(sc.steps, sc.escalate))))
+      }).pipe(Effect.provide(layerFor(sc.steps, sc.escalate, sc.events))))
   }
 
   it.effect("run() over a stream gives the same decisions as hear/tick", () => {
     const sc = bridgeFixture.scenarios.long_call
     const inputs = sc.steps.map((s): CallInput =>
       s._tag === "Utterance"
-        ? { _tag: "Utterance", speaker: s.speaker!, text: s.text!, silenceS: s.silenceS }
+        ? { _tag: "Utterance", speaker: s.speaker!, text: reword(s.text!), silenceS: s.silenceS }
         : { _tag: "Silence", silenceS: s.silenceS }
     )
     return Effect.gen(function*() {
       const bridge = yield* Bridge
       const events = yield* Stream.runCollect(bridge.run(Stream.fromIterable(inputs)))
-      assert.deepStrictEqual(roundScores(Array.from(events, toPythonEvent)), roundScores(sc.events.filter((e) => e !== null)))
-    }).pipe(Effect.provide(layerFor(sc.steps, false)))
+      assert.deepStrictEqual(
+        roundScores(Array.from(events, (e) => comparable(toPythonEvent(e)))),
+        roundScores(sc.events.filter((e) => e !== null).map(comparable))
+      )
+    }).pipe(Effect.provide(layerFor(sc.steps, false, sc.events)))
   })
 
-  function layerFor(steps: ReadonlyArray<{ _tag: string; answers?: unknown }>, withEscalator: boolean) {
-    const batches = steps.flatMap((s) => (s._tag === "Utterance" ? [s.answers as Record<string, SystemOneAnswer>] : []))
-    const deps = Layer.mergeAll(ScriptedDecider.layer(batches), MockSource.layer(), Writer.template)
+  type Recorded = Record<string, { noul?: number; choice?: string }>
+  type Step = { _tag: string; text?: string; answers?: unknown }
+
+  /** The route the old batch produced, and its gate answers, as a scripted line. */
+  const lineFor = (answers: Recorded, action: string): Line => {
+    const gate = answers.self_repaired === undefined
+      ? {}
+      : { rep: answers.self_repaired.noul!, fin: finFor(answers.floor_free!.noul!) }
+    const asserted = answers.asserted_state!.choice!
+    return action === "check"
+      ? { claim: 0.9, asserted, resource: answers.which_resource!.choice!, check: answers.which_check!.choice!, ...gate }
+      : { claim: action === "escalate" ? 0.9 : 0.05, asserted, ...gate }
+  }
+
+  function layerFor(steps: ReadonlyArray<Step>, withEscalator: boolean, events: ReadonlyArray<unknown>) {
+    const lines: Record<string, Line> = {}
+    let escalations = 0
+    steps.forEach((s, i) => {
+      if (s._tag !== "Utterance") return
+      const ev = events[i] as { route: { action: string }; escalations: number }
+      // with an escalator the fixture shows the escalator's route; Decider's own route escalated
+      const escalated = ev.escalations > escalations
+      escalations = ev.escalations
+      lines[reword(s.text!)] = lineFor(s.answers as Recorded, escalated ? "escalate" : ev.route.action)
+    })
+    const deps = Layer.mergeAll(scripted(lines), MockSource.layer(), Writer.template)
     return Bridge.layer.pipe(Layer.provide(withEscalator ? Layer.merge(deps, escalator) : deps))
   }
 })
+
+/**
+ * The old router routed a bare "the DB" to orders-db. The research pipeline only offers
+ * resources named in the line or the two turns before it, and its labels call a bare "the DB"
+ * ambiguous (two databases), so that line is replayed naming the resource.
+ */
+const REWORDED: Readonly<Record<string, string>> = {
+  "And the DB is fine too, it's the API.": "And the orders DB is fine too, it's the API."
+}
+const reword = (text: string) => REWORDED[text] ?? text
+
+/** Compare routes on what they decided; scores and a non-firing route's guesses changed shape. */
+const comparable = (e: unknown) => {
+  if (e === null) return null
+  const ev = e as { text: string; route: null | Record<string, unknown> }
+  const out = { ...ev, text: reword(ev.text) }
+  if (ev.route === null) return out
+  const { scores: _, ...route } = ev.route
+  return { ...out, route: route.action === "check" ? route : { action: route.action, asserted: route.asserted } }
+}
 
 const roundScores = (events: ReadonlyArray<unknown>) =>
   JSON.parse(JSON.stringify(events, (_k, v) => (typeof v === "number" && !Number.isInteger(v) ? Math.round(v * 1e5) / 1e5 : v)))

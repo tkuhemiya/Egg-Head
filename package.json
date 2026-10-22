@@ -10,9 +10,13 @@
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest run",
-    "smoke": "tsx scripts/smoke-decider.ts"
+    "smoke": "tsx scripts/smoke-decider.ts",
+    "replay": "tsx scripts/replay-research.ts",
+    "demo": "tsx --env-file-if-exists=.env demo/server.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-polly": "3.1155.0",
+    "@aws-sdk/client-transcribe-streaming": "3.1155.0",
     "@strands-agents/sdk": "1.22.0",
     "effect": "4.0.5",
     "zod": "4.6.7"

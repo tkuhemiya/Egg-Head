@@ -1,0 +1,1234 @@
+{
+ "split": "heldout",
+ "n": 135,
+ "claim": {
+  "P": 0.884,
+  "R": 0.905,
+  "F1": 0.894
+ },
+ "routing": {
+  "P": 0.806,
+  "R": 0.806,
+  "F1": 0.806,
+  "fired": 36,
+  "gold": 36
+ },
+ "escalated": 7,
+ "rows": [
+  {
+   "id": "x002",
+   "claim": 0.9867083479291904,
+   "action": "check",
+   "fired": "db_health@payments-db",
+   "gold": "db_health@payments-db",
+   "isClaim": true,
+   "ms": 2033
+  },
+  {
+   "id": "x003",
+   "claim": 0.9124085788862599,
+   "action": "check",
+   "fired": "db_health@payments-db",
+   "gold": "db_health@payments-db",
+   "isClaim": true,
+   "ms": 93264
+  },
+  {
+   "id": "x004",
+   "claim": 0.9864648984920897,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": 1105
+  },
+  {
+   "id": "x005",
+   "claim": 0.9521186334673444,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": 1030
+  },
+  {
+   "id": "x007",
+   "claim": 0.960740707294225,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@orders-api",
+   "isClaim": true,
+   "ms": 1032
+  },
+  {
+   "id": "x013",
+   "claim": 0.9748082519850744,
+   "action": "check",
+   "fired": "service_error_rate@auth-service",
+   "gold": "service_error_rate@auth-service",
+   "isClaim": true,
+   "ms": 969
+  },
+  {
+   "id": "x015",
+   "claim": 0.9799120857431763,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@orders-api",
+   "isClaim": true,
+   "ms": 1260
+  },
+  {
+   "id": "x016",
+   "claim": 0.9413653603074781,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@orders-api",
+   "isClaim": true,
+   "ms": 1070
+  },
+  {
+   "id": "x019",
+   "claim": 0.9543893301136003,
+   "action": "check",
+   "fired": "latency_p99@orders-api",
+   "gold": "latency_p99@orders-api",
+   "isClaim": true,
+   "ms": 1029
+  },
+  {
+   "id": "x021",
+   "claim": 0.9200344365427574,
+   "action": "check",
+   "fired": "latency_p99@payments-api",
+   "gold": "latency_p99@payments-api",
+   "isClaim": true,
+   "ms": 909
+  },
+  {
+   "id": "x022",
+   "claim": 0.9760686046815297,
+   "action": "check",
+   "fired": "latency_p99@auth-service",
+   "gold": "latency_p99@auth-service",
+   "isClaim": true,
+   "ms": 994
+  },
+  {
+   "id": "x025",
+   "claim": 0.5931698100901297,
+   "action": "check",
+   "fired": "recent_deploys@payments-api",
+   "gold": "recent_deploys@payments-api",
+   "isClaim": true,
+   "ms": 941
+  },
+  {
+   "id": "x026",
+   "claim": 0.7269889640455824,
+   "action": "check",
+   "fired": "recent_deploys@payments-api",
+   "gold": "recent_deploys@payments-api",
+   "isClaim": true,
+   "ms": 1376
+  },
+  {
+   "id": "x029",
+   "claim": 0.9012057616338078,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": 1033
+  },
+  {
+   "id": "x030",
+   "claim": 0.8820765447325084,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": 1036
+  },
+  {
+   "id": "x031",
+   "claim": 0.9488158533186979,
+   "action": "escalate",
+   "fired": null,
+   "gold": "alarm_state@orders-db",
+   "isClaim": true,
+   "ms": 1068
+  },
+  {
+   "id": "x033",
+   "claim": 0.9436956300529462,
+   "action": "check",
+   "fired": "alarm_state@orders-api",
+   "gold": "alarm_state@orders-api",
+   "isClaim": true,
+   "ms": 927
+  },
+  {
+   "id": "x034",
+   "claim": 0.9201107595731803,
+   "action": "check",
+   "fired": "alarm_state@payments-api",
+   "gold": "alarm_state@payments-api",
+   "isClaim": true,
+   "ms": 1151
+  },
+  {
+   "id": "x038",
+   "claim": 0.884439135522854,
+   "action": "check",
+   "fired": "alarm_state@payments-api",
+   "gold": "alarm_state@payments-api",
+   "isClaim": true,
+   "ms": 1049
+  },
+  {
+   "id": "x041",
+   "claim": 0.49231089402004313,
+   "action": "ignore",
+   "fired": null,
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": 462
+  },
+  {
+   "id": "x042",
+   "claim": 0.05247768173216577,
+   "action": "ignore",
+   "fired": null,
+   "gold": "recent_deploys@orders-api",
+   "isClaim": true,
+   "ms": 586
+  },
+  {
+   "id": "x043",
+   "claim": 0.62717096140647,
+   "action": "check",
+   "fired": "service_error_rate@payments-api",
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": 1383
+  },
+  {
+   "id": "x044",
+   "claim": 0.6365564561865279,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@auth-service",
+   "isClaim": true,
+   "ms": 1382
+  },
+  {
+   "id": "x047",
+   "claim": 0.9261886302733642,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": null,
+   "isClaim": true,
+   "ms": 929
+  },
+  {
+   "id": "x050",
+   "claim": 0.9560610691988236,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": null,
+   "isClaim": true,
+   "ms": 977
+  },
+  {
+   "id": "x052",
+   "claim": 0.8245386354286672,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": true,
+   "ms": 1043
+  },
+  {
+   "id": "x055",
+   "claim": 0.36590949462777295,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 601
+  },
+  {
+   "id": "x060",
+   "claim": 0.04804660919435029,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 459
+  },
+  {
+   "id": "x061",
+   "claim": 0.025781493193001333,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 562
+  },
+  {
+   "id": "x063",
+   "claim": 0.3744481199310009,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 459
+  },
+  {
+   "id": "x064",
+   "claim": 0.08964515538981338,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 473
+  },
+  {
+   "id": "x067",
+   "claim": 0.5823236786490643,
+   "action": "check",
+   "fired": "recent_deploys@orders-api",
+   "gold": null,
+   "isClaim": false,
+   "ms": 930
+  },
+  {
+   "id": "x068",
+   "claim": 0.03475745163655404,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 484
+  },
+  {
+   "id": "x069",
+   "claim": 0.024870155581060358,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 463
+  },
+  {
+   "id": "x072",
+   "claim": 0.01596062183936476,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 457
+  },
+  {
+   "id": "x073",
+   "claim": 0.22883045884131165,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 469
+  },
+  {
+   "id": "x075",
+   "claim": 0.027971924105791458,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 463
+  },
+  {
+   "id": "x077",
+   "claim": 0.0665000103778018,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 461
+  },
+  {
+   "id": "x078",
+   "claim": 0.02095038483441917,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 494
+  },
+  {
+   "id": "x081",
+   "claim": 0.016729327077077753,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 557
+  },
+  {
+   "id": "x083",
+   "claim": 0.04367530954658849,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 471
+  },
+  {
+   "id": "x087",
+   "claim": 0.3153870807136633,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 460
+  },
+  {
+   "id": "x088",
+   "claim": 0.04621169833124456,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 468
+  },
+  {
+   "id": "x090",
+   "claim": 0.0059010737328737215,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 684
+  },
+  {
+   "id": "x091",
+   "claim": 0.009747613517417925,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 458
+  },
+  {
+   "id": "x094",
+   "claim": 0.057763562970227826,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 488
+  },
+  {
+   "id": "x095",
+   "claim": 0.023658488467007365,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 462
+  },
+  {
+   "id": "x097",
+   "claim": 0.01016264027454987,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 462
+  },
+  {
+   "id": "x100",
+   "claim": 0.7843798787843842,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": 937
+  },
+  {
+   "id": "x101",
+   "claim": 0.8977035820499087,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@orders-api",
+   "isClaim": true,
+   "ms": 1174
+  },
+  {
+   "id": "x103",
+   "claim": 0.1715383221335742,
+   "action": "ignore",
+   "fired": null,
+   "gold": "service_error_rate@auth-service",
+   "isClaim": true,
+   "ms": 460
+  },
+  {
+   "id": "x105",
+   "claim": 0.8494153030819804,
+   "action": "check",
+   "fired": "latency_p99@orders-api",
+   "gold": "latency_p99@orders-api",
+   "isClaim": true,
+   "ms": 1155
+  },
+  {
+   "id": "x107",
+   "claim": 0.026820806190032218,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 481
+  },
+  {
+   "id": "x109",
+   "claim": 0.004708619417605984,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 501
+  },
+  {
+   "id": "x110",
+   "claim": 0.005007673309166192,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 460
+  },
+  {
+   "id": "x112",
+   "claim": 0.8714400320597002,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 975
+  },
+  {
+   "id": "x113",
+   "claim": 0.043877034111668996,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 463
+  },
+  {
+   "id": "x114",
+   "claim": 0.01442085113088163,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 506
+  },
+  {
+   "id": "x115",
+   "claim": 0.5587621661385496,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 1050
+  },
+  {
+   "id": "x118",
+   "claim": 0.1632208696852553,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 457
+  },
+  {
+   "id": "x121",
+   "claim": 0.007357622045354959,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 483
+  },
+  {
+   "id": "x122",
+   "claim": 0.018729003433742366,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 460
+  },
+  {
+   "id": "x129",
+   "claim": 0.02344051884048919,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 482
+  },
+  {
+   "id": "x130",
+   "claim": 0.06968401068868273,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 458
+  },
+  {
+   "id": "x131",
+   "claim": 0.01042439287590211,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 461
+  },
+  {
+   "id": "x133",
+   "claim": 0.9574247812630381,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": null,
+   "isClaim": false,
+   "ms": 990
+  },
+  {
+   "id": "x135",
+   "claim": 0.04870262787557209,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 457
+  },
+  {
+   "id": "x138",
+   "claim": 0.054738566513691515,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 462
+  },
+  {
+   "id": "x140",
+   "claim": 0.013151100631994471,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 534
+  },
+  {
+   "id": "x142",
+   "claim": 0.010145768168563232,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 464
+  },
+  {
+   "id": "x143",
+   "claim": 0.21459068203339252,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 592
+  },
+  {
+   "id": "x144",
+   "claim": 0.9003947192739559,
+   "action": "check",
+   "fired": "db_health@orders-db",
+   "gold": null,
+   "isClaim": false,
+   "ms": 1079
+  },
+  {
+   "id": "x148",
+   "claim": 0.01308932119406235,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 522
+  },
+  {
+   "id": "x149",
+   "claim": 0.01372855335955194,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 485
+  },
+  {
+   "id": "x150",
+   "claim": 0.04327912894788124,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 464
+  },
+  {
+   "id": "x151",
+   "claim": 0.007623229971902815,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 486
+  },
+  {
+   "id": "x153",
+   "claim": 0.020097639553824594,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 468
+  },
+  {
+   "id": "x161",
+   "claim": 0.012011891560920543,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 477
+  },
+  {
+   "id": "x162",
+   "claim": 0.03237423583716131,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 459
+  },
+  {
+   "id": "x164",
+   "claim": 0.018390615687790216,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 475
+  },
+  {
+   "id": "x166",
+   "claim": 0.050646256313221415,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 469
+  },
+  {
+   "id": "x167",
+   "claim": 0.024977799363403504,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 454
+  },
+  {
+   "id": "x169",
+   "claim": 0.03549223329825388,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 455
+  },
+  {
+   "id": "x172",
+   "claim": 0.011235366852441538,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 616
+  },
+  {
+   "id": "x173",
+   "claim": 0.01997945330138889,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 470
+  },
+  {
+   "id": "x174",
+   "claim": 0.014229305719825652,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 498
+  },
+  {
+   "id": "x175",
+   "claim": 0.008500817883592533,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 499
+  },
+  {
+   "id": "x176",
+   "claim": 0.06755940638358436,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 1151
+  },
+  {
+   "id": "x177",
+   "claim": 0.01802430152848058,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 477
+  },
+  {
+   "id": "x179",
+   "claim": 0.022494146217284756,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 474
+  },
+  {
+   "id": "x180",
+   "claim": 0.005283690555477303,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 474
+  },
+  {
+   "id": "x186",
+   "claim": 0.010767329060344511,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 573
+  },
+  {
+   "id": "x188",
+   "claim": 0.06223103833717937,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 495
+  },
+  {
+   "id": "x189",
+   "claim": 0.12614013656336023,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 550
+  },
+  {
+   "id": "x191",
+   "claim": 0.0700944259154667,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 468
+  },
+  {
+   "id": "x196",
+   "claim": 0.008590415019027192,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 477
+  },
+  {
+   "id": "x198",
+   "claim": 0.02276044649225926,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 476
+  },
+  {
+   "id": "x199",
+   "claim": 0.026275635063680837,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 475
+  },
+  {
+   "id": "x203",
+   "claim": 0.005609174641428346,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 472
+  },
+  {
+   "id": "x204",
+   "claim": 0.006881115834333084,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 486
+  },
+  {
+   "id": "x205",
+   "claim": 0.00427512978373363,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 469
+  },
+  {
+   "id": "x206",
+   "claim": 0.016958379574648855,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 484
+  },
+  {
+   "id": "x208",
+   "claim": 0.9243041836267074,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "db_health@orders-db",
+   "isClaim": true,
+   "ms": 976
+  },
+  {
+   "id": "x210",
+   "claim": 0.9591421549318729,
+   "action": "check",
+   "fired": "service_error_rate@payments-api",
+   "gold": "service_error_rate@payments-api",
+   "isClaim": true,
+   "ms": 957
+  },
+  {
+   "id": "x212",
+   "claim": 0.92485278462828,
+   "action": "check",
+   "fired": "latency_p99@orders-api",
+   "gold": "latency_p99@orders-api",
+   "isClaim": true,
+   "ms": 1091
+  },
+  {
+   "id": "x216",
+   "claim": 0.7894905380794414,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": 1599
+  },
+  {
+   "id": "x217",
+   "claim": 0.5850521957453841,
+   "action": "check",
+   "fired": "recent_deploys@orders-api",
+   "gold": "recent_deploys@orders-api",
+   "isClaim": true,
+   "ms": 1005
+  },
+  {
+   "id": "x218",
+   "claim": 0.984171357706925,
+   "action": "check",
+   "fired": "db_health@payments-db",
+   "gold": "db_health@payments-db",
+   "isClaim": true,
+   "ms": 1049
+  },
+  {
+   "id": "x220",
+   "claim": 0.75332852044288,
+   "action": "check",
+   "fired": "queue_depth@checkout-queue",
+   "gold": "queue_depth@checkout-queue",
+   "isClaim": true,
+   "ms": 1049
+  },
+  {
+   "id": "x223",
+   "claim": 0.007665914761356093,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 470
+  },
+  {
+   "id": "x225",
+   "claim": 0.013700192834629196,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 476
+  },
+  {
+   "id": "x227",
+   "claim": 0.049816619592196604,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 536
+  },
+  {
+   "id": "x228",
+   "claim": 0.2867526311406423,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 617
+  },
+  {
+   "id": "x231",
+   "claim": 0.013360814374754632,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 480
+  },
+  {
+   "id": "x232",
+   "claim": 0.9154725270128574,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": true,
+   "ms": 1052
+  },
+  {
+   "id": "x233",
+   "claim": 0.7930935446974572,
+   "action": "escalate",
+   "fired": null,
+   "gold": "db_health@payments-db",
+   "isClaim": true,
+   "ms": 1045
+  },
+  {
+   "id": "x235",
+   "claim": 0.8294394881172453,
+   "action": "escalate",
+   "fired": null,
+   "gold": null,
+   "isClaim": true,
+   "ms": 1040
+  },
+  {
+   "id": "x237",
+   "claim": 0.023332081455887017,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 612
+  },
+  {
+   "id": "x242",
+   "claim": 0.023699161295575782,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 496
+  },
+  {
+   "id": "x245",
+   "claim": 0.919481273162333,
+   "action": "check",
+   "fired": "service_error_rate@orders-api",
+   "gold": "service_error_rate@orders-api",
+   "isClaim": true,
+   "ms": 999
+  },
+  {
+   "id": "x247",
+   "claim": 0.03212617268693415,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 570
+  },
+  {
+   "id": "x248",
+   "claim": 0.04104650230388287,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": true,
+   "ms": 474
+  },
+  {
+   "id": "x251",
+   "claim": 0.02254626720590156,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 476
+  },
+  {
+   "id": "x252",
+   "claim": 0.03437336904089684,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 563
+  },
+  {
+   "id": "x253",
+   "claim": 0.013643719820860519,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 578
+  },
+  {
+   "id": "x255",
+   "claim": 0.03873364666204778,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 504
+  },
+  {
+   "id": "x256",
+   "claim": 0.0065296205730289054,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 545
+  },
+  {
+   "id": "x257",
+   "claim": 0.02227662217421898,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 473
+  },
+  {
+   "id": "x259",
+   "claim": 0.001768591804475981,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 477
+  },
+  {
+   "id": "x260",
+   "claim": 0.00846361284903569,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 555
+  },
+  {
+   "id": "x262",
+   "claim": 0.09180008257925637,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 472
+  },
+  {
+   "id": "x263",
+   "claim": 0.005984977138854756,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 581
+  },
+  {
+   "id": "x264",
+   "claim": 0.015068726754357862,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 487
+  },
+  {
+   "id": "x265",
+   "claim": 0.02725126659868462,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 511
+  },
+  {
+   "id": "x271",
+   "claim": 0.03411194626361276,
+   "action": "ignore",
+   "fired": null,
+   "gold": null,
+   "isClaim": false,
+   "ms": 524
+  }
+ ]
+}

@@ -1,8 +1,9 @@
 /**
  * Text-mode loop: utterance in, decision record out. Every decision is kept for the dashboard.
  *
- * hear(): ask Decider once per utterance -> route -> run the check -> compare in code ->
- *         ledger -> gate -> maybe speak. Silence ticks reuse the gate without a new utterance.
+ * hear(): route the latest utterance (Router.ts; Decider) and, while a claim is open, ask the
+ *         gate questions in parallel -> run the check -> compare in code -> ledger -> gate ->
+ *         maybe speak. Silence ticks reuse the last gate answers without a new utterance.
  *
  * All call state lives in one Ref and is only touched while holding the Bridge's semaphore,
  * so `hear` and `tick` never interleave. `run` turns a stream of call inputs (transcript
@@ -14,7 +15,7 @@ import { CheckSource } from "./Checks.ts"
 import { compare, inferAsserted } from "./Compare.ts"
 import * as G from "./Gate.ts"
 import * as L from "./Ledger.ts"
-import { type BridgeAnswers, buildQuestions, POLICY, renderState, type Turn } from "./Questions.ts"
+import { finishedProbability, gateQuestions, renderGate, type Turn } from "./Questions.ts"
 import { Escalator, Route, route } from "./Router.ts"
 import { type SupportError, Writer } from "./Speaker.ts"
 
@@ -31,6 +32,8 @@ export const Event = Schema.Struct({
   verdict: Schema.OptionFromNullOr(Verdict),
   checkEvidence: Schema.OptionFromNullOr(Schema.String),
   gate: Schema.OptionFromNullOr(G.GateDecision),
+  /** Gate questions asked with this utterance: self_repaired, finished (Platt) and finished_raw. */
+  gateScores: Schema.Record(Schema.String, Schema.Number),
   said: Schema.OptionFromNullOr(Schema.String),
   escalations: Schema.Int
 })
@@ -43,13 +46,19 @@ export const CallInput = Schema.Union([
 ])
 export type CallInput = typeof CallInput.Type
 
+/** The last gate answers, reused by silence ticks. */
+export interface GateSignals {
+  readonly selfRepairedP: number
+  readonly interruptP: number // 1 - P(finished), Platt-scaled
+}
+
 export interface BridgeState {
   readonly turns: ReadonlyArray<Turn>
   readonly ledger: L.Ledger
   readonly events: ReadonlyArray<Event>
   readonly escalations: number
   readonly lastSpokeS: number // Clock seconds; -Infinity until Egg Head first speaks
-  readonly answers: Option.Option<BridgeAnswers> // last Decider batch, reused by silence ticks
+  readonly gateSignals: Option.Option<GateSignals>
 }
 
 const initial: BridgeState = {
@@ -58,7 +67,7 @@ const initial: BridgeState = {
   events: [],
   escalations: 0,
   lastSpokeS: -Infinity,
-  answers: Option.none()
+  gateSignals: Option.none()
 }
 
 const blankEvent = (turn: number, speaker: string, text: string): Event => ({
@@ -70,6 +79,7 @@ const blankEvent = (turn: number, speaker: string, text: string): Event => ({
   verdict: Option.none(),
   checkEvidence: Option.none(),
   gate: Option.none(),
+  gateScores: {},
   said: Option.none(),
   escalations: 0
 })
@@ -98,11 +108,10 @@ export class Bridge extends Context.Service<Bridge, {
     const decide = Effect.fnUntraced(function*(s: BridgeState, ev: Event, silenceS: number, supportsOpen: boolean) {
       const item = L.open(s.ledger)[0]
       if (item === undefined) return [s, ev] as const
-      const policy = Option.filter(s.answers, (a) => POLICY.every((q) => a[q] !== undefined))
-      const [selfRepairedP, interruptP] = Option.match(policy, {
-        onNone: () => [0.0, 0.5], // claim was just added this turn; policy questions were not asked yet
-        onSome: (a) => [a.self_repaired!.probability, a.floor_free!.probability]
-      })
+      const { selfRepairedP, interruptP } = Option.getOrElse(s.gateSignals, () => ({
+        selfRepairedP: 0.0, // claim was just added this turn; the gate questions were not asked yet
+        interruptP: 0.5
+      }))
       const nowS = (yield* Clock.currentTimeMillis) / 1000
       const gate = G.decide({
         check: item.check,
@@ -137,17 +146,29 @@ export class Bridge extends Context.Service<Bridge, {
         const heard = yield* Ref.updateAndGet(state, (s) => ({ ...s, turns: [...s.turns, [speaker, text] as const] }))
         const window = heard.turns.slice(-WINDOW_TURNS)
         const openItems = L.open(heard.ledger)
-        const resources = yield* source.resources
-        const [elapsed, { answers }] = yield* Effect.timed(
-          decider.decide(buildQuestions(resources, openItems.length > 0), { input: renderState(window, openItems) })
+        const inventory = yield* source.inventory
+        const askGate = Effect.map(
+          decider.decide(gateQuestions, { input: renderGate(window, silenceS, openItems) }),
+          ({ answers }) => answers
         )
-        let s: BridgeState = { ...heard, answers: Option.some(answers) }
+        const [elapsed, [routed, gateAnswers]] = yield* Effect.timed(Effect.all([
+          route(window, inventory).pipe(Effect.provideService(DecisionModel.DecisionModel, decider)),
+          openItems.length > 0 ? Effect.asSome(askGate) : Effect.succeedNone
+        ], { concurrency: "unbounded" }))
+        const finished = Option.map(gateAnswers, (a) => finishedProbability(a.fin.probability))
+        let s: BridgeState = Option.isSome(gateAnswers) && Option.isSome(finished)
+          ? { ...heard, gateSignals: Option.some({ selfRepairedP: gateAnswers.value.rep.probability, interruptP: 1 - finished.value }) }
+          : heard
         let ev: Event = {
           ...blankEvent(heard.turns.length - 1, speaker, text),
-          deciderMs: Duration.toMillis(elapsed)
+          deciderMs: Duration.toMillis(elapsed),
+          gateScores: Option.match(gateAnswers, {
+            onNone: () => ({}),
+            onSome: (a) => ({ self_repaired: a.rep.probability, finished: finished.pipe(Option.getOrElse(() => 0)), finished_raw: a.fin.probability })
+          })
         }
 
-        let rt = route(answers)
+        let rt = routed
         ev = { ...ev, route: Option.some(rt) }
         if (rt.action === "escalate") {
           s = { ...s, escalations: s.escalations + 1 }

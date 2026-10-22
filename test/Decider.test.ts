@@ -120,6 +120,27 @@ describe("HTTP DecisionModel", () => {
       assert.strictEqual((yield* Ref.get(http.seen)).length, 2)
     }))
 
+  it.effect("splits a batch over 8 questions into several requests", () =>
+    Effect.gen(function*() {
+      const http = yield* fakeHttp(() => ({ status: 200, body: okBody }))
+      const many = Decision.make({
+        input: Schema.String,
+        decisions: Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`claim${i}`, Decision.probability({ instructions: "?" })]))
+      })
+      const reply = (n: number) => ({
+        status: 200,
+        body: { answers: Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`claim${i}`, { type: "noul", noul: n / 10 }])) }
+      })
+      const split = yield* fakeHttp(reply)
+      const { answers } = yield* DecisionModel.decide(many, { input: "x" }).pipe(
+        Effect.provide(layerHttp({ url: "http://decider.test" }).pipe(Layer.provide(split.layer)))
+      )
+      const sent = (yield* Ref.get(split.seen)).map((r) => Object.keys((r.body as { questions: object }).questions).length)
+      assert.deepStrictEqual(sent, [8, 2])
+      assert.deepStrictEqual([answers.claim0?.probability, answers.claim9?.probability], [0.1, 0.2])
+      assert.strictEqual((yield* Ref.get(http.seen)).length, 0)
+    }))
+
   it.effect("maps a 4xx to an AiError that carries the server's explanation", () =>
     Effect.gen(function*() {
       const body = { error: { code: "invalid_request", fields: [{ location: ["body", "model"], type: "missing" }] } }
