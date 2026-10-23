@@ -1,6 +1,6 @@
 # Agent mode review, 23 Oct 2026
 
-An adversarial review of agent mode (`git diff 3fe7ca1..7dd7885 -- src demo`). It used the pstack `interrogate` method with two reviewers on different models (Opus, Sonnet). It was cross-checked against the TLA+ model in [`spec/Bridge.tla`](../../spec/Bridge.tla) (`spec/check.sh`). A finding is listed as *Act on* only when a concrete path through the code was traced. These are findings, not fixes. Each is replayed as a failing test before it is fixed.
+An adversarial review of agent mode (`git diff 3fe7ca1..7dd7885 -- src demo`). It used two independent reviewers on different models (Opus, Sonnet). It was cross-checked against the TLA+ model in [`spec/Bridge.tla`](../../spec/Bridge.tla) (`spec/check.sh`). A finding is listed as *Act on* only when a concrete path through the code was traced. These are findings, not fixes. Each is replayed as a failing test before it is fixed.
 
 ## Intent under review
 

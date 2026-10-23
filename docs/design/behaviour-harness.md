@@ -2,7 +2,7 @@
 
 Egg Head's product is a decision: when a voice agent on a multi-party call should stay quiet, investigate, speak, reply, take a question or barge in. This harness writes those decisions down as typed expectations. Each scenario plays through the real call loop in virtual time, and the same judge scores a saved live run. The incident demo is one scenario among several.
 
-The design came from the pstack `architect` and `arena` process: two candidates (Opus, Sonnet) and one cross-judge. Both candidates reached the same core shape independently. That shape is one call loop shared by the demo, the tests and live scoring; typed per-line expectations; and one pure judge over the call log. Candidate 2 was the base, and the strongest parts of candidate 1 were grafted on.
+The design came from two independent candidate designs (Opus, Sonnet) and a cross-judge. Both candidates reached the same core shape independently. That shape is one call loop shared by the demo, the tests and live scoring; typed per-line expectations; and one pure judge over the call log. Candidate 2 was the base, and the strongest parts of candidate 1 were grafted on.
 
 ## Usage
 
