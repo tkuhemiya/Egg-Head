@@ -122,16 +122,8 @@
   .controls .leave { background: var(--bad); color: #fff; padding: 9px 18px; font: 600 13px var(--sans); flex-direction: row; }
   .controls .leave:hover { background: #dc2626; color: #fff; }
 
-  /* toon animation */
-  .toon .head { transform-box: fill-box; transform-origin: 50% 90%; }
-  .toon.talking .head { animation: bob .36s ease-in-out infinite alternate; }
-  .toon .eye { transform-box: fill-box; transform-origin: center; transition: transform .06s; }
-  .toon.blink .eye { transform: scaleY(.08); }
-  .toon.egg.thinking .glint { animation: glint 1.2s infinite; }
-  .toon.egg.thinking .head { animation: think 2.4s ease-in-out infinite; }
-  @keyframes bob { from { transform: translateY(0) rotate(-.6deg); } to { transform: translateY(-2.5px) rotate(.6deg); } }
-  @keyframes think { 50% { transform: rotate(-3deg) translateY(-2px); } }
-  @keyframes glint { 50% { opacity: .1; } }
+  /* blink/bob/mouth are driven in JS (core.js); .talking is toggled on the svg */
+  .toon.soft { overflow: visible; }
   @media (prefers-reduced-motion: reduce) { .tile.egg.speaking { animation: none; } }
 </style>
 </head>

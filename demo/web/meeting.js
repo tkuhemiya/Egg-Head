@@ -162,8 +162,9 @@ store.subscribe((s, m) => {
     case "line": {
       tiles.forEach((_, name) => speaking(name, false))
       speaking(m.speaker, true, m.durationS * 1000)
-      tiles.get(m.speaker)?.toon.say(m.marks, m.durationS)
-      playing.set(m.index, play(m.audio))
+      const a = play(m.audio)
+      playing.set(m.index, a)
+      tiles.get(m.speaker)?.toon.say(m.marks, m.durationS, { audio: a, text: m.text })
       caption(m.speaker, m.marks, m.durationS, false, m.text)
       break
     }
@@ -182,8 +183,8 @@ store.subscribe((s, m) => {
       setTimeout(() => renderEgg(store.get()), m.durationS * 1000 + 50)
       speaking("Egg Head", true, m.durationS * 1000)
       flash(egg.t, "rgba(245,200,76,.5)")
-      eggToon.say(m.marks, m.durationS)
-      play(m.audio)
+      const ea = play(m.audio)
+      eggToon.say(m.marks, m.durationS, { audio: ea, text: m.text })
       caption("Egg Head", m.marks, m.durationS, true, m.text)
       break
     case "done":
@@ -215,7 +216,15 @@ function renderEgg(s) {
     node.dataset.key = st.key
   }
   morph(node.querySelector("span"), st.text)
-  eggToon.svg.classList.toggle("thinking", st.key === "checking")
+  if (eggToon.state !== "speaking" && Date.now() >= eggSpeakingUntil) {
+    let avatar = "neutral"
+    if (st.key === "checking") avatar = "unsure"
+    else {
+      const addr = [...s.requests.values()].find((r) => r.state === "listening" && r.kind === "addressed")
+      if (addr || st.key === "listening" || st.key === "waiting") avatar = "listening"
+    }
+    if (eggToon.state !== avatar) eggToon.setState(avatar)
+  }
   const running = [...s.tasks.values()].find((t) => t.state === "running")
   const listening = [...s.requests.values()].find((r) => r.state === "listening" && r.kind === "addressed")
   const confirmed = [...s.claims.values()].find((c) => c.state === "confirmed")
