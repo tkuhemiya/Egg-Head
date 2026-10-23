@@ -1,0 +1,3 @@
+ts	phase	decision	why	evidence	result
+2026-10-23T01:07:55Z	baseline	recorded the starting state before any change	every later change is compared against this	npm run check ok; npm test 65/65 at 7dd7885	green
+2026-10-23T01:07:55Z	network	hosted Decider, OpenRouter and Hugging Face are blocked by this environment's network policy	live Decider calls and a free LLM are needed for W4, W5, W7; no stand-in results will be made up	proxy status: connect_rejected api.decider.cloud:443	blocked, user told
