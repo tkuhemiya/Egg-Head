@@ -74,8 +74,9 @@ export class ScriptMismatch extends Schema.TaggedError<ScriptMismatch>()("Script
 }) {}
 
 const kindOf = (ev: Event): SaidKind => {
-  const kind = ev.saidKind ?? "flag" // without an Investigator the Bridge only flags
-  return kind === "ack" && ev.request?.kind === "open" ? "take" : kind
+  if (ev.speech !== undefined && Option.isSome(ev.speech)) return ev.speech.value.kind
+  const kind = ev.saidKind ?? "flag"
+  return kind === "ack" && ev.request?.kind === "open" ? "take" : kind === "retract" ? "retract" : kind
 }
 
 export const observe = (call: Call, log: ReadonlyArray<Logged>): Result.Result<Trace, ScriptMismatch> => {
@@ -123,20 +124,35 @@ export const observe = (call: Call, log: ReadonlyArray<Logged>): Result.Result<T
           claims.set(ev.turn, { speaker: ev.speaker, resource: Option.flatMap(ev.route, (r) => r.resource) })
         }
         if (ev.note !== undefined) l.notes.push(ev.note)
-        if (ev.agent?.action === "dispatched") l.observed.push({ _tag: "Dispatched", job: ev.agent.job, at: s })
-        if (Option.isSome(ev.said)) {
+        for (const mv of ev.moves ?? []) if (mv._tag === "Note") l.notes.push(mv.text)
+        const dispatched = (ev.moves ?? []).filter((mv) => mv._tag === "Dispatched")
+        if (dispatched.length > 0) {
+          for (const mv of dispatched) {
+            if (mv.via === "direct" && mv.kind !== "confirm") continue // fallback is not a new investigation
+            l.observed.push({ _tag: "Dispatched", job: mv.kind === "answer" ? "answer" : "confirm", at: s })
+          }
+        } else if (ev.agent?.action === "dispatched") {
+          l.observed.push({ _tag: "Dispatched", job: ev.agent.job, at: s })
+        }
+        const saidText = ev.speech !== undefined && Option.isSome(ev.speech) ? ev.speech.value.text : Option.getOrUndefined(ev.said)
+        if (saidText !== undefined) {
           const kind = kindOf(ev)
+          const speech = ev.speech !== undefined && Option.isSome(ev.speech) ? ev.speech.value : undefined
           const claim = ev.claim === undefined ? undefined : claims.get(ev.claim)
           const asked = ev.request
-          const toward = kind === "barge"
+          const toward = speech?.toward !== undefined
+            ? Option.some(speech.toward)
+            : kind === "barge"
             ? Option.some(ev.speaker)
-            : kind === "flag"
+            : kind === "flag" || kind === "retract"
             ? Option.fromUndefinedOr(claim?.speaker)
             : Option.fromUndefinedOr(asked?.speaker)
-          const about = kind === "flag" || kind === "barge"
+          const about = speech?.about !== undefined
+            ? speech.about
+            : kind === "flag" || kind === "barge" || kind === "retract"
             ? Option.flatten(Option.fromUndefinedOr(claim?.resource))
             : Option.fromUndefinedOr(asked && aliasHits(asked.text)[0])
-          const o: Said = { _tag: "Said", kind, text: ev.said.value, toward, about, at: s, start: s, end: s }
+          const o: Said = { _tag: "Said", kind, text: saidText, toward, about, at: s, start: s, end: s }
           l.observed.push(o)
           said.push({ ...o, index: m.index })
         }

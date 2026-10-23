@@ -83,7 +83,7 @@ export const expectOf = (line: CallLine): Expect => line.expect ?? []
 // What the loop publishes: the meeting page's feed, and the run log the Judge reads
 // ---------------------------------------------------------------------------
 
-export const SpokenKind = Schema.Literals(["flag", "ack", "answer", "barge", "line"])
+export const SpokenKind = Schema.Literals(["flag", "ack", "answer", "barge", "line", "retract"])
 
 const logged = <const T extends string, const F extends Schema.Struct.Fields>(type: T, fields: F) =>
   Schema.Struct({ type: Schema.Literal(type), at: Schema.Number, ...fields })
@@ -193,11 +193,22 @@ export const session = Effect.fnUntraced(function*(call: Call, options: PlayOpti
     Effect.gen(function*() {
       const index = (yield* Ref.get(lineOfTurn))[ev.turn] ?? (yield* Ref.get(current))
       yield* publish({ type: "event", index, event: ev })
-      if (Option.isSome(ev.said)) {
+      const said = ev.speech !== undefined && Option.isSome(ev.speech) ? ev.speech.value.text : Option.getOrUndefined(ev.said)
+      const kind = ev.speech !== undefined && Option.isSome(ev.speech) ? ev.speech.value.kind : ev.saidKind ?? "line"
+      const speechId = ev.speech !== undefined && Option.isSome(ev.speech) ? ev.speech.value.id : undefined
+      if (said !== undefined) {
         yield* Ref.set(humansWaitUntil, (yield* now) + 30) // hold the next line while the voice is made
-        const clip = yield* sound.speak(call.voices["Egg Head"] ?? "Matthew", ev.said.value)
+        const clip = yield* sound.speak(call.voices["Egg Head"] ?? "Matthew", said).pipe(
+          Effect.tapError(() => speechId ? bridge.spoke(speechId, "dropped") : Effect.void)
+        )
         yield* Ref.set(humansWaitUntil, (yield* now) + clip.durationS + 0.6)
-        yield* publish({ type: "egghead", index, text: ev.said.value, audio: clip.audio, durationS: clip.durationS, marks: clip.marks, kind: ev.saidKind ?? "line" })
+        yield* publish({ type: "egghead", index, text: said, audio: clip.audio, durationS: clip.durationS, marks: clip.marks, kind: kind === "take" || kind === "retract" ? "line" : kind })
+        if (speechId) {
+          yield* Effect.sleep(`${Math.round(clip.durationS * 1000)} millis`).pipe(
+            Effect.andThen(bridge.spoke(speechId, "finished")),
+            Effect.forkScoped
+          )
+        }
       }
     })
   yield* bridge.changes.pipe(Stream.runForEach(onEvent), Effect.forkScoped)
@@ -222,7 +233,9 @@ export const session = Effect.fnUntraced(function*(call: Call, options: PlayOpti
       yield* Effect.sleep(`${TICK_MS} millis`)
       const end = yield* Ref.get(lastEnd)
       const t = yield* now
-      if (Number.isFinite(end) && t - end >= 0.5) yield* bridge.tick(t - end)
+      if (Number.isFinite(end) && t - end >= 0.5) {
+        yield* bridge.tick(t - end).pipe(Effect.catchCause((c) => Effect.logError(c)))
+      }
     }
   }).pipe(Effect.forkScoped)
 
@@ -319,7 +332,11 @@ export const play = Effect.fnUntraced(function*(call: Call, options: PlayOptions
           if (wait > 0) yield* Effect.sleep(`${Math.round(wait)} millis`)
           const text = words.slice(0, k + 1).map((w) => w.value).join(" ")
           const ev = yield* bridge.partial(l.speaker, text).pipe(Effect.catchCause(() => Effect.succeedNone))
-          if (Option.isSome(ev) && Option.isSome(ev.value.said)) {
+          const barged = Option.isSome(ev) && (
+            (ev.value.speech !== undefined && Option.isSome(ev.value.speech) && ev.value.speech.value.kind === "barge") ||
+            Option.isSome(ev.value.said)
+          )
+          if (barged) {
             yield* Deferred.succeed(cut, text)
             return
           }

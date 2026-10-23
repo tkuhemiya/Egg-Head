@@ -17,6 +17,13 @@ export interface TuningShape extends C.ReplyTuning {
   readonly asks: number // P(a question to the call)
   readonly directive: number // P(telling someone to act now): barge-in
   readonly openSilenceS: number // a question nobody answers for this long is Egg Head's
+  readonly parked: number // P(a line parks a claim's resource); regex rule is 0 or 1
+  readonly floor: {
+    readonly quietAfterSpeechS: number
+    readonly maxSpeechS: number
+    readonly composeDeadlineS: number
+  }
+  readonly jobs: { readonly confirmS: number; readonly answerS: number; readonly recheckS: number }
 }
 
 export const DEFAULTS: TuningShape = {
@@ -25,16 +32,25 @@ export const DEFAULTS: TuningShape = {
   addressed: C.T_ADDRESSED,
   asks: C.T_ASKS,
   directive: C.T_DIRECTIVE,
-  openSilenceS: C.OPEN_SILENCE_S
+  openSilenceS: C.OPEN_SILENCE_S,
+  parked: 0.5,
+  floor: { quietAfterSpeechS: 3, maxSpeechS: 20, composeDeadlineS: 10 },
+  jobs: { confirmS: 45, answerS: 45, recheckS: 8 }
 }
 
 export const Tuning = Context.Reference<TuningShape>("egghead/Tuning", { defaultValue: () => DEFAULTS })
 
 /** One or more knobs changed; `gate` merges field by field. */
-export type TuningPatch = Partial<Omit<TuningShape, "gate">> & { readonly gate?: Partial<G.GateTuning> }
+export type TuningPatch = Partial<Omit<TuningShape, "gate" | "floor" | "jobs">> & {
+  readonly gate?: Partial<G.GateTuning>
+  readonly floor?: Partial<TuningShape["floor"]>
+  readonly jobs?: Partial<TuningShape["jobs"]>
+}
 
 export const patch = (p: TuningPatch, base: TuningShape = DEFAULTS): TuningShape => ({
   ...base,
   ...p,
-  gate: { ...base.gate, ...p.gate }
+  gate: { ...base.gate, ...p.gate },
+  floor: { ...base.floor, ...p.floor },
+  jobs: { ...base.jobs, ...p.jobs }
 })

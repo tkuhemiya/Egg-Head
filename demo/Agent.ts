@@ -23,7 +23,12 @@ const BIN = fileURLToPath(new URL("./agent/bin", import.meta.url))
 const HOME = fileURLToPath(new URL("./out/agent/", import.meta.url))
 
 export const Report = Schema.Union([
-  Schema.Struct({ kind: Schema.Literal("report"), task: Schema.Int, status: Status, fact: Schema.String }),
+  Schema.Struct({
+    kind: Schema.Literal("report"),
+    task: Schema.Int,
+    status: Schema.Literals([...Status.literals, "unknown"]),
+    fact: Schema.String
+  }),
   Schema.Struct({ kind: Schema.Literal("answer"), task: Schema.Int, answer: Schema.String })
 ])
 export type Report = typeof Report.Type

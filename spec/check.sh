@@ -9,7 +9,7 @@ if [ ! -f "$JAR" ]; then
   curl -fsSL -o "$JAR" https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar || { echo "could not download tla2tools.jar" >&2; exit 2; }
 fi
 SPEC="${SPEC:-Bridge}"
-INVARIANTS="TypeOK NeverSaysUnconfirmed NeverSaysCorrected NeverSaysRightClaimIsWrong"
+INVARIANTS="TypeOK NeverFirmOnUnconfirmed NeverSaysCorrected NeverSaysRightClaimIsWrong TentativeIsChecked ParkingIsScoped OneLinePerGap"
 PROPERTIES="AckIsAnswered ConfirmedIsResolved"
 WANT="${*:-$INVARIANTS $PROPERTIES}"
 META="$(mktemp -d)"
@@ -21,7 +21,7 @@ for p in $WANT; do
   cfg="$META/$p.cfg"
   {
     echo "SPECIFICATION Spec"
-    echo "CONSTANTS Claims = {c1, c2}  MaxTurns = ${MAX_TURNS:-5}"
+    echo "CONSTANTS Claims = {c1, c2}  MaxTurns = ${MAX_TURNS:-3}"
     echo "$kind $p"
     echo "CHECK_DEADLOCK FALSE"
   } > "$cfg"

@@ -58,7 +58,7 @@ export const BASE_COST: Readonly<Record<string, number>> = {
 }
 const DOWN_BUMP = 1 // a check that says "down" is worse than "degraded"
 
-const REPAIR = new RegExp(
+export const REPAIR = new RegExp(
   [
     String.raw`\bwait\b`,
     String.raw`\bhold on\b`,
@@ -70,7 +70,7 @@ const REPAIR = new RegExp(
   ].join("|"),
   "i"
 )
-const PARKED = new RegExp(
+export const PARKED = new RegExp(
   [
     String.raw`\bpark(?:ed|ing)?\b`,
     String.raw`\bnot in the (?:\w+ )?path\b`,
@@ -90,6 +90,12 @@ export interface GateInput {
   readonly interruptP: number // Decider noul, P(speaking now would interrupt)
   readonly laterClaimSupportsCheck?: boolean // router found a later true claim on this resource
   readonly secondsSinceLastSpoke?: number
+  /** When set, skip scanning laterTurns for parking (per-claim verdict). */
+  readonly parked?: boolean
+  /** When set, skip computing repairedBy from laterTurns. */
+  readonly correctedBy?: Option.Option<RepairedBy>
+  /** When set, `persisted` uses this instead of laterTurns.length. */
+  readonly turnsSince?: number
 }
 
 export const Reason = Schema.Literals(["persisted", "not_repaired", "min_silence", "floor_open", "worth_it", "cooldown"])
@@ -109,6 +115,7 @@ export type GateDecision = typeof GateDecision.Type
 
 /** Why this claim no longer needs raising. */
 export const repairedBy = (g: GateInput, t: GateTuning = GATE_DEFAULTS): Option.Option<RepairedBy> => {
+  if (g.correctedBy !== undefined) return g.correctedBy
   if (g.laterClaimSupportsCheck) return Option.some("ledger")
   if (g.laterTurns.some((turn) => REPAIR.test(turn))) return Option.some("keyword")
   if (g.selfRepairedP >= t.selfRepaired) return Option.some("decider")
@@ -117,20 +124,23 @@ export const repairedBy = (g: GateInput, t: GateTuning = GATE_DEFAULTS): Option.
 
 /** How harmful silence is, from the check that disagreed. 0 none ... 4 critical. */
 export const costLevel = (g: GateInput): number => {
-  if (g.laterTurns.some((t) => PARKED.test(t))) return 1
+  if (g.parked ?? g.laterTurns.some((t) => PARKED.test(t))) return 1
   const level = (BASE_COST[g.check] ?? 2) + (g.status === "down" ? DOWN_BUMP : 0)
   return Math.min(level, LEVELS.length - 1)
 }
+
+export const gapOpen = (floorP: number, silenceS: number, t: GateTuning = GATE_DEFAULTS): boolean =>
+  floorP >= t.floor || silenceS >= t.silenceS
 
 export const decide = (g: GateInput, t: GateTuning = GATE_DEFAULTS): GateDecision => {
   const floorP = 1 - g.interruptP
   const rep = repairedBy(g, t)
   const level = costLevel(g)
   const reasons: Record<Reason, boolean> = {
-    persisted: g.laterTurns.length > 0, // the call has moved on at least one turn since the claim
+    persisted: (g.turnsSince ?? g.laterTurns.length) > 0,
     not_repaired: Option.isNone(rep),
     min_silence: g.silenceS >= t.minSilenceS,
-    floor_open: floorP >= t.floor || g.silenceS >= t.silenceS,
+    floor_open: gapOpen(floorP, g.silenceS, t),
     worth_it: level >= t.costLevel,
     cooldown: (g.secondsSinceLastSpoke ?? Infinity) >= t.cooldownS
   }

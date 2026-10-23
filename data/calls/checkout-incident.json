@@ -48,7 +48,7 @@
       "why": "false claim, but there is no gap to raise it before the next line" },
     { "speaker": "Priya", "text": "Okay. Jordan, restart the payments API now, and Lee, keep an eye on the dashboards.", "pause": 0.6,
       "decider": { "act": 0.9 },
-      "expect": [{ "_tag": "Says", "kind": "barge", "toward": "Priya", "about": "payments-api" }],
+      "expect": [{ "_tag": "Says", "kind": "barge", "toward": "Priya", "about": "payments-api" }, { "_tag": "Investigates", "job": "confirm" }],
       "why": "barge: cuts Priya off before the restart" },
     { "speaker": "Priya", "text": "Good catch. Jordan, roll back orders-api to v2.13 instead.", "pause": 0.5 },
     { "speaker": "Jordan", "text": "Rolling back orders-api now.", "pause": 1.5 }

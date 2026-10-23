@@ -18,7 +18,7 @@ import { Schema } from "effect"
  * - answer: says the result of a lookup it acked or took
  * - barge:  cuts a speaker off mid-line
  */
-export const SaidKind = Schema.Literals(["flag", "ack", "take", "answer", "barge"])
+export const SaidKind = Schema.Literals(["flag", "ack", "take", "answer", "barge", "retract"])
 export type SaidKind = typeof SaidKind.Type
 
 /** Said without being asked: these are the lines a cooldown spaces out. */
@@ -41,13 +41,15 @@ export const Says = Schema.TaggedStruct("Says", {
   toward: Schema.optionalKey(Schema.String),
   /** The resource it is about: the claim's resource, or the one the question names. */
   about: Schema.optionalKey(Schema.String),
-  when: Schema.optionalKey(Timing)
+  when: Schema.optionalKey(Timing),
+  certainty: Schema.optionalKey(Schema.Literals(["firm", "tentative"])),
+  basis: Schema.optionalKey(Schema.Literals(["confirmed", "fastCheck"]))
 })
 export type Says = typeof Says.Type
 
 /** The Investigator was sent off, silently: a second look at a claim, or a question to answer. */
 export const Investigates = Schema.TaggedStruct("Investigates", {
-  job: Schema.Literals(["confirm", "answer"])
+  job: Schema.Literals(["confirm", "recheck", "answer"])
 })
 export type Investigates = typeof Investigates.Type
 

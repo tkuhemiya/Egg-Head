@@ -20,4 +20,6 @@ Prefer `--query` and `--output text` to keep output short. Relative times like `
 
 Finish every task by running the `egghead` command the task gives you, exactly once. The fact or answer
 is spoken aloud on the call: plain words, real numbers from what you saw, no markdown, no code names
-unless people would say them ("orders DB CPU has been at 98 percent for 6 minutes" is good). Then stop.
+unless people would say them ("orders DB CPU has been at 98 percent for 6 minutes" is good). If what you
+saw does not settle the claim or the question, say so: `egghead report <task> --status unknown --fact "…"`
+on a claim, or an answer that you could not find that out. Never guess a number. Then stop.

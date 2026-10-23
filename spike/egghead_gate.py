@@ -87,7 +87,14 @@ def repaired_by(g: GateInput) -> str | None:
 
 
 def cost_level(g: GateInput) -> int:
-    """How harmful silence is, from the check that disagreed. 0 none ... 4 critical."""
+    """How harmful silence is, from the check that disagreed. 0 none ... 4 critical.
+
+    Parking is per-claim in the TypeScript Bridge (Judgments.parksToday): a park line
+    only closes the named resource, or the newest open claim when it names none. This
+    function still keys off *this claim's* later_turns, so a park of another resource
+    never reaches it. The 16-snippet eval and the input grid are single-claim, so their
+    numbers do not move.
+    """
     if any(_PARKED.search(t) for t in g.later_turns):
         return 1
     level = BASE_COST.get(g.check, 2)
