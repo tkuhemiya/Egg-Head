@@ -4,6 +4,7 @@ This brief is for whoever picks up branch `claude/fervent-fermat-c78gg1` (PR #11
 
 ## Read first, in this order
 
+0. [`findings.md`](findings.md): everything learned on this branch in one place. It covers where every constant comes from, all 23 known defects with their state, the TLA+ counterexamples, what the harness found, what Decider is good and bad at, and the decisions. The raw reports are in [`reports/`](reports/).
 1. `AGENTS.md` and `README.md`: the project. Egg Head decides **when a voice agent on a multi-party call speaks**. The incident call is only a demo of that, so don't over-fit to it.
 2. [`docs/design/architecture.md`](../design/architecture.md): how the Bridge, Router, Gate, Conversation, agent and demo fit together, with every concurrency and timing hazard found.
 3. [`docs/reviews/2026-10-23-agent-mode.md`](../reviews/2026-10-23-agent-mode.md): the 11 findings to fix. Finding 10, demo security, is already fixed.
