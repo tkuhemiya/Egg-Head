@@ -126,7 +126,7 @@ export const decodeLog = (entries: ReadonlyArray<unknown>): Effect.Effect<Readon
 // The loop
 // ---------------------------------------------------------------------------
 
-/** Clock the humans wait on while Egg Head writes. Not `src/Floor.ts` (who is talking). */
+/** Clock the humans wait on while Egg Head writes. Not `src/domain/Floor.ts` (who is talking). */
 export class Hold extends Context.Service<Hold, {
   /** Humans wait until this Clock time, in seconds. */
   readonly until: Ref.Ref<number>

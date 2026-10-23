@@ -1,5 +1,5 @@
 /**
- * Offline: play a scenario through the real call loop (src/Call.ts `play`) and the real
+ * Offline: play a scenario through the real call loop (src/runtime/Call.ts `play`) and the real
  * Bridge, Router, Gate and Conversation, in virtual time. Only the edges are stand-ins, all
  * built from the scenario's own data:
  *

@@ -27,7 +27,7 @@ export const T_SILENCE_S = 1.2 // this much silence opens the gate on its own
 export const T_COST_LEVEL = 2 // moderate: do not interrupt for less
 export const COOLDOWN_S = 30.0
 
-/** The numbers `decide` compares against. Defaults are the constants above (src/Tuning.ts overrides them). */
+/** The numbers `decide` compares against. Defaults are the constants above (`src/domain/Tuning.ts` overrides them). */
 export interface GateTuning {
   readonly selfRepaired: number
   readonly floor: number

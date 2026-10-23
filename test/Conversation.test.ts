@@ -5,7 +5,7 @@ import { Bridge, type Event } from "../src/runtime/Bridge.ts"
 import { MockSource } from "../src/domain/Checks.ts"
 import * as C from "../src/domain/Conversation.ts"
 import { Investigator } from "../src/runtime/Investigator.ts"
-import { Writer } from "../src/domain/Speaker.ts"
+import { SupportError, Writer } from "../src/domain/Speaker.ts"
 import { type Line, scripted } from "./helpers.ts"
 
 /** Bridge with an Investigator that answers from the mock world (no model). */
@@ -70,6 +70,23 @@ describe("Bridge with an Investigator", () => {
       assert.strictEqual(s.tasks, 0)
       assert.deepStrictEqual(said([yield* bridge.tick(2)]), [])
     }).pipe(Effect.provide(layer({ "We didn't deploy orders-api today.": { claim: 0.9, asserted: "unchanged", check: "recent_deploys" } }))))
+
+  it.effect("marks a crashed Investigator job failed instead of leaving it running", () =>
+    Effect.gen(function*() {
+      const bridge = yield* Bridge
+      yield* bridge.hear("Sam", "The orders DB is fine, CPU is normal.", 0.3)
+      yield* bridge.hear("Priya", "Okay, so let's focus on the API then.", 0.3)
+      yield* settle
+      const s = yield* bridge.state
+      assert.isTrue(s.events.some((e) => e.agent?.action === "failed"), "JobDone must project the failed job, not only the fallback dispatch")
+    }).pipe(Effect.provide(layer(
+      { "The orders DB is fine, CPU is normal.": falseDb },
+      Layer.succeed(Investigator, Investigator.of({
+        name: "stub",
+        confirm: () => Effect.fail(new SupportError({ operation: "investigate", cause: "no model" })),
+        answer: () => Effect.fail(new SupportError({ operation: "investigate", cause: "no model" }))
+      }))
+    ))))
 
   it.effect("stays quiet when the Investigator finds the claim was right", () =>
     Effect.gen(function*() {

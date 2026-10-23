@@ -1,6 +1,6 @@
 /**
  * The scenarios have to be able to fail. Each mutant builds the Bridge with one deliberately
- * wrong number (src/Tuning.ts) and some line of some scenario in data/calls/ must then
+ * wrong number (src/domain/Tuning.ts) and some line of some scenario in data/calls/ must then
  * misbehave. A surviving mutant means the Bridge compares against a constant around Tuning, or
  * no scenario pins that behaviour down.
  */

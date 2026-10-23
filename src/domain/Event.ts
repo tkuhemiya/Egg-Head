@@ -119,14 +119,9 @@ export const project = (ev: Event): Event => {
   const opened = [...moves].reverse().find((m) => m._tag === "Opened")
   const closed = [...moves].reverse().find((m) => m._tag === "Closed")
   const note = [...moves].filter((m) => m._tag === "Note").map((m) => m.text).join(" ")
-  const agent: AgentNote | undefined = dispatched
-    ? {
-      task: Number(String(dispatched.job).split("/")[1] ?? 0),
-      job: dispatched.kind === "answer" ? "answer" : "confirm",
-      action: "dispatched",
-      detail: dispatched.detail
-    }
-    : reported
+  // A failed job that starts a direct fallback carries both. Prefer Reported: otherwise the
+  // meeting feed keeps the original task on "running" after Egg Head has already answered.
+  const agent: AgentNote | undefined = reported
     ? {
       task: Number(String(reported.job).split("/")[1] ?? 0),
       job: reported.kind === "answer" ? "answer" : "confirm",
@@ -134,6 +129,13 @@ export const project = (ev: Event): Event => {
       detail: reported.detail,
       ...(reported.by ? { by: reported.by } : {}),
       ms: reported.ms
+    }
+    : dispatched
+    ? {
+      task: Number(String(dispatched.job).split("/")[1] ?? 0),
+      job: dispatched.kind === "answer" ? "answer" : "confirm",
+      action: "dispatched",
+      detail: dispatched.detail
     }
     : undefined
   const claimTurn = opened ? opened.turn : closed ? Number(String(closed.claim).split(":")[0]) : ev.claim

@@ -5,7 +5,7 @@
  * no investigation, nobody cut off. Anything the agent does that the list does not name fails.
  * Per call, `never` lists invariants that hold on every line.
  *
- * Every field is read from Bridge `Event` fields (src/Judge.ts), never from the spoken words,
+ * Every field is read from Bridge `Event` fields (`src/runtime/Judge.ts`), never from the spoken words,
  * so a reworded line does not fail a live run. Nothing here knows about the checkout incident:
  * "flag" is raising a claim the call got wrong, whatever the call is about.
  */

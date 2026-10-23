@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Incident bridge · Egg Head</title>
-<link rel="stylesheet" href="/vendor/xterm.css">
+<title>DEMO</title>
 <link rel="stylesheet" href="/web/theme.css">
 <style>
   :root { --bg: var(--n-950); --bar: var(--n-950); --panel: var(--n-950); --line: var(--n-800); --text: var(--n-100); --muted: var(--n-500); --accent: var(--run); }
@@ -20,10 +19,9 @@
   .bar .title { font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .bar .sub { color: var(--muted); font: 11.5px var(--mono); white-space: nowrap; }
   .bar .timer { font: 500 13px var(--mono); color: var(--n-300); padding: 4px 9px; border-radius: 6px; background: var(--n-900); border: 1px solid var(--hair); }
-  .bar .live { display: none; align-items: center; gap: 7px; color: var(--bad-ink); font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .09em; }
+  .bar .live { display: none; align-items: center; gap: 6px; color: var(--n-500); font: 500 11px var(--mono); letter-spacing: .06em; }
   .bar .live.on { display: flex; }
-  .bar .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); animation: ring 1.6s ease-out infinite; }
-  @keyframes ring { from { box-shadow: 0 0 0 0 rgba(239,68,68,.6); } to { box-shadow: 0 0 0 7px rgba(239,68,68,0); } }
+  .bar .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--bad); }
   .bar .grow { flex: 1; }
   .bar a { color: var(--muted); text-decoration: none; font: 12px var(--mono); transition: color .15s; }
   .bar a:hover { color: var(--text); }
@@ -34,8 +32,8 @@
 
   /* room */
   .room { display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0; }
-  .stage { display: grid; grid-template-rows: minmax(0, 1fr) var(--term-h, 34%); gap: 10px; padding: 10px; min-height: 0; transition: grid-template-rows var(--spring-default-ms) var(--spring-default); }
-  body.agent-busy .stage { grid-template-rows: minmax(0, 1fr) var(--term-busy, 56%); }
+  .stage { display: grid; grid-template-rows: minmax(0, 1fr) minmax(120px, 28%); gap: 10px; padding: 10px; min-height: 0; transition: grid-template-rows var(--spring-default-ms) var(--spring-default); }
+  body.work-busy .stage { grid-template-rows: minmax(0, 1fr) minmax(150px, 34%); }
   .grid { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 10px; min-height: 0; }
   .tile { position: relative; border-radius: 12px; overflow: hidden; background: radial-gradient(120% 90% at 50% 20%, var(--bg1, #3a3f4a), var(--bg2, #22252c)); min-height: 0;
     transition: box-shadow var(--spring-default-ms) var(--spring-default); }
@@ -78,16 +76,18 @@
   .captions b { font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--run-ink); margin-right: 8px; vertical-align: 1px; }
   .captions.egg b { color: var(--egg); }
 
-  /* terminal */
-  .term { display: grid; grid-template-rows: 34px minmax(0, 1fr); background: var(--n-950); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; min-height: 0; transition: border-color .3s, box-shadow .4s; }
-  body.agent-busy .term { border-color: rgba(59,130,246,.45); box-shadow: 0 0 32px rgba(59,130,246,.12); }
-  .term header { display: flex; align-items: center; gap: 10px; padding: 0 12px; background: var(--n-900); border-bottom: 1px solid var(--line); font: 11.5px var(--mono); color: var(--muted); }
-  .term header .dots { display: flex; gap: 6px; } .term header .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--n-700); }
-  .term header b { color: var(--n-200); font-weight: 500; }
-  .term header .node { margin-left: auto; padding: 1px 10px; font-size: 11px; opacity: 0; scale: .6; filter: blur(6px); transition: opacity .2s, scale var(--spring-bouncy-ms) var(--spring-bouncy), filter .2s; }
-  .term header .node.on { opacity: 1; scale: 1; filter: blur(0); }
-  .term .screen { padding: 6px 8px; min-height: 0; }
-  .term .screen .xterm { height: 100%; }
+  .work { display: grid; grid-template-rows: 34px minmax(0, 1fr); background: var(--n-950); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden; min-height: 0; }
+  body.work-busy .work { border-color: rgba(245,200,76,.35); }
+  .work header { display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid var(--hair); font: 11.5px var(--mono); color: var(--muted); }
+  .work header b { color: var(--egg); font-weight: 600; }
+  .work header .node { margin-left: auto; padding: 1px 10px; font-size: 11px; opacity: 0; }
+  .work header .node.on { opacity: 1; }
+  .work-list { overflow-y: auto; padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .work-list .empty { color: var(--muted); font: 12px var(--mono); padding: 6px 2px; }
+  .job { border: 1px solid var(--hair); border-radius: 9px; padding: 8px 10px; background: var(--n-900); font-size: 13px; }
+  .job .k { font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+  .job p { margin: 0; color: var(--n-300); }
+  .job.running { border-color: rgba(245,200,76,.35); }
 
   /* Egg Head panel */
   .panel { display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--panel); border-left: 1px solid var(--hair); min-height: 0; }
@@ -108,12 +108,7 @@
   .item.egg { background: var(--egg-soft); border-color: rgba(245,200,76,.35); }
   .item.egg .who { color: var(--egg); }
   .item.egg .txt { color: var(--egg-ink); }
-  .item.agent { overflow: hidden; background: var(--n-900); border-color: rgba(59,130,246,.35); }
-  .item.agent .who { color: var(--run-ink); }
-  .item.agent.running .who, .item.agent.running .txt { color: #fff; }
-  .item.agent.done { border-color: rgba(34,197,94,.3); background: var(--ok-soft); }
-  .item.agent.done .who { color: var(--ok-ink); }
-  .item.agent.failed { border-color: rgba(239,68,68,.4); background: var(--bad-soft); }
+  .item.egg.running { background: var(--egg-soft); border-color: rgba(245,200,76,.45); }
   .item.quiet { background: transparent; border: 1px dashed var(--n-800); color: var(--muted); font-size: 12px; }
   .item.quiet .who { color: var(--n-400); font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .07em; }
 
@@ -137,19 +132,15 @@
   @keyframes bob { from { transform: translateY(0) rotate(-.6deg); } to { transform: translateY(-2.5px) rotate(.6deg); } }
   @keyframes think { 50% { transform: rotate(-3deg) translateY(-2px); } }
   @keyframes glint { 50% { opacity: .1; } }
-  @media (prefers-reduced-motion: reduce) { .tile.egg.speaking, .bar .live::before { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .tile.egg.speaking { animation: none; } }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="bar">
-    <div class="logo">IB</div>
-    <div>
-      <div class="title" id="title">Incident bridge</div>
-      <div class="sub" id="sub">#inc-checkout · Sev 2</div>
-    </div>
+    <div class="title" id="title">DEMO</div>
     <div class="timer"><span id="timer">00:00</span></div>
-    <div class="live" id="live">Live</div>
+    <div class="live" id="live">live</div>
     <div class="grow"></div>
     <a href="/dashboard" target="_blank">Open dashboard ↗</a>
     <button id="start">Start call</button>
@@ -160,13 +151,12 @@
       <div class="grid" id="grid">
         <div class="captions" id="captions"></div>
       </div>
-      <section class="term">
+      <section class="work">
         <header>
-          <div class="dots"><i></i><i></i><i></i></div>
-          <span><b>Egg Head's agent</b> · <span id="agent-label"></span></span>
-          <span class="node running" id="agent-pill">working</span>
+          <b>Egg Head</b>
+          <span class="node running" id="work-pill">looking</span>
         </header>
-        <div class="screen" id="screen"></div>
+        <div class="work-list" id="work"><div class="empty">Waiting.</div></div>
       </section>
     </section>
 
@@ -174,7 +164,6 @@
       <div class="head">
         <div class="mini" id="mini"></div>
         <h2>Egg Head</h2>
-        <span class="label">decisions</span>
       </div>
       <div class="feed" id="feed"><div class="empty">Egg Head's activity shows up here.</div></div>
     </aside>
@@ -190,8 +179,6 @@
   </div>
 </div>
 
-<script src="/vendor/xterm.js"></script>
-<script src="/vendor/addon-fit.js"></script>
 <script type="module" src="/web/meeting.js"></script>
 </body>
 </html>

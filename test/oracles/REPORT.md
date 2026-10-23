@@ -77,7 +77,7 @@ Expected calibration error (pooled, 269 answers): **0.104**
 
 ## 6. Rewording test
 
-Not run yet. Worst three: `python spike/run.py ... --reword silence_cost,asserted_state,which_resource` then re-run eval.
+Not run yet. The Day-1 run harness (`run.py`) is in git history, not this folder.
 
 ## 7. Errors
 

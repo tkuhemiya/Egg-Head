@@ -1,7 +1,7 @@
 /**
  * ClaimCheckRouter: the latest utterance -> which check to run, on what, for what claim.
  *
- * The research pipeline (research/decider, FINDINGS.md exp 4 and exp 9), in two requests:
+ * The research pipeline (docs/research/decider, FINDINGS.md exp 4 and exp 9), in two requests:
  *
  * 1. The claim layers and the asserted state, on the latest line only.
  * 2. Only for a claim, on the latest line plus two turns: the resource, unless code found

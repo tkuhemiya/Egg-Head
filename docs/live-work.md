@@ -83,7 +83,7 @@ Use `lib.py` (cache, backoff, User-Agent) and `common.py` (renderers). Write `PR
      - `corrects` is the `REPAIR` regex in `src/domain/Gate.ts`, plus "a later true claim on the same check and resource";
      - `parks` is the `PARKED` regex, applied to every claim;
      - `answered` is "a different speaker spoke next" (`src/runtime/Bridge.ts` request handling).
-  2. **The generic Decider question** in use today (`SELF_REPAIRED` in `src/Questions.ts` for `corrects`; none exists for the others, so write one).
+  2. **The generic Decider question** in use today (`SELF_REPAIRED` in `src/domain/Questions.ts` for `corrects`; none exists for the others, so write one).
   3. **The state-scoped yes/no question.** The claim or question is spelled out, and the input is the latest line or the lines since, in kv format.
   4. **A whole-state N-way choice** ("flag / answer / ack / stay quiet") over a kv dump of the open claims, open questions and the last 6 lines. Decider is predicted to lose here, so this variant tests the prediction.
 - **LLM baseline:** the best variant's question, sent to a free OpenRouter model of the same family as the Bedrock models used here (Nemotron). Find the current slug at https://openrouter.ai/models?q=nemotron and record it. Run it with `LLM=<slug>` through a copy of `llm_baseline.py`.

@@ -1,7 +1,7 @@
 """Export the research pipeline's renderers, wording and combiners as a fixture for the
 TypeScript runtime (test/fixtures/research-parity.json). No Decider calls.
 
-    cd research/decider/scripts && python3 export_runtime_parity.py
+    cd docs/research/decider/scripts && python3 export_runtime_parity.py
 """
 import json, math, os, random
 from lib import ROOT, load
@@ -49,7 +49,7 @@ for it in picked:
 
 grid = [[rng.random() for _ in range(4)] for _ in range(40)] + [[0.0, 1.0, 0.5, 1e-6], [1.0, 1.0, 1.0, 0.0]]
 json.dump({
-    "source": "research/decider/scripts/export_runtime_parity.py (exp9 frozen claim combo, final_eval routing and gate)",
+    "source": "docs/research/decider/scripts/export_runtime_parity.py (exp9 frozen claim combo, final_eval routing and gate)",
     "wording": {"claim": Q, "resource": RESI, "unknown": RQU, "none_check": NONE_CHECK,
                 "check_orders_db": check_instructions("orders-db"), "self_repaired": REP, "finished": FIN_Q["repo"]},
     "checks": {r: list(cs) for r, cs in W["checks"].items()},

@@ -39,6 +39,16 @@ export const parseMarks = (jsonl: string): Marks => {
   }
 }
 
+/** Silence as long as `text` would take to say. Used by rehearsal, and when Polly cannot run. */
+const silentClip = (key: string, text: string): Clip => {
+  const { marks, durationS } = estimateMarks(text)
+  const file = `${createHash("sha256").update(key).digest("hex").slice(0, 16)}.wav`
+  const pcm = new Uint8Array(Math.round(durationS * SAMPLE_RATE) * 2)
+  const path = new URL(file, OUT)
+  if (!existsSync(path)) writeFileSync(path, wav(pcm))
+  return { file, pcm, durationS, marks }
+}
+
 /** 16-bit mono PCM -> WAV bytes, for the browser. */
 export const wav = (pcm: Uint8Array): Uint8Array => {
   const header = new DataView(new ArrayBuffer(44))
@@ -73,6 +83,7 @@ export class Voice extends Context.Service<Voice, {
     // seconds, and the first uncached line is usually Egg Head's, mid-call.
     void polly.config.credentials().catch(() => {})
     let billed = 0
+    let warned = false
     mkdirSync(OUT, { recursive: true })
     return Voice.of({
       speak: (voice, text) =>
@@ -120,7 +131,17 @@ export class Voice extends Context.Service<Voice, {
               return res.AudioStream!.transformToByteArray()
             },
             catch: (cause) => new AudioError({ operation: "synthesize", cause })
-          })
+          }).pipe(Effect.catch((e) => {
+            // Do not write silence under the Polly cache key: a later `aws login` should still
+            // be able to fill the real clip. The call loop synthesises every line before the
+            // first one plays, so a missing credential used to abort the whole meeting.
+            if (!warned) {
+              warned = true
+              console.error("Polly failed; playing silent estimated voices. `aws login` (a Bedrock API key does not cover Polly).", e.cause)
+            }
+            return Effect.succeed(undefined)
+          }))
+          if (pcm === undefined) return silentClip(`silent\n${voice}\n${text}`, text)
           billed += text.length
           writeFileSync(path, wav(pcm))
           return { file, pcm, durationS: pcm.length / 2 / SAMPLE_RATE, marks: yield* marked }
@@ -149,15 +170,7 @@ export const voiceSound = Layer.effect(Sound, Effect.gen(function*() {
 export const rehearsalVoice = Layer.sync(Voice, () => {
   mkdirSync(OUT, { recursive: true })
   return Voice.of({
-    speak: (voice, text) =>
-      Effect.sync(() => {
-        const { marks, durationS } = estimateMarks(text)
-        const file = `${createHash("sha256").update(`rehearsal\n${voice}\n${text}`).digest("hex").slice(0, 16)}.wav`
-        const pcm = new Uint8Array(Math.round(durationS * SAMPLE_RATE) * 2)
-        const path = new URL(file, OUT)
-        if (!existsSync(path)) writeFileSync(path, wav(pcm))
-        return { file, pcm, durationS, marks }
-      }),
+    speak: (voice, text) => Effect.sync(() => silentClip(`rehearsal\n${voice}\n${text}`, text)),
     charactersBilled: Effect.succeed(0)
   })
 })

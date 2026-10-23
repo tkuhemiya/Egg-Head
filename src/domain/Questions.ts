@@ -1,5 +1,5 @@
 /**
- * Decider questions and the state they read: the research pipeline (research/decider), frozen
+ * Decider questions and the state they read: the research pipeline (docs/research/decider), frozen
  * on dev and scored once on held-out (FINDINGS.md, exp 9 and final_eval).
  *
  * - Claim: four narrow yes/no questions on the latest utterance alone (kv format, window 1),

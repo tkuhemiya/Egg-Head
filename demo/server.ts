@@ -1,7 +1,7 @@
 /**
  * The demo: a meeting page at http://localhost:8787 (cartoon teammates, your camera, Egg Head,
- * and the coding agent's live terminal) and a dashboard at /dashboard (transcript, checks,
- * what triggered what). Press Start on either page to play the call.
+ * and the coding agent's live terminal) and a dashboard at /dashboard (transcript plus
+ * what that line triggered). Press Start on either page to play the call.
  *
  *   npm run demo                               # Decider + pi on Bedrock in the terminal + Polly voices
  *   npm run demo -- --rehearsal                # no network: scripted Decider and pi model, silent voices
@@ -147,7 +147,12 @@ const start = () => {
   Effect.runPromise(program)
     .catch((e) => {
       console.error(e)
-      return Effect.runPromise(publish({ type: "done", at: Date.now() - runStarted }))
+      const text = (e instanceof Error ? e.message : String(e)).replace(/\s+/g, " ").slice(0, 240)
+      return Effect.runPromise(
+        publish({ type: "status", text: `Call stopped: ${text}` }).pipe(
+          Effect.andThen(publish({ type: "done", at: Date.now() - runStarted }))
+        )
+      )
     })
     .finally(() => {
       running = false

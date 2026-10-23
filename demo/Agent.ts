@@ -6,10 +6,11 @@
  * commands works; the default is pi on Amazon Bedrock.
  *
  * The agent's shell has the stand-in AWS CLI first on PATH (demo/agent/bin/aws), which answers
- * from data/aws.json. Jobs run one at a time, each with a timeout; on a timeout or a crash the
- * Bridge falls back to the direct check (Investigator.direct).
+ * from data/aws.json. Open jobs share one prompt (oldest task first); the agent reports each
+ * id with `egghead report|answer <task>`. A timeout or a crash falls back to the direct check
+ * (Investigator.direct).
  */
-import { Context, Deferred, Duration, Effect, Layer, Option, Ref, Schema, Semaphore } from "effect"
+import { Context, Deferred, Duration, Effect, Layer, Option, Queue, Ref, Schema } from "effect"
 import { chmodSync, mkdirSync, readdirSync, statSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join } from "node:path"
@@ -113,6 +114,15 @@ export const answerPrompt = (task: number, speaker: string, question: string): s
   `Task ${task} · ${speaker} asked: "${said(question)}" Find out with the aws CLI, then run: egghead answer ${task} ` +
   `"<one spoken sentence for ${speaker}, at most 20 words>"`
 
+/** One turn for every still-open job, oldest task first. A single item is typed as-is. */
+export const inboxPrompt = (items: ReadonlyArray<{ readonly task: number; readonly line: string }>): string => {
+  const ordered = [...items].sort((a, b) => a.task - b.task)
+  return ordered.length === 1
+    ? ordered[0]!.line
+    : `Open items, oldest first. For each id, do only that item's work, then run its egghead command with that id. Do not skip, merge, or invent ids.\n\n` +
+      ordered.map((it, i) => `${i + 1}. ${it.line}`).join("\n\n")
+}
+
 export class AgentTerminal extends Context.Service<AgentTerminal, {
   readonly label: string
   /** Everything the terminal printed so far (for a page that connects late), and new output as it comes. */
@@ -122,10 +132,10 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
   /** A result from the agent's `egghead` command. False when no job is waiting for it. */
   report(body: unknown): Effect.Effect<boolean>
   /**
-   * Type a job into the agent and wait for its report. The terminal numbers jobs itself, across
-   * runs, so a late report from an earlier run can never answer a job of this one.
+   * Queue a job (Bridge task id). Nearby jobs share one typed prompt; each `egghead` report
+   * completes its own task. A late report from an earlier run cannot match this run's ids.
    */
-  submit(prompt: (job: number) => string): Effect.Effect<Report, SupportError>
+  enqueue(spec: { readonly task: number; readonly line: string }): Effect.Effect<Report, SupportError>
 }>()("egghead/demo/AgentTerminal") {
   static readonly layer = (options: AgentOptions) =>
     Layer.effect(AgentTerminal, Effect.gen(function*() {
@@ -136,6 +146,13 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
       let lastOutput = Date.now()
       let size = { cols: 100, rows: 26 }
       let proc: pty.IPty | undefined
+      let dead: string | undefined
+
+      const show = (chunk: string) => {
+        lastOutput = Date.now()
+        scrollback = (scrollback + chunk).slice(-400_000)
+        for (const l of listeners) l(chunk)
+      }
 
       const spawn = () => {
         const p = pty.spawn(options.command, [...options.args], {
@@ -153,25 +170,28 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
           } as Record<string, string>
         })
         p.onData((chunk) => {
-          lastOutput = Date.now()
-          scrollback = (scrollback + chunk).slice(-400_000)
-          for (const l of listeners) l(chunk)
+          if (/No model selected|No models available/.test(chunk)) {
+            dead = "No model selected. aws login / Bedrock credentials, then restart the demo."
+          }
+          show(chunk)
         })
         p.onExit(() => {
           if (proc === p) proc = undefined
-          const note = `\r\n\x1b[2m[${options.label} exited]\x1b[0m\r\n`
-          scrollback += note
-          for (const l of listeners) l(note)
+          show(`\r\n\x1b[2m[${options.label} exited]\x1b[0m\r\n`)
         })
         return p
       }
       proc = spawn()
       yield* Effect.addFinalizer(() => Effect.sync(() => proc?.kill()))
 
-      const waiting = yield* Ref.make(new Map<number, Deferred.Deferred<Report>>())
-      const one = yield* Semaphore.make(1)
+      type Slot = {
+        readonly line: string
+        readonly done: Deferred.Deferred<Report, SupportError>
+        readonly phase: "queued" | "typed"
+      }
+      const waiting = yield* Ref.make(new Map<number, Slot>())
+      const wake = yield* Queue.unbounded<void>()
       const decode = Schema.decodeUnknownOption(Report)
-      let jobs = 0
 
       // Type like a fast typist (a pasted wall of text is less readable on video), then Enter.
       const type = (text: string) =>
@@ -185,33 +205,78 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
           proc!.write("\r")
         })
 
-      // After a report, let the agent finish its turn before typing the next job.
+      // After a report, let the agent finish its turn before typing the next inbox.
       const settle = Effect.gen(function*() {
         const until = Date.now() + 6000
         while (Date.now() < until && Date.now() - lastOutput < 800) yield* Effect.sleep("100 millis")
       })
 
-      const submit = (prompt: (job: number) => string) =>
-        one.withPermits(1)(Effect.gen(function*() {
-          const task = ++jobs
-          const done = yield* Deferred.make<Report>()
-          yield* Ref.update(waiting, (m) => new Map(m).set(task, done))
-          yield* type(prompt(task))
-          const report = yield* Deferred.await(done).pipe(
+      const failSlot = (slot: Slot, cause: string) =>
+        Deferred.fail(slot.done, new SupportError({ operation: "investigate", cause }))
+
+      const failWaiting = (cause: string) =>
+        Effect.gen(function*() {
+          const m = yield* Ref.get(waiting)
+          yield* Ref.set(waiting, new Map())
+          for (const slot of m.values()) yield* failSlot(slot, cause)
+        })
+
+      const worker = Effect.forever(Effect.gen(function*() {
+        yield* Queue.take(wake)
+        yield* Effect.sleep("200 millis")
+        yield* Queue.takeAll(wake)
+        while (true) {
+          const batch = [...(yield* Ref.get(waiting)).entries()]
+            .filter(([, s]) => s.phase === "queued")
+            .sort((a, b) => a[0] - b[0])
+          if (batch.length === 0) break
+          if (dead) {
+            show(`\x1b[31m  ${dead} Falling back to the fast check.\x1b[0m\r\n`)
+            yield* failWaiting(dead)
+            break
+          }
+          yield* Ref.update(waiting, (m) => {
+            const next = new Map(m)
+            for (const [task, slot] of batch) next.set(task, { ...slot, phase: "typed" })
+            return next
+          })
+          const prompt = inboxPrompt(batch.map(([task, s]) => ({ task, line: s.line })))
+          show(`\r\n\x1b[96m▸ ${batch.map(([t]) => t).join(", ")}\x1b[0m ${prompt.slice(0, 160)}\r\n`)
+          yield* type(prompt)
+          yield* Effect.forEach(
+            batch,
+            ([, slot]) => Deferred.await(slot.done).pipe(Effect.ignore),
+            { concurrency: "unbounded" }
+          )
+          yield* settle
+        }
+      }))
+      yield* Effect.forkScoped(worker)
+
+      const enqueue = (spec: { readonly task: number; readonly line: string }) =>
+        Effect.gen(function*() {
+          if (dead) {
+            show(`\x1b[31m  ${dead} Falling back to the fast check.\x1b[0m\r\n`)
+            return yield* Effect.fail(new SupportError({ operation: "investigate", cause: dead }))
+          }
+          const done = yield* Deferred.make<Report, SupportError>()
+          yield* Ref.update(waiting, (m) => new Map(m).set(spec.task, { line: spec.line, done, phase: "queued" }))
+          yield* Queue.offer(wake, undefined)
+          const timed = yield* Deferred.await(done).pipe(
             Effect.timeoutOption(Duration.seconds(options.timeoutS)),
             Effect.ensuring(Ref.update(waiting, (m) => {
               const next = new Map(m)
-              next.delete(task)
+              next.delete(spec.task)
               return next
             }))
           )
-          if (Option.isNone(report)) {
+          if (Option.isNone(timed)) {
             proc?.write("\x1b") // interrupt the agent's turn (pi: Escape aborts)
+            yield* failSlot({ line: spec.line, done, phase: "typed" }, `no report within ${options.timeoutS} s`)
             return yield* Effect.fail(new SupportError({ operation: "investigate", cause: `no report within ${options.timeoutS} s` }))
           }
-          yield* settle
-          return report.value
-        }))
+          return timed.value
+        })
 
       return AgentTerminal.of({
         label: options.label,
@@ -228,11 +293,11 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
           Effect.gen(function*() {
             const r = decode(body)
             if (Option.isNone(r)) return false
-            const done = (yield* Ref.get(waiting)).get(r.value.task)
-            if (!done) return false
-            return yield* Deferred.succeed(done, r.value)
+            const slot = (yield* Ref.get(waiting)).get(r.value.task)
+            if (!slot) return false
+            return yield* Deferred.succeed(slot.done, r.value)
           }),
-        submit
+        enqueue
       })
     }))
 
@@ -244,10 +309,10 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
     return Investigator.of({
       name: agent.label,
       confirm: (task, item) =>
-        Effect.flatMap(agent.submit((job) => confirmPrompt(job, item)), (r) =>
+        Effect.flatMap(agent.enqueue({ task, line: confirmPrompt(task, item) }), (r) =>
           r.kind === "report" ? Effect.succeed({ status: r.status, fact: r.fact, by: agent.label }) : wrong(task, r.kind)),
       answer: (task, q) =>
-        Effect.flatMap(agent.submit((job) => answerPrompt(job, q.speaker, q.text)), (r) =>
+        Effect.flatMap(agent.enqueue({ task, line: answerPrompt(task, q.speaker, q.text) }), (r) =>
           r.kind === "answer" ? Effect.succeed(r.answer) : wrong(task, r.kind))
     })
   }))

@@ -1,5 +1,5 @@
 // The meeting page: cartoon teammates who lip-sync to their Polly voices, your camera, Egg Head
-// with what it is doing right now, its coding agent's live terminal, and a feed of every decision.
+// with what it is doing right now, a look-up pane (pi runs underneath), and a feed.
 import { drawEggHead, drawPerson, personOf } from "./avatars.js"
 import { enter, flash, morph, pop, reconcile, roll, shake } from "./motion.js"
 import { connect, createStore, eggState, esc } from "./store.js"
@@ -14,11 +14,6 @@ const h = (tag, cls, html) => {
 const params = new URLSearchParams(location.search)
 const me = params.get("me") || "You"
 const cfg = await fetch("/config").then((r) => r.json())
-$("title").textContent = `Incident bridge · ${cfg.title}`
-$("agent-label").textContent = cfg.agent === "none" ? "off" : cfg.agent.startsWith("pi · amazon-bedrock") ? "pi on Amazon Bedrock" : cfg.agent.split(" · ")[0]
-// ?term=30%&busy=60%: terminal height when idle, and while the agent works (it grows so its commands show)
-if (params.has("term")) document.documentElement.style.setProperty("--term-h", params.get("term"))
-if (params.has("busy")) document.documentElement.style.setProperty("--term-busy", params.get("busy"))
 
 const MIC_ON = '<svg class="mic-on" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>'
 const MIC_OFF = '<svg class="mic-off" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2zM3.3 2.3 2 3.6l18.4 18.4 1.3-1.3z"/></svg>'
@@ -141,30 +136,6 @@ const badge = (name, text, cls, ms = 2500) => {
 }
 
 // ---------------------------------------------------------------------------
-// Terminal
-// ---------------------------------------------------------------------------
-
-const term = new window.Terminal({
-  fontFamily: '"JetBrains Mono", "SF Mono", Menlo, Consolas, monospace',
-  fontSize: Number(params.get("font") ?? 12),
-  lineHeight: 1.1,
-  cursorBlink: false,
-  disableStdin: true,
-  scrollback: 4000,
-  theme: { background: "#0a0a0a", foreground: "#e5e5e5", cursor: "#3b82f6", selectionBackground: "#262626" }
-})
-const fit = new window.FitAddon.FitAddon()
-term.loadAddon(fit)
-term.open($("screen"))
-const resize = () => {
-  try { fit.fit() } catch {}
-  fetch("/pty/resize", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cols: term.cols, rows: term.rows }) })
-}
-new ResizeObserver(() => { clearTimeout(resize.t); resize.t = setTimeout(resize, 450) }).observe($("screen"))
-resize()
-new EventSource("/pty").onmessage = (e) => term.write(JSON.parse(e.data).d)
-
-// ---------------------------------------------------------------------------
 // The call
 // ---------------------------------------------------------------------------
 
@@ -229,6 +200,7 @@ store.subscribe((s, m) => {
     }
   }
   renderEgg(s)
+  renderWork(s)
   renderFeed(s)
 })
 
@@ -253,24 +225,42 @@ function renderEgg(s) {
     ? running.job === "confirm" ? `Checking ${running.detail?.split(":")[0]}'s claim` : `Looking into ${answering?.speaker ?? "a"}'s question`
     : confirmed ? `${confirmed.speaker}'s claim is wrong`
     : ready ? `Has an answer for ${ready.speaker}`
+    : s.status && (s.running || s.done) ? s.status
     : ""
   if ($("egg-detail").textContent !== detail) {
     $("egg-detail").textContent = detail
     if (detail) enter($("egg-detail"), { y: 6, scale: 1 })
   }
   const busy = !!running
-  // the terminal grows while the agent works, and stays big a moment after it reports
   if (busy) {
     clearTimeout(renderEgg.shrink)
     renderEgg.shrink = 0
-    document.body.classList.add("agent-busy")
-  } else if (document.body.classList.contains("agent-busy") && !renderEgg.shrink) {
+    document.body.classList.add("work-busy")
+  } else if (document.body.classList.contains("work-busy") && !renderEgg.shrink) {
     renderEgg.shrink = setTimeout(() => {
       renderEgg.shrink = 0
-      document.body.classList.remove("agent-busy")
+      document.body.classList.remove("work-busy")
     }, 3000)
   }
-  $("agent-pill").classList.toggle("on", busy)
+  $("work-pill").classList.toggle("on", busy)
+}
+
+function renderWork(s) {
+  const jobs = [...s.tasks.values()].filter((t) => t.dispatchedAt !== undefined)
+  const box = $("work")
+  if (!jobs.length) {
+    if (!box.querySelector(".empty")) box.innerHTML = `<div class="empty">Waiting.</div>`
+    return
+  }
+  box.querySelector(".empty")?.remove()
+  reconcile(box, jobs.map((t) => {
+    const who = t.job === "confirm" ? `${(t.detail ?? "").split(":")[0]}'s claim` : "a question"
+    const st = t.state === "running" ? "looking" : "found"
+    const raw = (t.result ?? "").replace(/^confirmed: /, "")
+    const useful = raw && !/no model|fast check/i.test(raw)
+    const body = t.state === "running" ? `Looking up ${esc(who)}.` : useful ? esc(raw) : `Looked up ${esc(who)}.`
+    return { key: `w${t.task}`, cls: `job ${t.state === "running" ? "running" : "done"}`, html: `<div class="k">${esc(st)}</div><p>${body}</p>` }
+  }))
 }
 
 let feedTouched = 0
@@ -291,9 +281,9 @@ function renderFeed(s) {
     items.push({ at: l.at, key: `l${l.index}`, cls: "item", html: `<span class="who">${esc(l.speaker)}</span><span class="txt">${esc(text)}</span>${tag ? ` ${tag}` : ""}` })
   }
   for (const t of s.tasks.values()) {
-    if (t.dispatchedAt === undefined) continue
+    if (t.dispatchedAt === undefined || t.state !== "running") continue
     const what = t.job === "confirm" ? `Checking ${t.detail?.split(":")[0]}'s claim` : "Looking into the question"
-    items.push({ at: t.dispatchedAt + 1, key: `t${t.task}`, cls: `item agent ${t.state}`, html: `<span class="who">Agent</span><span class="txt">${t.result ? esc(t.result.replace(/^confirmed: /, "")) : `${esc(what)}…`}</span>` })
+    items.push({ at: t.dispatchedAt + 1, key: `t${t.task}`, cls: "item egg running", html: `<span class="who">Egg Head</span><span class="txt">${esc(what)}…</span>` })
   }
   s.egg.forEach((e, i) => items.push({ at: e.at + 2, key: `e${i}`, cls: "item egg", html: `<span class="who">Egg Head</span><span class="txt">${esc(e.text)}</span>` }))
   s.quiet.forEach((q, i) => items.push({ at: q.at + 1, key: `q${i}`, cls: "item quiet", html: `<span class="who">Stayed quiet</span> ${esc(q.why)}` }))

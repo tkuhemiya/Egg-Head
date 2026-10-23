@@ -59,6 +59,11 @@ const plan = (task: string) => {
   return { resource, command, finish }
 }
 
+const plansOf = (text: string) => {
+  const chunks = text.split(/(?=Task \d+)/).filter((s) => /Task \d+/.test(s))
+  return (chunks.length > 0 ? chunks : [text]).map(plan)
+}
+
 let call = 0
 const id = () => `call_${Date.now()}_${call++}`
 const usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } }
@@ -87,11 +92,14 @@ export default function(pi: ExtensionAPI) {
         const task = messages[lastUser]
         const text = typeof task?.content === "string" ? task.content : (task?.content ?? []).map((b: any) => b.text ?? "").join("")
         const step = messages.slice(lastUser + 1).filter((m) => m.role === "toolResult").length
-        const p = plan(text)
+        const plans = plansOf(text)
+        const p = plans[0]!
+        const command = plans.map((x) => x.command).join(" && ")
+        const finish = plans.map((x) => x.finish).join(" && ")
         const content: Array<any> = step === 0
-          ? [{ type: "text", text: `Checking ${p.resource} with the AWS CLI.` }, { type: "toolCall", id: id(), name: "bash", arguments: { command: p.command } }]
+          ? [{ type: "text", text: `Checking ${p.resource} with the AWS CLI.` }, { type: "toolCall", id: id(), name: "bash", arguments: { command } }]
           : step === 1
-          ? [{ type: "toolCall", id: id(), name: "bash", arguments: { command: p.finish } }]
+          ? [{ type: "toolCall", id: id(), name: "bash", arguments: { command: finish } }]
           : [{ type: "text", text: "Reported to Egg Head." }]
         const message: any = {
           role: "assistant", content: [], api: model.api, provider: model.provider, model: model.id, usage,

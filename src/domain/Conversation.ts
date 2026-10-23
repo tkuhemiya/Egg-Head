@@ -15,7 +15,7 @@
  *   (code), and Decider says the speaker is telling someone to act on a system now. Waiting for
  *   a gap would cost more than interrupting, so this skips the gate's silence rules.
  *
- * These questions have no research numbers behind them yet (research/decider scored claim
+ * These questions have no research numbers behind them yet (docs/research/decider scored claim
  * routing and the gate); their wording follows the research findings (separate yes/no
  * questions, the latest line, plain words).
  */

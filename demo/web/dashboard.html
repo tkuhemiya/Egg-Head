@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Egg Head · run dashboard</title>
+<title>DEMO</title>
 <link rel="stylesheet" href="/web/theme.css">
 <style>
   :root { --bg: var(--n-950); --panel: var(--n-950); --line: var(--n-800); --text: var(--n-100); --muted: var(--n-500); --agent: var(--run-ink); }
@@ -21,28 +21,25 @@
   header button:hover { transform: translateY(-1px); }
   header button:active { transform: scale(.96); transition-duration: .08s; }
   header button:disabled { opacity: .35; cursor: default; transform: none; }
-  .live { display: none; align-items: center; gap: 7px; color: var(--bad-ink); font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .09em; }
+  .live { display: none; align-items: center; gap: 6px; color: var(--n-500); font: 500 11px var(--mono); letter-spacing: .06em; }
   .live.on { display: inline-flex; }
-  .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); animation: ring 1.6s ease-out infinite; }
-  @keyframes ring { from { box-shadow: 0 0 0 0 rgba(239,68,68,.6); } to { box-shadow: 0 0 0 7px rgba(239,68,68,0); } }
+  .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--bad); }
 
-  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 18px 22px 0; }
-  .kpi { position: relative; overflow: hidden; background: var(--n-900); border: 1px solid var(--hair); border-radius: 12px; padding: 12px 14px; }
-  .kpi b { display: flex; width: fit-content; font: 600 26px/1.1 var(--mono); letter-spacing: -.02em; margin-bottom: 6px; }
-  .kpi > span { font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  .kpi.bad b { color: var(--bad-ink); } .kpi.egg b { color: var(--egg); } .kpi.agent b { color: var(--agent); } .kpi.quiet b { color: var(--n-300); }
-
-  main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; padding: 16px 22px 40px; }
+  main { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.8fr); gap: 20px; padding: 16px 22px 40px; align-items: start; }
   section { background: var(--n-950); border: 1px solid var(--hair); border-radius: 14px; padding: 14px 16px; min-width: 0; }
   h2 { margin: 0 0 10px; font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .09em; color: var(--muted); display: flex; justify-content: space-between; }
-  .right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
   .empty { color: var(--n-600); font: 12px var(--mono); }
+  #moment-sec { position: sticky; top: 64px; }
 
-  /* transcript */
-  #transcript { max-height: 72vh; overflow-y: auto; margin: 0 -6px; padding: 0 6px; }
-  .t-line { position: relative; display: grid; grid-template-columns: 48px 1fr; gap: 10px; padding: 9px 6px; border-bottom: 1px solid var(--hair); border-radius: 8px; transform-origin: 50% 0; }
-  .t-line:last-child { border-bottom-color: transparent; }
-  .t-time { color: var(--n-600); font: 12px var(--mono); padding-top: 2px; }
+  /* transcript: a time spine, not a stack of cards */
+  #transcript { max-height: 72vh; overflow-y: auto; margin: 0 -4px; padding: 0; }
+  .t-line { position: relative; display: grid; grid-template-columns: 44px 14px 1fr; gap: 0 8px; padding: 8px 12px 8px 4px; transform-origin: 50% 0; }
+  .t-time { color: var(--n-600); font: 12px var(--mono); text-align: right; padding-top: 2px; }
+  .t-rail { position: relative; }
+  .t-rail::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--n-800); transform: translateX(-50%); }
+  .t-line:first-child .t-rail::before { top: 14px; }
+  .t-line:last-child .t-rail::before { bottom: auto; height: 14px; }
+  .t-rail i { position: absolute; z-index: 1; left: 50%; top: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--n-700); transform: translateX(-50%); }
   .t-who { font-weight: 600; margin-right: 6px; }
   .t-who i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
   .t-text { color: var(--n-300); }
@@ -59,46 +56,32 @@
   .sub-row.quiet { border: 1px dashed var(--n-800); color: var(--muted); }
   .sub-row.quiet b { color: var(--n-400); font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .07em; margin-right: 4px; }
 
-  /* tables */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; color: var(--n-600); font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .08em; padding: 4px 6px 7px; border-bottom: 1px solid var(--hair); }
-  td { padding: 8px 6px; border-bottom: 1px solid var(--hair); vertical-align: top; color: var(--n-300); }
-  td b { color: var(--n-100); font-weight: 600; }
-  tr:last-child td { border-bottom-color: transparent; }
-  tr { position: relative; }
-  td .dim { color: var(--muted); font: 11.5px var(--mono); display: block; margin-top: 2px; }
-  td.n { white-space: nowrap; font: 12px var(--mono); }
   .state { position: relative; display: inline-flex; align-items: center; gap: 6px; overflow: hidden; font: 500 11px/1.5 var(--mono); padding: 1px 8px; border-radius: 999px; white-space: nowrap;
     border: 1px solid transparent; transition: background-color .12s, color .12s; }
   .state.raised, .state.barged, .state.answered { color: var(--n-950); background: var(--egg); }
   .state.corrected, .state.true, .state.overruled, .state.parked, .state.dropped, .state.done { color: var(--ok-ink); background: var(--ok-soft); border-color: rgba(34,197,94,.25); }
   .state.contradicted, .state.confirmed, .state.failed { color: var(--bad-ink); background: var(--bad-soft); border-color: rgba(239,68,68,.3); }
   .state.listening, .state.ready { color: var(--ask); background: var(--ask-soft); border-color: rgba(129,140,248,.3); }
-  .quiet-list div { padding: 8px 0; border-bottom: 1px solid var(--hair); font-size: 13px; color: var(--n-300); }
-  .quiet-list div:last-child { border-bottom-color: transparent; }
-  .quiet-list span { color: var(--n-600); font: 12px var(--mono); margin-right: 8px; }
+  .fact { padding: 12px 0; border-bottom: 1px solid var(--hair); }
+  .fact:last-child { border-bottom: 0; padding-bottom: 2px; }
+  .fact .k { font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }
+  .fact p { margin: 0 0 6px; color: var(--n-300); }
+  .fact p:last-child { margin-bottom: 0; }
+  .fact b { color: var(--n-100); }
+  .fact .dim { color: var(--muted); font: 12px var(--mono); }
   /* decision tree */
   .tree-wrap { margin: 16px 22px 0; }
-  .tree-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .tree-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
   .tree-head h2 { margin: 0; }
-  .seg { position: relative; display: inline-flex; background: var(--n-900); border: 1px solid var(--hair); border-radius: 9px; padding: 2px; }
-  .seg button { position: relative; z-index: 1; background: none; border: 0; color: var(--n-500); font: 500 11.5px var(--mono); padding: 4px 11px; cursor: pointer; transition: color .15s; }
-  .seg button.on { color: var(--n-100); }
-  .seg i { position: absolute; top: 2px; bottom: 2px; border-radius: 7px; background: var(--n-800); box-shadow: inset 0 0 0 1px var(--hair-2);
-    transition: left var(--spring-bouncy-ms) var(--spring-bouncy), width var(--spring-bouncy-ms) var(--spring-bouncy); }
-  .pick { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; font-size: 13px; color: var(--n-300); }
-  .pick button { background: var(--n-900); border: 1px solid var(--hair); color: var(--n-300); border-radius: 7px; width: 26px; height: 24px; cursor: pointer; font: 12px var(--mono); transition: transform var(--spring-bouncy-ms) var(--spring-bouncy); }
-  .pick button:active { transform: scale(.9); transition-duration: .08s; }
-  .pick .what { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pick .what b { font-weight: 600; color: var(--n-100); margin-right: 5px; }
-  .pick .what span { color: var(--n-600); font: 12px var(--mono); margin-right: 8px; }
-  .pick .follow { font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--n-600); white-space: nowrap; }
-  .pick .follow.on { color: var(--run-ink); }
+  .choice { display: inline-block; border: 1px solid var(--hair); border-radius: 6px; padding: 2px 8px; font: 11.5px var(--mono); color: var(--n-300); margin: 0 5px 5px 0; }
+  .layers { margin: 8px 0 0; padding: 0 0 0 16px; color: var(--n-400); font: 12px var(--mono); }
   .tree-scroll { overflow-x: auto; padding-bottom: 4px; }
   .tree { position: relative; margin: 0 auto; }
   .tree svg { position: absolute; inset: 0; overflow: visible; }
   .tree path { fill: none; stroke: var(--n-800); stroke-width: 1.5px; stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke .2s, stroke-width var(--spring-default-ms) var(--spring-default); }
   .tree path.asked { stroke: var(--n-700); stroke-dasharray: .012 .012; }
+  .tree path.no { stroke: var(--n-400); stroke-width: 2px; stroke-dasharray: .06 .045; }
+  .tree text.fork-no { fill: var(--n-500); font: 600 10px var(--mono); text-anchor: middle; pointer-events: none; }
   .tree path.hit { stroke: var(--n-600); }
   .tree path.on { stroke: var(--n-300); stroke-width: 2px; }
   .tree path.on.run, .tree path.on.wait { stroke: var(--run); }
@@ -139,43 +122,25 @@
   .reasons b { width: 9px; height: 9px; border-radius: 3px; }
   .reasons b.ok { background: #22c55e; } .reasons b.bad { background: var(--bad); }
   .t-line { cursor: pointer; transition: background-color .15s, opacity .25s; }
-  .t-line:hover { background: rgba(255,255,255,.02); }
-  .t-line.sel { background: var(--n-900); box-shadow: inset 2px 0 0 var(--run); }
+  .t-line:hover { background: rgba(255,255,255,.025); }
+  .t-line.sel { background: rgba(59, 130, 246, .07); }
+  .t-line.sel .t-time { color: var(--run-ink); }
+  .t-line.sel .t-rail i { background: var(--run); width: 8px; height: 8px; box-shadow: 0 0 0 3px rgba(59, 130, 246, .28); }
   .t-line.dim { opacity: .3; }
-  .t-line.hit { box-shadow: inset 2px 0 0 var(--n-300); }
+  .t-line.hit .t-rail i { background: var(--n-300); }
 
-  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(3, 1fr); } }
-  @media (prefers-reduced-motion: reduce) { .live::before { animation: none; } }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } #moment-sec { position: static; } }
 </style>
 </head>
 <body>
 <header>
-  <h1><span>Egg Head</span> · run dashboard</h1>
-  <div class="sub" id="title"></div>
   <span class="live" id="live">live</span>
   <div class="grow"></div>
   <a href="/">Meeting ↗</a>
   <button id="start">Start call</button>
 </header>
 
-<div class="kpis">
-  <div class="kpi"><b id="k-lines">0</b><span>lines heard</span></div>
-  <div class="kpi bad"><b id="k-wrong">0</b><span>wrong claims caught</span></div>
-  <div class="kpi egg"><b id="k-spoke">0</b><span>times Egg Head spoke</span></div>
-  <div class="kpi quiet"><b id="k-quiet">0</b><span>times it stayed quiet</span></div>
-  <div class="kpi agent"><b id="k-llm">0</b><span>LLM calls</span></div>
-</div>
-
 <section class="tree-wrap">
-  <div class="tree-head">
-    <h2>Decision tree</h2>
-    <div class="seg" id="seg"><i></i><button data-mode="line" class="on">One line</button><button data-mode="run">Whole run</button></div>
-    <div class="pick">
-      <button id="prev" title="Previous line (←)">←</button><button id="next" title="Next line (→)">→</button>
-      <div class="what" id="what">Pick a line in the transcript</div>
-      <span class="follow" id="follow">following live</span>
-    </div>
-  </div>
   <div class="tree-scroll"><div class="tree" id="tree"></div></div>
 </section>
 
@@ -184,24 +149,10 @@
     <h2>Transcript</h2>
     <div id="transcript"><div class="empty">The call shows up here once it starts.</div></div>
   </section>
-  <div class="right">
-    <section>
-      <h2>Claims checked</h2>
-      <div id="checks"><div class="empty">None yet.</div></div>
-    </section>
-    <section>
-      <h2>Agent tasks</h2>
-      <div id="tasks"><div class="empty">None yet.</div></div>
-    </section>
-    <section>
-      <h2>Questions</h2>
-      <div id="questions"><div class="empty">None yet.</div></div>
-    </section>
-    <section>
-      <h2>Why Egg Head stayed quiet</h2>
-      <div id="quiet" class="quiet-list"><div class="empty">Nothing yet.</div></div>
-    </section>
-  </div>
+  <section id="moment-sec">
+    <h2 id="moment-h">On this line</h2>
+    <div id="moment"><div class="empty">Pick a line in the transcript.</div></div>
+  </section>
 </main>
 <script type="module" src="/web/dashboard.js"></script>
 </body>

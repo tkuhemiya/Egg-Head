@@ -1,6 +1,6 @@
 """SpeakGate: should Egg Head interrupt the call with a contradicted claim?
 
-Pass-2 spike findings (spike/REPORT.md) decide who owns what:
+Pass-2 spike findings (test/oracles/REPORT.md) decide who owns what:
 
 - `floor_free` (asked as "would speaking interrupt?" and inverted) was 87% accurate, but it
   missed the cases where someone was still mid-thought. Decider stays the gap detector and
