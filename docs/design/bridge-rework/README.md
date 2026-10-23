@@ -43,7 +43,7 @@ Grafts from design B: `Agenda` is one ordered list of candidates (answer, ack, t
 
 ## Tradeoffs
 
-Larger module count for machines that TLC and Laws can check. `hear` stays serialized until W7. Event gains `speech`/`moves` but keeps the old fields as a projection. Barge-in is off without an Investigator (finding 1). A caller who never calls `spoke` degrades to `maxSpeechS`.
+Larger module count for machines that TLC can check. `hear` stays serialized (moving the gather out of it is latency work, not done). Event gains `speech`/`moves` but keeps the old fields as a projection. Barge-in is off without an Investigator (finding 1). A caller who never calls `spoke` degrades to `maxSpeechS`.
 
 ## Alternatives not taken
 

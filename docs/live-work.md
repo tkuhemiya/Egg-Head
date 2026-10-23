@@ -1,10 +1,10 @@
-# Handoff: the work that needs a network
+# The work that needs a network
 
-This is a brief for an agent running on a machine that can reach the hosted Decider, OpenRouter, Hugging Face and AWS. The cloud environment this work was done in blocks those hosts. Everything else lives on branch `claude/fervent-fermat-c78gg1`.
+This is a brief for an agent running on a machine that can reach the hosted Decider, OpenRouter, Hugging Face and AWS. Nothing here has been run yet: the cloud environment the Bridge rework was built in blocked those hosts.
 
 ## Ground rules
 
-- **Branch.** Work on your own branch off `claude/fervent-fermat-c78gg1` (`git switch -c research/live-runs origin/claude/fervent-fermat-c78gg1`). Push it and open a PR into `claude/fervent-fermat-c78gg1`. That branch is being changed in parallel under `src/`, `test/`, `demo/` and `spec/`. Keep your changes inside the paths each task names, and nothing will conflict.
+- **Branch.** Work on your own branch off `main` (`git switch -c research/live-runs origin/main`) and open a PR into `main`. Keep your changes inside the paths each task names.
 - **Secrets.** Never commit a key. `.env` is gitignored. The research scripts read OpenRouter's key from `~/.secrets/openrouter.env` (`OPENROUTER_API_KEY=...`).
 - **Honesty.** Every number you report comes from a file you committed. Never tune on `heldout`: score it once, after the choices are written down in a `PREREGISTERED_*.json`. If something fails, commit the failure and say so.
 - **Read first.** `AGENTS.md`, `README.md`, `research/decider/README.md`, `research/decider/FINDINGS.md`, `docs/design/decider-on-state.md` and `docs/design/behaviour-harness.md`.
@@ -12,8 +12,8 @@ This is a brief for an agent running on a machine that can reach the hosted Deci
 ## 0. Check the machine (5 min)
 
 ```bash
-git switch -c research/live-runs origin/claude/fervent-fermat-c78gg1
-npm install && npm run check && npm test          # expect: all tests pass (105 at handoff)
+git switch -c research/live-runs origin/main
+npm install && npm run check && npm test          # expect: all tests pass
 curl -sS -X POST https://api.decider.cloud/v1/systemone -H 'content-type: application/json' \
   -H 'User-Agent: egghead-research/0.2' \
   -d '{"model":"strands-decider-2b","state":"Sam: orders db is fine","questions":{"q":{"type":"noul","instructions":"Does the latest speaker state a fact about a system?"}}}'
@@ -107,11 +107,10 @@ Put the parameters in `research/decider/results/exp12_platt_dev.json`. Do **not*
 - `results/exp12_platt_dev.json`;
 - the FINDINGS section.
 
-## 4. Later: these wait for code that is still being written
+## 4. Later
 
-The steps here are written so you can plan for them. Start each one only once the named code is on `claude/fervent-fermat-c78gg1`.
 
-- **Blind test of the agent prompt (after the Bridge rework lands; look for an `unknown` status in `demo/agent/bin/egghead`).**
+- **Blind test of the agent prompt** (`demo/agent/bin/egghead` now takes `--status unknown`).
   - Add 6 to 10 cases to `data/aws.json` (copy it to `data/aws-eval.json`; the stand-in `aws` reads `EGGHEAD_AWS_DATA` if set, or add that) in which the data cannot settle the claim, or contradicts it subtly.
   - Write tasks phrased like real ones, with no words like "eval", "test" or "judge" anywhere the agent can see.
   - Run pi with the old `demo/agent/SYSTEM.md` (from git history) and with the new one, several times each.
@@ -121,7 +120,7 @@ The steps here are written so you can plan for them. Start each one only once th
 
 ## Bring back
 
-Push your branch and open a PR into `claude/fervent-fermat-c78gg1`. List in the PR:
+Push your branch and open a PR into `main`. List in the PR:
 - what ran;
 - what failed;
 - where each deliverable is;

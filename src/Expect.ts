@@ -81,7 +81,6 @@ export const investigates = (job: Investigates["job"]): Outcome => ({ _tag: "Inv
 /** Not before `minS` after the line ended, and no later than `maxS` when given. */
 export const afterEnd = (minS: number, maxS?: number): Timing => ({ since: "lineEnd", minS, ...(maxS === undefined ? {} : { maxS }) })
 /** While the line is still playing (barge-in). */
-export const duringLine: Timing = { since: "lineEnd", maxS: 0 }
 
 const fmt = (s: number) => `${Number(s.toFixed(2))} s`
 

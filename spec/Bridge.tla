@@ -81,6 +81,9 @@ Init ==
 
 MaySpeak == floor = "Open"  \* src/Floor.ts mayStart: not while Speaking or Composing
 
+\* ghost: a line started while Egg Head was already speaking (barge-in is exempt by design)
+Overlap == IF floor # "Open" THEN {"overlap"} ELSE {}
+
 \* src/Agenda.ts next + src/Claims.ts spoken (flag)
 GateItem == {c \in Claims : status[c] = "Standing"}
 Oldest == IF GateItem = {} THEN CHOOSE x \in Claims : TRUE
@@ -97,7 +100,7 @@ SpeakFlag(c) ==
     /\ how' = [how EXCEPT ![c] = IF basis[c] = "confirmed" THEN "firm" ELSE "tentative"]
     /\ floor' = "Speaking"
     /\ humanSince' = FALSE
-    /\ harm' = harm \cup HarmOf(c, basis[c] = "confirmed")
+    /\ harm' = harm \cup HarmOf(c, basis[c] = "confirmed") \cup Overlap
     /\ UNCHANGED <<turn, intro, truth, repaired, parked, told, jobs, attempts, basis, req, reqJob>>
 
 \* src/Requests.ts worked then jobFinished then answered
@@ -107,7 +110,8 @@ SpeakAnswer ==
     /\ req' = "Closed"
     /\ floor' = "Speaking"
     /\ humanSince' = FALSE
-    /\ UNCHANGED <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis, reqJob, said, how, harm>>
+    /\ harm' = harm \cup Overlap
+    /\ UNCHANGED <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis, reqJob, said, how>>
 
 Ack ==
     /\ req = "Listening"
@@ -116,7 +120,8 @@ Ack ==
     /\ reqJob' = TRUE
     /\ floor' = "Speaking"
     /\ humanSince' = FALSE
-    /\ UNCHANGED <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis, said, how, harm>>
+    /\ harm' = harm \cup Overlap
+    /\ UNCHANGED <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis, said, how>>
 
 Step(floorOpen) ==
     /\ floorOpen
@@ -166,10 +171,12 @@ Hear(kind, c, found) ==
           /\ humanSince' = TRUE
           /\ status' = s2
           /\ UNCHANGED basis
+          /\ harm' = harm \cup (IF \E x \in Claims : prk[x] /\ ~parked[x] /\ res[x] # c
+                                 THEN {"parked other"} ELSE {})
           /\ IF kind = "question" /\ req \in {"none", "Closed"}
              THEN /\ req' = "Listening"
-                  /\ UNCHANGED <<reqJob, said, how, harm, floor, told>>
-             ELSE /\ UNCHANGED <<req, reqJob, said, how, harm, floor, told>>
+                  /\ UNCHANGED <<reqJob, said, how, floor, told>>
+             ELSE /\ UNCHANGED <<req, reqJob, said, how, floor, told>>
 
 HearAny ==
     \/ \E c \in Claims, found \in {"wrong", "right"} : Hear("claim", c, found)
@@ -309,24 +316,24 @@ TypeOK ==
     /\ said \subseteq Claims
     /\ jobs \subseteq Claims
 
-\* src/Laws.ts NeverFirmOnUnconfirmed — tentative barge on an unconfirmed claim is allowed.
+\* src/Claims.ts bargeVoice, src/Step.ts speakTail: a tentative barge on an unconfirmed claim is allowed.
 NeverFirmOnUnconfirmed == "firm unconfirmed" \notin harm
-NeverSaysUnconfirmed == NeverFirmOnUnconfirmed
 
-\* src/Laws.ts NeverSaysCorrected
+\* src/Claims.ts bargeable; corrected and parked claims are Closed
 NeverSaysCorrected == "corrected" \notin harm
 
-\* src/Laws.ts NeverFirmRightClaimIsWrong
+\* src/Claims.ts jobFinished: a claim the agent finds right is Closed (overruled)
 NeverSaysRightClaimIsWrong == "claim was right" \notin harm
 
-\* src/Laws.ts TentativeIsChecked (src/Claims.ts spoken starts a job)
+\* src/Claims.ts spoken: a tentative barge starts a confirm job
 TentativeIsChecked == \A c \in Claims : told[c] => status[c] \in {"Checking", "Standing", "Closed"}
 
-\* src/Laws.ts ParkingIsScoped — a park of r never closes a claim whose resource is not r.
-ParkingIsScoped == \A c \in Claims : parked[c] => res[c] = c
+\* src/Claims.ts judge + src/Judgments.ts parksToday: a park of r never closes a claim about another resource.
+ParkingIsScoped == "parked other" \notin harm
 
-\* src/Laws.ts OneLinePerGap — Floor.mayStart: never take the floor while already speaking.
-OneLinePerGap == floor \in SpeechStatuses
+\* src/Floor.ts mayStart: no flag, ack or answer starts while Egg Head is speaking. The quiet-time
+\* half of the rule (quietAfterSpeechS) is timing and is not modelled; barge-in is exempt.
+OneLinePerGap == "overlap" \notin harm
 
 \* src/Requests.ts jobFinished always reaches Ready, then Agenda answers.
 AckIsAnswered == (req = "Working") ~> (req = "Closed")

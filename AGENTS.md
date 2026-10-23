@@ -6,11 +6,13 @@ Hackathon agent: incident-call bridge that uses **Strands Decider 2B** for fast 
 
 | Path | Role |
 |------|------|
-| `src/` | Runtime, TypeScript on [Effect 4](https://effect.website): Decider provider, questions, gate, checks, `Bridge`, Bedrock (Strands TS) |
+| `src/` | Runtime, TypeScript on [Effect 4](https://effect.website): Decider provider, questions, gate, checks, Bedrock (Strands TS), and the `Bridge`: `Gather` (slow work against a snapshot), `Step.reduce` (pure; meets `Claims`, `Requests`, `Jobs`, `Floor`, `Agenda`) and a shell that commits then runs commands |
 | `test/` | Vitest + `@effect/vitest` (`ScriptedDecider` layer; no live Decider or AWS). `test/fixtures/` holds the Python parity oracles |
 | `data/world.json` | Mock check world for the demo (`MockSource`); `data/aws.json` is the same incident in AWS CLI shapes, for the agent's stand-in `aws` |
 | `scripts/` | `smoke-decider.ts` (short live call), `replay-research.ts` (router vs the research numbers), `probe-bedrock.ts` (two live Bedrock calls), `record-demo.ts` (film the meeting page to an mp4), `aws-usage.sh` (spend from CloudWatch) |
 | `demo/` | The demo: meeting page and dashboard (`web/`), real-time call runner, Polly voices (with viseme marks) and Transcribe streaming, the terminal agent (`Agent.ts`, `agent/`: pi extension, system prompt, stand-in `aws` CLI and `egghead` report command). Call scripts are in `data/calls/`; [`demo/RECORDING.md`](demo/RECORDING.md) is the video run sheet |
+| `spec/` | TLA+ model of when Egg Head speaks (`Bridge.tla`); `spec/check.sh` model-checks every rule (needs Java). `test/SpecSync.test.ts` keeps its tags in step with the code |
+| `docs/` | Design notes (`design/bridge-rework/README.md` is the current Bridge), the decision log (`decisions/quality-run.tsv`, append-only) and `live-work.md`, the runs that need a network |
 | `spike/` | Python, frozen. What is left of the Day-1 go/no-go spike: `egghead_gate.py` (the Python gate the research scripts import and `src/Gate.ts` is held to), the pass-2 answers and reports, and the gate parity export |
 | `research/decider/` | Decider 2B research campaign (prompting, bias, routing, calibration); see [`FINDINGS.md`](research/decider/FINDINGS.md) |
 
@@ -36,7 +38,7 @@ Effect idioms used throughout (follow them in new code; `node_modules/effect/AGE
 - Pure core (`Gate`, `Router`, `Compare`, `Ledger`) is plain functions over immutable data; effects stay at the edges.
 - Domain records (`Route`, `GateDecision`, `LedgerItem`, `Event`) are `Schema`s; absent values are `Option` (`OptionFromNullOr`, so JSON shows `null`).
 - Untrusted input (Decider responses, `world.json`) is decoded with `Schema`. Errors are tagged (`AiError`, `SupportError`).
-- State lives in `Ref`s; `Bridge` serialises `hear`/`tick` with a `Semaphore`. Time comes from `Clock` (use `TestClock` in tests).
+- State lives in one `Ref`; every input goes through `Step.reduce` in one `Ref.modify`, and `hear` lines are serialised with a `Semaphore`. Time comes from `Clock` (use `TestClock` in tests).
 
 **Router = research pipeline:** `src/Questions.ts` and `src/Router.ts` port the frozen research pipeline (FINDINGS.md exp 9 + final_eval): claim from four yes/no layers on the latest line (kv format) combined with the dev-fit logistic weights; code-first resource lookup by alias; check limited to that resource's checks; every choice averaged over option orders; fire at min(claim, resource, check) ≥ 0.25. The gate asks `self_repaired` and Platt-scaled `finished`. `test/Questions.test.ts` holds wording, renderers and combiners to the Python (`research/decider/scripts/export_runtime_parity.py`). `npm run replay -- heldout` reproduced exp 9 exactly on 22 Oct (claim P 0.884 R 0.905; route P 0.806 R 0.806; results in `research/decider/results/runtime_*.json`). A claim the router cannot route is escalated (to Bedrock when wired).
 

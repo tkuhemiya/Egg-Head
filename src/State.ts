@@ -131,5 +131,3 @@ export interface Transition {
   readonly event: Option.Option<Event>
   readonly commands: ReadonlyArray<Command>
 }
-
-export const noop = (s: State): Transition => ({ state: s, event: Option.none(), commands: [] })

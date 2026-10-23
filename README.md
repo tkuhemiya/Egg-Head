@@ -68,13 +68,12 @@ npm run demo                   # live: hosted Decider, pi on Bedrock, Polly voic
 
 ## Status and to do
 
-Done: runtime (TypeScript on Effect 4), research router and gate ported with parity tests, Bedrock writer and escalation, agent mode with the pi Investigator, meeting page and dashboard, Polly voices, Transcribe mode.
+Done: runtime (TypeScript on Effect 4), research router and gate ported with parity tests, Bedrock writer and escalation, agent mode with the pi Investigator, the Bridge reworked as gather / reduce / interpret with a TLA+ model of when it speaks (`spec/`), meeting page and dashboard, Polly voices, Transcribe mode.
 
 Open:
 
-- [ ] First live run of agent mode: the new Decider questions (`addr`, `ask`, `act`) have no research numbers yet; check each line's `expect` on the dashboard.
+- [ ] First live run of agent mode: the new Decider questions (`addr`, `ask`, `act`) have no research numbers yet; check each line's `expect` on the dashboard. The runs that need a network are written up in [`docs/live-work.md`](docs/live-work.md).
 - [ ] Live-mic mode so real people can run the demo.
-- [ ] Known quirk, kept for parity: "park that" anywhere after a claim lowers the cost of every open claim.
 - [ ] Choose the pattern tag: `#policy` (speak gate, recommended) or `#tool-selection` (claim-check router).
 
 Submission:

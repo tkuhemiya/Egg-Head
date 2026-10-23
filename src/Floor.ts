@@ -92,8 +92,5 @@ export const expire = (f: Floor, now: number): Floor => {
   return f
 }
 
-export const composingExpired = (f: Floor, now: number): Option.Option<SpeechId> =>
-  f.phase._tag === "Composing" && now >= f.phase.until ? Option.some(f.phase.id) : Option.none()
-
 export const currentSpeech = (f: Floor): Option.Option<SpeechId> =>
   f.phase._tag === "Open" ? Option.none() : Option.some(f.phase.id)
