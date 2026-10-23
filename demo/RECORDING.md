@@ -1,6 +1,6 @@
 # Recording the demo video
 
-A real screen recording of a live run, with your camera in the meeting. The run is not
+A real screen recording of a live run, of the meeting page. The run is not
 staged: the call is a script with synthetic voices, but every decision on screen is Decider
 answering live, and the terminal is pi on Bedrock running commands.
 
@@ -20,8 +20,8 @@ answering live, and the terminal is pi on Bedrock running commands.
 
 ## Recording setup
 
-- Browser window full screen at 1440×900 or 1920×1080. Open `http://localhost:8787/?me=YourName`
-  and allow the camera (video only; the page never asks for your microphone).
+- Browser window full screen at 1440×900 or 1920×1080. Open `http://localhost:8787/`.
+  The page uses no camera or microphone.
 - Screen recorder that captures **system audio** (the voices play in the browser). On macOS, QuickTime
   cannot; OBS (macOS 13+ captures app audio) can. Record your own mic as a separate track if you narrate.
 - Restart the server right before the take (`Ctrl+C`, `npm run demo`) so the terminal starts clean.

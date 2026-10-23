@@ -1,0 +1,17 @@
+stateDiagram-v2
+  direction LR
+  [*] --> Fresh: fast check contradicts it
+  Fresh --> Checking: one turn passes uncorrected
+  Fresh --> Corrected: the call fixes it
+  Checking --> Standing: confirmed, or the recheck still disagrees
+  Checking --> Checking: the agent fails, so a direct recheck
+  Checking --> Overruled: the agent finds it right
+  Checking --> Undetermined: the agent cannot tell
+  Standing --> Spoken: the gate opens at a gap
+  Standing --> Corrected: the call fixes it
+  Standing --> Parked: someone parks the resource
+  Corrected --> [*]
+  Overruled --> [*]
+  Undetermined --> [*]
+  Parked --> [*]
+  Spoken --> [*]

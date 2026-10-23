@@ -61,7 +61,7 @@ try {
   const context = await browser.newContext({ viewport: { width, height }, recordVideo: { dir: TMP, size: { width, height } } })
   const videoStart = Date.now()
   const page = await context.newPage()
-  await page.goto(`${base}/?nocam`) // a headless browser has no camera
+  await page.goto(`${base}/`)
   await page.waitForTimeout(1500) // a beat on the empty meeting
   const clickAt = Date.now()
   await page.click("#start")

@@ -1,0 +1,8 @@
+stateDiagram-v2
+  direction LR
+  [*] --> Open
+  Open --> Composing: gate opens, Bedrock writes
+  Open --> Speaking: gate opens, template line
+  Composing --> Speaking: line written (or the template on failure)
+  Speaking --> Open: Polly finishes (spoke)
+  Speaking --> Open: 20 s safety timeout

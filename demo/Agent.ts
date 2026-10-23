@@ -224,7 +224,7 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
       const worker = Effect.forever(Effect.gen(function*() {
         yield* Queue.take(wake)
         yield* Effect.sleep("200 millis")
-        yield* Queue.takeAll(wake)
+        yield* Queue.clear(wake) // drop wake-ups that arrived meanwhile (takeAll would wait for one)
         while (true) {
           const batch = [...(yield* Ref.get(waiting)).entries()]
             .filter(([, s]) => s.phase === "queued")

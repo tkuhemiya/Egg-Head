@@ -1,0 +1,15 @@
+flowchart LR
+  A[A line of the call] --> B([Decider: a claim?])
+  B -- yes --> C[Code: resource by alias]
+  C --> D([Decider: which check?])
+  D --> E[Code: run it, compare]
+  E -- agrees --> Q[Stay quiet]
+  E -- contradicts --> F[Ledger: survives a turn?]
+  F -- yes --> I[Agent: second look]
+  F -- corrected --> Q
+  B -- no --> G([Decider: spoken to? left hanging?])
+  G -- no --> Q
+  G -- yes --> J
+  I -- confirmed --> J([Speak gate])
+  J -- closed --> Q
+  J -- open --> K[One sentence, Polly]

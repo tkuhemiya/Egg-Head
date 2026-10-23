@@ -11,7 +11,7 @@ const STYLES = ["short", "bob", "bun", "curly", "long", "side", "beanie", "buzz"
 export const PEOPLE = {
   Priya: { skin: 4, hair: 1, style: "long", accent: 1, headset: true, role: "Incident commander" },
   Jordan: { skin: 1, hair: 2, style: "beanie", accent: 2, role: "Backend" },
-  Sam: { skin: 0, hair: 4, style: "buzz", accent: 0, glasses: true, role: "Database" },
+  Sam: { skin: 0, hair: 4, style: "bald", accent: 0, glasses: true, role: "Database" },
   Lee: { skin: 3, hair: 1, style: "bob", accent: 3, glasses: true, role: "Release" },
   Mei: { skin: 0, hair: 0, style: "bun", accent: 4, headset: true, role: "SRE" }
 }
@@ -46,6 +46,11 @@ function hairFront(g, p) {
       el("rect", { x: 47, y: 76, width: 106, height: 14, rx: 7, fill: p.accentC, opacity: 1 }, g)
       el("rect", { x: 47, y: 76, width: 106, height: 14, rx: 7, fill: "#fff", opacity: 0.25 }, g)
       el("circle", { cx: 100, cy: 33, r: 7, fill: p.accentC }, g); break
+    case "bald": // a shine on top and a little hair over each ear
+      el("ellipse", { cx: 86, cy: 60, rx: 16, ry: 7, fill: "#fff", opacity: 0.35, transform: "rotate(-18 86 60)" }, g)
+      el("path", { d: "M51 104 C49 90 52 80 58 74 C58 86 58 96 60 106 Z", ...f, opacity: 0.85 }, g)
+      el("path", { d: "M149 104 C151 90 148 80 142 74 C142 86 142 96 140 106 Z", ...f, opacity: 0.85 }, g)
+      break
     case "buzz": el("path", { d: "M54 86 C56 60 74 48 100 48 C126 48 144 60 146 86 C130 74 116 70 100 70 C84 70 70 74 54 86 Z", ...f, opacity: 0.85 }, g); break
   }
 }

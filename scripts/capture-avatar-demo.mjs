@@ -57,7 +57,7 @@ await page.evaluate(() => {
 await page.waitForTimeout(400)
 await page.screenshot({ path: join(outDir, "preview-speaking.png") })
 
-await page.goto(`http://127.0.0.1:${demoPort}/?nocam`, { waitUntil: "networkidle" })
+await page.goto(`http://127.0.0.1:${demoPort}/`, { waitUntil: "networkidle" })
 await page.click("#start")
 await page.waitForTimeout(3500)
 await page.screenshot({ path: join(outDir, "meeting-start.png"), fullPage: false })
