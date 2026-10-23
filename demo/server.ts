@@ -6,17 +6,18 @@
  *   npm run demo                               # Decider + pi on Bedrock in the terminal + Polly voices
  *   npm run demo -- --rehearsal                # no network: scripted Decider and pi model, silent voices
  *   npm run demo -- --agent none               # no terminal agent: Egg Head speaks from the fast checks
- *   npm run demo -- --agent-cmd "claude"       # any other terminal coding agent
+ *   npm run demo -- --agent-cmd "claude" --agent-env ANTHROPIC_API_KEY   # any other terminal agent (it sees only the variables named)
  *   npm run demo -- --agent-model qwen.qwen3-coder-30b-a3b-v1:0
  *   npm run demo -- --writer bedrock           # Bedrock routes claims Decider could not (escalations)
  *   npm run demo -- --mode transcribe          # Amazon Transcribe hears the call audio
- *   npm run demo -- --call data/calls/x.json --port 8080 --autostart
+ *   npm run demo -- --call data/calls/x.json --port 8080 --autostart   # --host 0.0.0.0 to serve other machines
  *
  * Needs AWS credentials for Polly (and Transcribe in that mode), and Bedrock for pi and
  * --writer bedrock: `npm run demo` loads .env (AWS_BEARER_TOKEN_BEDROCK, EGGHEAD_MODEL_ID,
  * AWS_REGION). Every run is saved to demo/out/runs/<time>.json with the scenario it played, and
  * scored against the scenario's expectations (`npx tsx scripts/check-run.ts latest` for the table).
  */
+import { randomUUID } from "node:crypto"
 import { Console, Duration, Effect, Layer, ManagedRuntime, Result, Schema } from "effect"
 import { Decision, DecisionModel } from "effect/ai"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
@@ -42,9 +43,11 @@ const { values: args } = parseArgs({
     "agent-cmd": { type: "string" },
     "agent-model": { type: "string" },
     "agent-timeout": { type: "string", default: "60" },
+    "agent-env": { type: "string", default: "" },
     rehearsal: { type: "boolean", default: false },
     call: { type: "string", default: "data/calls/checkout-incident.json" },
     port: { type: "string", default: "8787" },
+    host: { type: "string", default: "127.0.0.1" },
     autostart: { type: "boolean", default: false }
   }
 })
@@ -64,10 +67,12 @@ const AUDIO = new URL("./out/audio/", import.meta.url)
 const RUNS = new URL("./out/runs/", import.meta.url)
 
 // The terminal agent lives as long as the server, so the page shows it before and between runs.
-const reportUrl = `http://127.0.0.1:${port}/agent/report`
+// Only the agent's `egghead` command knows this key, so nothing else can put words in Egg Head's mouth.
+const reportKey = randomUUID()
+const reportUrl = `http://127.0.0.1:${port}/agent/report?key=${reportKey}`
 const timeoutS = Number(args["agent-timeout"])
 const agentOptions = args["agent-cmd"]
-  ? customOptions(args["agent-cmd"], reportUrl, timeoutS)
+  ? customOptions(args["agent-cmd"], reportUrl, timeoutS, args["agent-env"]!.split(",").filter(Boolean))
   : args.agent === "pi"
   ? piOptions({
     model: args["agent-model"] ?? process.env.EGGHEAD_AGENT_MODEL ?? process.env.EGGHEAD_MODEL_ID ?? "nvidia.nemotron-nano-3-30b",
@@ -160,10 +165,17 @@ const start = () => {
     })
 }
 
+const MAX_BODY = 64 * 1024
+
+/** A JSON body (or undefined). Requiring JSON makes a cross-site form or no-cors fetch fail its preflight. */
 const body = (req: IncomingMessage) =>
   new Promise<unknown>((resolve) => {
+    if (!(req.headers["content-type"] ?? "").startsWith("application/json")) return resolve(undefined)
     let raw = ""
-    req.on("data", (d) => (raw += d))
+    req.on("data", (d) => {
+      raw += d
+      if (raw.length > MAX_BODY) req.destroy()
+    })
     req.on("end", () => {
       try {
         resolve(JSON.parse(raw))
@@ -212,6 +224,7 @@ createServer((req, res) => {
       res.writeHead(204).end()
     })
   } else if (url.pathname === "/agent/report" && req.method === "POST") {
+    if (url.searchParams.get("key") !== reportKey) return void res.writeHead(403).end()
     void body(req).then(async (b) => {
       const taken = agent ? await Effect.runPromise(agent.report(b)) : false
       res.writeHead(taken ? 200 : 404, { "content-type": "text/plain" }).end(taken ? "ok" : "no job is waiting for that task")
@@ -223,13 +236,16 @@ createServer((req, res) => {
       res.writeHead(404).end()
     }
   } else if (url.pathname === "/start" && req.method === "POST") {
-    start()
-    res.writeHead(204).end()
+    void body(req).then((b) => {
+      if (b === undefined) return void res.writeHead(415).end()
+      start()
+      res.writeHead(204).end()
+    })
   } else {
     res.writeHead(404).end()
   }
-}).listen(port, () => {
-  console.log(`Egg Head demo: http://localhost:${port}  (dashboard /dashboard; mode ${mode}, agent ${agentLabel}${rehearsal ? ", REHEARSAL" : ""})`)
+}).listen(port, args.host, () => {
+  console.log(`Egg Head demo: http://${args.host === "127.0.0.1" ? "localhost" : args.host}:${port}  (dashboard /dashboard; mode ${mode}, agent ${agentLabel}${rehearsal ? ", REHEARSAL" : ""})`)
   Effect.runPromise(Effect.timed(warmUp))
     .then(([d]) => console.log(`Decider warm (${Math.round(Duration.toMillis(d))} ms)`), (e) => console.error("Decider warm-up failed", e))
     .finally(() => args.autostart && start())

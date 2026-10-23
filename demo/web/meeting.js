@@ -318,7 +318,7 @@ $("start").onclick = () => {
   audioOn = true
   pop($("start"), 0.9)
   $("start").disabled = true
-  fetch("/start", { method: "POST" })
+  fetch("/start", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })
 }
 // joining mid-run: a click anywhere turns the sound on
 document.addEventListener("click", () => (audioOn = true), { once: true })
