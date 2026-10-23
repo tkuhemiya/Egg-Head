@@ -1,5 +1,5 @@
 /**
- * Offline: play a scenario through the real call loop (src/Call.ts `play`) and the real
+ * Offline: play a scenario through the real call loop (src/runtime/Call.ts `play`) and the real
  * Bridge, Router, Gate and Conversation, in virtual time. Only the edges are stand-ins, all
  * built from the scenario's own data:
  *
@@ -15,15 +15,15 @@
 import { Cause, Effect, Exit, Fiber, Layer } from "effect"
 import { TestClock } from "effect/testing"
 import world from "../../data/world.json" with { type: "json" }
-import { Bridge } from "../../src/Bridge.ts"
-import { type AgentPlan, type Call, Floor, type Logged, play, type WorldPatch } from "../../src/Call.ts"
-import { MockSource, type World } from "../../src/Checks.ts"
-import { hinted } from "../../src/Hints.ts"
-import { direct, Investigator } from "../../src/Investigator.ts"
-import { judge, OFFLINE, type Report, render } from "../../src/Judge.ts"
-import { Sound } from "../../src/Sound.ts"
-import { SupportError, Writer } from "../../src/Speaker.ts"
-import { patch, Tuning, type TuningPatch } from "../../src/Tuning.ts"
+import { Bridge } from "../../src/runtime/Bridge.ts"
+import { type AgentPlan, type Call, Hold, type Logged, play, type WorldPatch } from "../../src/runtime/Call.ts"
+import { MockSource, type World } from "../../src/domain/Checks.ts"
+import { hinted } from "../../src/runtime/Hints.ts"
+import { direct, Investigator } from "../../src/runtime/Investigator.ts"
+import { judge, OFFLINE, type Report, render } from "../../src/runtime/Judge.ts"
+import { Sound } from "../../src/runtime/Sound.ts"
+import { SupportError, Writer } from "../../src/domain/Speaker.ts"
+import { patch, Tuning, type TuningPatch } from "../../src/domain/Tuning.ts"
 
 export interface OfflineOptions {
   /** Build the Bridge with these numbers instead of the defaults (test/Mutants.test.ts). */
@@ -66,7 +66,7 @@ const scriptedInvestigator = (plan: Exclude<AgentPlan, false>, seen: World) =>
 const layerFor = (call: Call, options: OfflineOptions) => {
   const fast = overlay(world as World, call.world)
   const plan = call.agent ?? {}
-  const writing = Layer.provideMerge(Floor.holdWhileWriting, Layer.merge(Writer.template, Floor.layer))
+  const writing = Layer.provideMerge(Hold.whileWriting, Layer.merge(Writer.template, Hold.layer))
   const deps = Layer.mergeAll(
     hinted(call.lines, { latencyMs: options.deciderLatencyMs ?? 150 }),
     MockSource.layer(fast),

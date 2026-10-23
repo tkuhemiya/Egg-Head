@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Model-check spec/Bridge.tla one property at a time; print PASS or the shortest counterexample.
-# Usage: spec/check.sh [property ...]   (needs java and tla2tools.jar; see .claude/skills/verify-bridge-model)
+# Usage: spec/check.sh [property ...]   (needs java; downloads tla2tools.jar once, or set TLA2TOOLS)
 set -uo pipefail
 cd "$(dirname "$0")"
 JAR="${TLA2TOOLS:-$HOME/.cache/egghead/tla2tools.jar}"

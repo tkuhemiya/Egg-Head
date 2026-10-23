@@ -4,10 +4,10 @@
  */
 import { assert, describe, it } from "@effect/vitest"
 import { Effect, Option, Result } from "effect"
-import type { Event } from "../src/Bridge.ts"
-import { type Call, type CallLine, decodeLog, encodeLogged, type Logged } from "../src/Call.ts"
-import { afterEnd, type Invariant, investigates, says } from "../src/Expect.ts"
-import { judge, LIVE, OFFLINE, type Report } from "../src/Judge.ts"
+import type { Event } from "../src/runtime/Bridge.ts"
+import { type Call, type CallLine, decodeLog, encodeLogged, type Logged } from "../src/runtime/Call.ts"
+import { afterEnd, type Invariant, investigates, says } from "../src/domain/Expect.ts"
+import { judge, LIVE, OFFLINE, type Report } from "../src/runtime/Judge.ts"
 
 const marks = { words: [], visemes: [] }
 const ms = (s: number) => Math.round(s * 1000)

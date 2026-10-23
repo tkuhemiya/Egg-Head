@@ -14,8 +14,8 @@
 import { Console, Effect, Result, Schema } from "effect"
 import { readdirSync, readFileSync } from "node:fs"
 import { parseArgs } from "node:util"
-import { type Call, decodeCall, decodeLog } from "../src/Call.ts"
-import { judge, LIVE, render } from "../src/Judge.ts"
+import { type Call, decodeCall, decodeLog } from "../src/runtime/Call.ts"
+import { judge, LIVE, render } from "../src/runtime/Judge.ts"
 
 const { values: args, positionals } = parseArgs({ allowPositionals: true, options: { call: { type: "string" } } })
 const RUNS = "demo/out/runs/"

@@ -29,8 +29,8 @@ export const springs = {
   bouncy: spring({ stiffness: 260, damping: 18, mass: 1 }),
   snappy: spring({ stiffness: 200, damping: 2 * Math.sqrt(200), mass: 1 })
 }
-const root = document.documentElement.style
-for (const [name, s] of Object.entries(springs)) {
+const root = globalThis.document?.documentElement?.style
+if (root) for (const [name, s] of Object.entries(springs)) {
   root.setProperty(`--spring-${name}`, s.easing)
   root.setProperty(`--spring-${name}-ms`, `${s.duration}ms`)
 }

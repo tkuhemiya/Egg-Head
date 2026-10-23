@@ -25,19 +25,19 @@ Every file in `data/calls/` is a scenario. `test/Scenarios.test.ts` plays each o
 
 ## Shape
 
-- **`src/Call.ts`** holds the text-mode call loop moved out of `demo/Run.ts`: ticks, partials from word marks, the humans' hold while Egg Head talks, and `waitForEggHead`. It runs on `Clock` only, through a `session()` that the Transcribe driver in `demo/` reuses. `Message` becomes a Schema whose `event` is the Bridge `Event`. The loop stamps `at` from `Clock`, so a TestClock run and a live run produce the same log. Page-only messages (`stats`, `status`) stay in `demo/`.
-- **`src/Sound.ts`** is the voice seen as durations and word marks: Polly in the demo, estimated marks offline.
-- **`src/Hints.ts`** is the hinted Decider (from `test/helpers.ts` and `demo/Rehearsal.ts`), now with a Schema, so a typo in a hint fails at decode. Its latency is deterministic. `test/helpers.ts` re-exports it, so the parity tests are untouched, and `demo/` no longer imports `test/`.
-- **`src/Expect.ts`** holds the vocabulary.
+- **`src/runtime/Call.ts`** holds the text-mode call loop moved out of `demo/Run.ts`: ticks, partials from word marks, the humans' hold while Egg Head talks, and `waitForEggHead`. It runs on `Clock` only, through a `session()` that the Transcribe driver in `demo/` reuses. `Message` becomes a Schema whose `event` is the Bridge `Event`. The loop stamps `at` from `Clock`, so a TestClock run and a live run produce the same log. Page-only messages (`stats`, `status`) stay in `demo/`.
+- **`src/runtime/Sound.ts`** is the voice seen as durations and word marks: Polly in the demo, estimated marks offline.
+- **`src/runtime/Hints.ts`** is the hinted Decider (from `test/helpers.ts` and `--rehearsal`), now with a Schema, so a typo in a hint fails at decode. Its latency is deterministic. `test/helpers.ts` re-exports it, so the parity tests are untouched, and `demo/` no longer imports `test/`.
+- **`src/domain/Expect.ts`** holds the vocabulary.
   - Per line, `expect` is a closed list of outcomes: `Says{ kind, toward?, about?, when?, certainty?, basis? }` and `Investigates{ job }`. `[]` (the default) means quiet: no speech, no investigation, no cut. Anything not listed fails.
   - Per call, `never` lists invariants: `NoTalkOver`, `SilenceBeforeSpeaking`, `OneLinePerGap`, `Cooldown{ unprompted }` and `NeverOnCorrected`.
   - Parking is checked as a `Closes{ resource }` outcome.
   - Every field is read from Bridge `Event` fields, never from the spoken words. That way a reworded Bedrock line does not fail a live run.
-- **`src/Judge.ts`** is pure. `observe(log)` gives the observed outcomes per line, and `judge(call, log)` gives a `Report` of typed problems (`Missing` with a `foundIn` line, `Unexpected`, `Mismatch`, `NotPlayed`). Its `Tolerance` setting applies one of two policies.
+- **`src/runtime/Judge.ts`** is pure. `observe(log)` gives the observed outcomes per line, and `judge(call, log)` gives a `Report` of typed problems (`Missing` with a `foundIn` line, `Unexpected`, `Mismatch`, `NotPlayed`). Its `Tolerance` setting applies one of two policies.
   - `offline` is tight.
   - `live` forgives up to 1 s of lateness for Decider and ASR latency, and never forgives being early.
 - **Scenario data** carries an optional `world` patch and an optional `agent` setting: `false` for no Investigator, or delays, what the agent sees, and whether it fails or times out. Overrule, delay and failure paths are therefore data, and the same file can be played live.
-- **`src/Tuning.ts`** puts every threshold and timing the Bridge compares against in one `Context.Reference`. Its defaults are built from the existing constants. `Gate.decide` takes a defaulted `GateTuning`, so the parity fixtures are unchanged. `test/Mutants.test.ts` breaks one setting at a time and requires a scenario to fail, naming the first failing line. A surviving mutant means either that the Bridge bypasses `Tuning` or that no scenario covers that behaviour.
+- **`src/domain/Tuning.ts`** puts every threshold and timing the Bridge compares against in one `Context.Reference`. Its defaults are built from the existing constants. `Gate.decide` takes a defaulted `GateTuning`, so the parity fixtures are unchanged. `test/Mutants.test.ts` breaks one setting at a time and requires a scenario to fail, naming the first failing line. A surviving mutant means either that the Bridge bypasses `Tuning` or that no scenario covers that behaviour.
 - **Run files** embed the scenario they ran (`{ scenario, run, log }`), so a later edit to the script cannot change the score. Old files still load through their `call` path.
 
 ## Rejected
@@ -49,6 +49,6 @@ Every file in `data/calls/` is a scenario. `test/Scenarios.test.ts` plays each o
 
 ## Accepted costs
 
-- `demo/Run.ts` is refactored into `src/Call.ts`.
+- `demo/Run.ts` is refactored into `src/runtime/Call.ts`.
 - Expectations repeat their numbers (2.5 s) instead of importing the constants, because the expectation is the spec.
 - Unlisted behaviour fails, so a new kind of line turns the scenarios red until they are updated.

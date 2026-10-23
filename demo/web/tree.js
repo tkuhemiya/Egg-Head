@@ -13,41 +13,99 @@ const REASON_TEXT = {
   floor_open: "a natural gap", worth_it: "costly enough to raise", cooldown: "hasn't just spoken"
 }
 
-const n = (id, label, about, children = [], kind) => ({ id, label, about, children, kind })
-const TREE = n("heard", "Line heard", "Decider asks three things at once", [
+const n = (id, label, about, children = [], extra = {}) =>
+  ({ id, label, about, children, ...(typeof extra === "string" ? { kind: extra } : extra) })
+const TREE = n("heard", "Line heard", "one Decider batch on the latest line", [
   n("claim", "States a fact?", `4 yes/no layers ≥ ${T.claim}`, [
-    n("unrouted", "Couldn't route it", "no confident resource or check", [], "quiet"),
+    n("unrouted", "Couldn't route it", "no confident resource or check", [], {
+      kind: "quiet", type: "outcome",
+      ask: "Can we name one resource and one check for this claim?",
+      choices: ["yes → fast check", "no → stay quiet (or escalate)"]
+    }),
     n("check", "Fast check", `resource, check ≥ ${T.route}; live data`, [
-      n("true", "Checks out", "live data agrees", [], "quiet"),
-      n("unsure", "Inconclusive", "live data can't tell", [], "quiet"),
+      n("true", "Checks out", "live data agrees", [], {
+        kind: "quiet", type: "outcome",
+        ask: "Does live data agree with what they said?",
+        choices: ["agrees → stay quiet", "can't tell → stay quiet", "contradicts → wait a turn"]
+      }),
+      n("unsure", "Inconclusive", "live data can't tell", [], {
+        kind: "quiet", type: "outcome",
+        ask: "Does live data agree with what they said?",
+        choices: ["agrees", "can't tell", "contradicts"]
+      }),
       n("wrong", "Wrong: wait a turn", "give the call a chance", [
-        n("corrected", "Call corrected it", "no LLM call at all", [], "quiet"),
-        n("barge", "Cut in", "someone is about to act on it", [], "speak"),
-        n("agent", "Agent double-checks", "pi runs aws in the terminal", [
-          n("overruled", "It was right", "the agent overruled the check", [], "quiet"),
+        n("corrected", "Call corrected it", "no model call at all", [], {
+          kind: "quiet", type: "outcome",
+          ask: "Did someone on the call correct the claim before Egg Head spoke?",
+          choices: ["yes → stay quiet", "no → look it up"]
+        }),
+        n("barge", "Cut in", "someone is about to act on it", [], {
+          kind: "speak", type: "outcome",
+          ask: "Are they telling someone to act on a resource that is already known wrong?",
+          choices: ["act now → cut in", "just mentioning it → wait"]
+        }),
+        n("agent", "Looks it up", "Egg Head checks live data, then the gate", [
+          n("overruled", "It was right", "the look-up overruled the fast check", [], {
+            kind: "quiet", type: "outcome",
+            ask: "Did the second look agree with the speaker?",
+            choices: ["speaker was right → stay quiet", "still wrong → the gate"]
+          }),
           n("gate", "The gate", "six reasons, all must pass", [
-            n("held", "Held back", "a reason failed", [], "quiet"),
-            n("flag", "Raised it", "at the next gap", [], "speak")
-          ])
-        ])
-      ])
-    ])
-  ]),
-  n("addressed", "Talking to Egg Head?", `addressed ≥ ${T.addressed}`, [
-    n("finished", "Finished talking?", `finished ≥ ${T.finished}, or 4 s quiet`, [
-      n("answer", "Agent finds out", "ack, then the agent looks", [
-        n("answered", "Answered", "at the next gap", [], "speak")
-      ])
-    ])
-  ]),
-  n("open", "Question to the call?", `asks ≥ ${T.asks}`, [
-    n("dropped", "Someone answered", "Egg Head stays out", [], "quiet"),
-    n("take", "Nobody did: agent", "2.5 s of silence, then it looks", [
-      n("answered2", "Answered", "at the next gap", [], "speak")
-    ])
-  ]),
-  n("nothing", "Just talk", "nothing to check or answer", [], "quiet")
-])
+            n("held", "Held back", "a reason failed", [], {
+              kind: "quiet", type: "outcome",
+              ask: "Do all six reasons to speak pass?",
+              choices: REASONS.map((k) => `${k}: ${REASON_TEXT[k]}`)
+            }),
+            n("flag", "Raised it", "at the next gap", [], {
+              kind: "speak", type: "outcome",
+              ask: "Do all six reasons to speak pass?",
+              choices: ["yes → speak at a gap", "no → stay quiet"]
+            })
+          ], { type: "gate", ask: "Six independent reasons. All must pass before Egg Head speaks.", choices: REASONS.map((k) => `${k}: ${REASON_TEXT[k]}`) })
+        ], { type: "work", ask: "Look the resource up (coding agent underneath, or the fast check).", choices: ["found → the gate", "speaker was right → stay quiet"] })
+      ], { type: "wait", ask: "Give the call one turn to correct itself before looking it up.", choices: ["someone corrects it", "someone is about to act → cut in", "nobody does → look it up"] })
+    ], { type: "lookup", ask: "Name the resource, pick a check, compare live data.", threshold: T.route, choices: ["agrees", "can't tell", "contradicts"] }),
+    n("addressed", "Talking to Egg Head?", `no on the claim; addressed ≥ ${T.addressed}`, [
+      n("finished", "Finished talking?", `finished ≥ ${T.finished}, or 4 s quiet`, [
+        n("answer", "Looks it up", "ack, then Egg Head looks", [
+          n("answered", "Answered", "at the next gap", [], { kind: "speak", type: "outcome", ask: "Speak the answer at the next gap.", choices: ["ack now", "answer when there is a gap"] })
+        ], { type: "work", ask: "Find the answer from live data.", choices: ["ack", "then speak at a gap"] })
+      ], { type: "yes/no", ask: "Has this speaker finished? Trailing 'uh…' waits; 4 s of quiet also counts as done.", threshold: T.finished, choices: ["not yet → wait", "yes → look it up"] }),
+      n("open", "Question to the call?", `no on claim and addressed; asks ≥ ${T.asks}`, [
+        n("dropped", "Someone answered", "Egg Head stays out", [], { kind: "quiet", type: "outcome", ask: "Did someone else take the question?", choices: ["yes → stay quiet", "nobody for 2.5 s → take it"] }),
+        n("take", "Nobody did: take it", "2.5 s of silence, then Egg Head looks", [
+          n("answered2", "Answered", "at the next gap", [], { kind: "speak", type: "outcome", ask: "Speak the answer at the next gap.", choices: ["take it", "then answer"] })
+        ], { type: "work", ask: "The call left a question hanging. Egg Head takes it.", choices: ["look it up", "answer at a gap"] }),
+        n("nothing", "Just talk", "no on all three", [], {
+          kind: "quiet", type: "outcome", fork: "no",
+          ask: "Not a claim, not aimed at Egg Head, not a hanging question. Stay quiet.",
+          choices: ["stay quiet"]
+        })
+      ], {
+        type: "yes/no", fork: "no",
+        ask: "Is this a question to the people on the call (not to Egg Head)? Asked only after the line was not a claim and not aimed at Egg Head.",
+        threshold: T.asks,
+        choices: ["yes → give them 2.5 s", "no → just talk"]
+      })
+    ], {
+      type: "yes/no", fork: "no",
+      ask: "Is the latest utterance aimed at Egg Head? Asked only after the line was not a claim.",
+      threshold: T.addressed,
+      choices: ["yes → wait until they finish", "no → is it a question to the call?"]
+    })
+  ], {
+    type: "yes/no",
+    ask: "Does the latest speaker state a fact about the current state of a system?",
+    threshold: T.claim,
+    choices: ["yes → name a resource and check", "no → talking to Egg Head?"],
+    layers: [
+      "fact about a system or service?",
+      "how something is right now, not a guess?",
+      "a status, number or observation?",
+      "unsure / guessing / planning? (this one counts against)"
+    ]
+  })
+], { type: "batch", ask: "One Decider batch answers all three, but the tree reads them in order: claim, then addressed, then a hanging question. No on all three is just talk.", choices: ["yes, a claim", "no → talking to Egg Head?", "no → question to the call?", "no → just talk"] })
 
 const W = 164, H = 42, COL = 194, ROW = 48, PAD = 6
 
@@ -90,9 +148,6 @@ export function trace(s, l) {
   const asked = l.events.find((e) => e.request && e.request.turn === main.turn)?.request
   const req = asked && (s.requests.get(asked.id) ?? asked) // where the question is now
   set("claim", isClaim ? "yes" : "no", bar(sc.claim, T.claim))
-  set("addressed", req?.kind === "addressed" ? "yes" : "no", bar(gs.addressed, T.addressed))
-  set("open", req?.kind === "open" ? "yes" : "no", bar(gs.asks, T.asks))
-  if (!isClaim && !req) set("nothing", "quiet")
 
   if (isClaim) {
     const routeP = Math.min(sc.claim ?? 0, sc.resource ?? 0, sc.check ?? 0)
@@ -107,7 +162,7 @@ export function trace(s, l) {
         const task = c.task !== undefined ? s.tasks.get(c.task) : undefined
         set("wrong", c.state === "contradicted" ? "wait" : "yes", evidence)
         const agent = () => set("agent", task ? (task.state === "running" ? "run" : "yes") : "skip",
-          task ? (task.ms ? `${secs(task.ms)} · ${esc(task.by?.split(" · ")[0] ?? "agent")}` : "running…") : "no agent this run")
+          task ? (task.ms ? `${secs(task.ms)}` : "looking…") : "fast check")
         const gate = (state) => set("gate", state, c.gate ? `<span class="reasons">${REASONS.map((k) =>
           `<b class="${c.gate.reasons[k] ? "ok" : "bad"}" title="${k}: ${REASON_TEXT[k]}"></b>`).join("")}</span>` : "waiting for a gap")
         switch (c.state) {
@@ -123,22 +178,32 @@ export function trace(s, l) {
     }
   }
 
-  if (req) {
+  if (isClaim) return path
+
+  set("addressed", req?.kind === "addressed" ? "yes" : "no", bar(gs.addressed, T.addressed))
+  if (req?.kind === "addressed") {
     const st = req.state
     const answer = esc(req.answer ?? "")
-    if (req.kind === "addressed") {
-      set("finished", st === "listening" ? "wait" : "yes", bar(gs.finished, T.finished))
-      if (st === "checking") set("answer", "run", "running…")
-      if (st === "ready") (set("answer", "yes"), set("answered", "wait", "waiting for a gap"))
-      if (st === "answered") (set("answer", "yes"), set("answered", "speak", answer))
-    } else {
-      if (st === "listening") set("open", "wait", `${bar(gs.asks, T.asks)} anyone?`)
-      if (st === "dropped") set("dropped", "quiet")
-      if (st === "checking") set("take", "run", "running…")
-      if (st === "ready") (set("take", "yes"), set("answered2", "wait", "waiting for a gap"))
-      if (st === "answered") (set("take", "yes"), set("answered2", "speak", answer))
-    }
+    set("finished", st === "listening" ? "wait" : "yes", bar(gs.finished, T.finished))
+    if (st === "checking") set("answer", "run", "running…")
+    if (st === "ready") (set("answer", "yes"), set("answered", "wait", "waiting for a gap"))
+    if (st === "answered") (set("answer", "yes"), set("answered", "speak", answer))
+    return path
   }
+
+  set("open", req?.kind === "open" ? "yes" : "no", bar(gs.asks, T.asks))
+  if (req?.kind === "open") {
+    const st = req.state
+    const answer = esc(req.answer ?? "")
+    if (st === "listening") set("open", "wait", `${bar(gs.asks, T.asks)} anyone?`)
+    if (st === "dropped") set("dropped", "quiet")
+    if (st === "checking") set("take", "run", "running…")
+    if (st === "ready") (set("take", "yes"), set("answered2", "wait", "waiting for a gap"))
+    if (st === "answered") (set("take", "yes"), set("answered2", "speak", answer))
+    return path
+  }
+
+  set("nothing", "quiet")
   return path
 }
 
@@ -161,6 +226,14 @@ export function createTree(box, { onNode } = {}) {
     p.setAttribute("pathLength", "1")
     svg.append(p)
     edgeEl.set(c.id, p)
+    if (c.fork === "no") {
+      const t = document.createElementNS("http://www.w3.org/2000/svg", "text")
+      t.setAttribute("x", String(mx))
+      t.setAttribute("y", String((y1 + y2) / 2 - 5))
+      t.setAttribute("class", "fork-no")
+      t.textContent = "no"
+      svg.append(t)
+    }
   }
   const nodeEl = new Map()
   for (const x of nodes) {
@@ -213,7 +286,7 @@ export function createTree(box, { onNode } = {}) {
       const e = edgeEl.get(c.id)
       const p = path?.get(c.id)
       const on = path ? reached(p) : counts.has(c.id)
-      e.setAttribute("class", path ? (on ? `on ${p.state}` : p ? "asked" : "") : on ? "hit" : "")
+      e.setAttribute("class", path ? (on ? `on ${p.state}` : p?.state === "no" ? "no" : p ? "asked" : "") : on ? "hit" : "")
       e.style.strokeWidth = path ? "" : on ? `${1.5 + 5 * (counts.get(c.id) / most)}px` : ""
       const was = reached(last.get(c.id))
       if (path && on && (fresh || !was) && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -227,5 +300,26 @@ export function createTree(box, { onNode } = {}) {
 
   /** The lines that reached a node, for highlighting the transcript. */
   const linesThrough = (s, id) => new Set(s.lines.filter((l) => l?.speaker && reached(trace(s, l).get(id))).map((l) => l.index))
-  return { update, linesThrough, has: (id) => byId.has(id) }
+  return { update, linesThrough, has: (id) => byId.has(id), inspect: (id) => inspectNode(id) }
+}
+
+const TYPE_LABEL = { batch: "Batch", "yes/no": "Yes / no", lookup: "Lookup", wait: "Wait", work: "Look-up", gate: "Gate", outcome: "Outcome" }
+
+/** Static copy for a tree node, for the inspector. */
+export function inspectNode(id) {
+  const x = byId.get(id)
+  if (!x) return null
+  return {
+    id: x.id,
+    label: x.label,
+    about: x.about,
+    type: x.type ?? (x.kind === "speak" || x.kind === "quiet" ? "outcome" : "step"),
+    typeLabel: TYPE_LABEL[x.type] ?? "Step",
+    parent: x.parent?.id ?? null,
+    ask: x.ask ?? x.about,
+    threshold: x.threshold,
+    choices: x.choices ?? x.children.map((c) => c.label),
+    layers: x.layers ?? [],
+    kind: x.kind
+  }
 }

@@ -60,8 +60,29 @@ export function createStore() {
       }
       if (ev.verdict === "supports") quiet(index, at, `${ev.speaker}'s claim checks out.`)
     }
-    if (ev.agent) {
-      const a = ev.agent
+    const agentNotes = []
+    for (const m of ev.moves ?? []) {
+      if (m._tag === "Dispatched") {
+        agentNotes.push({
+          task: Number(String(m.job).split("/")[1] ?? 0),
+          job: m.kind === "answer" ? "answer" : "confirm",
+          action: "dispatched",
+          detail: m.detail
+        })
+      }
+      if (m._tag === "Reported") {
+        agentNotes.push({
+          task: Number(String(m.job).split("/")[1] ?? 0),
+          job: m.kind === "answer" ? "answer" : "confirm",
+          action: m.end === "failed" || m.end === "timedOut" ? "failed" : "reported",
+          detail: m.detail,
+          by: m.by,
+          ms: m.ms
+        })
+      }
+    }
+    if (!agentNotes.length && ev.agent) agentNotes.push(ev.agent)
+    for (const a of agentNotes) {
       const t = s.tasks.get(a.task) ?? { task: a.task, job: a.job, index, state: "running" }
       if (a.action === "dispatched") Object.assign(t, { detail: a.detail, dispatchedAt: at, index })
       if (a.action === "reported") Object.assign(t, { result: a.detail, by: a.by, ms: a.ms, reportedAt: at, state: "done" })

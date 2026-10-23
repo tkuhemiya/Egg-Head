@@ -6,8 +6,8 @@
  *   npx tsx --env-file=.env scripts/probe-bedrock.ts
  */
 import { Console, Effect, Layer, Option } from "effect"
-import { BedrockSupport } from "../src/Bedrock.ts"
-import { MockSource } from "../src/Checks.ts"
+import { BedrockSupport } from "../src/runtime/Bedrock.ts"
+import { MockSource } from "../src/domain/Checks.ts"
 
 const program = Effect.gen(function*() {
   const support = yield* BedrockSupport

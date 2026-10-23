@@ -1,5 +1,5 @@
 {
- "source": "research/decider/scripts/export_runtime_parity.py (exp9 frozen claim combo, final_eval routing and gate)",
+ "source": "docs/research/decider/scripts/export_runtime_parity.py (exp9 frozen claim combo, final_eval routing and gate)",
  "wording": {
   "claim": {
    "short": "Does the latest speaker state a fact about the current state of a computer system or service?",

@@ -1,7 +1,7 @@
 /**
  * The demo: a meeting page at http://localhost:8787 (cartoon teammates, your camera, Egg Head,
- * and the coding agent's live terminal) and a dashboard at /dashboard (transcript, checks,
- * what triggered what). Press Start on either page to play the call.
+ * and the coding agent's live terminal) and a dashboard at /dashboard (transcript plus
+ * what that line triggered). Press Start on either page to play the call.
  *
  *   npm run demo                               # Decider + pi on Bedrock in the terminal + Polly voices
  *   npm run demo -- --rehearsal                # no network: scripted Decider and pi model, silent voices
@@ -23,14 +23,14 @@ import { Decision, DecisionModel } from "effect/ai"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 import { parseArgs } from "node:util"
-import { BedrockSupport } from "../src/Bedrock.ts"
-import { Bridge } from "../src/Bridge.ts"
-import { Call, decodeCallSync, encodeLogged, Floor, type Logged } from "../src/Call.ts"
-import { MockSource } from "../src/Checks.ts"
-import * as Decider from "../src/Decider.ts"
-import { hinted } from "../src/Hints.ts"
-import { judge, LIVE, render } from "../src/Judge.ts"
-import { Writer } from "../src/Speaker.ts"
+import { BedrockSupport } from "../src/runtime/Bedrock.ts"
+import { Bridge } from "../src/runtime/Bridge.ts"
+import { Call, decodeCallSync, encodeLogged, Hold, type Logged } from "../src/runtime/Call.ts"
+import { MockSource } from "../src/domain/Checks.ts"
+import * as Decider from "../src/runtime/Decider.ts"
+import { hinted } from "../src/runtime/Hints.ts"
+import { judge, LIVE, render } from "../src/runtime/Judge.ts"
+import { Writer } from "../src/domain/Speaker.ts"
 import { AgentTerminal, customOptions, piOptions } from "./Agent.ts"
 import { DeciderMeter, type PageOnly, run } from "./Run.ts"
 import { rehearsalVoice, Voice, voiceSound } from "./Voice.ts"
@@ -110,7 +110,7 @@ const runLayer = () => {
   const support = writer === "bedrock"
     ? BedrockSupport.bridgeServices.pipe(Layer.provideMerge(BedrockSupport.layer()), Layer.provide(source))
     : Writer.template
-  const writing = Layer.provideMerge(Floor.holdWhileWriting, Layer.merge(support, Floor.layer))
+  const writing = Layer.provideMerge(Hold.whileWriting, Layer.merge(support, Hold.layer))
   const investigator = agent ? AgentTerminal.investigator.pipe(Layer.provide(Layer.succeed(AgentTerminal, agent))) : Layer.empty
   return Bridge.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(decider, source, writing, Layer.provideMerge(voiceSound, rehearsal ? rehearsalVoice : Voice.layer), investigator))
@@ -147,7 +147,12 @@ const start = () => {
   Effect.runPromise(program)
     .catch((e) => {
       console.error(e)
-      return Effect.runPromise(publish({ type: "done", at: Date.now() - runStarted }))
+      const text = (e instanceof Error ? e.message : String(e)).replace(/\s+/g, " ").slice(0, 240)
+      return Effect.runPromise(
+        publish({ type: "status", text: `Call stopped: ${text}` }).pipe(
+          Effect.andThen(publish({ type: "done", at: Date.now() - runStarted }))
+        )
+      )
     })
     .finally(() => {
       running = false

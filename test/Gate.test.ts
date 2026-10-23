@@ -1,6 +1,6 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Option } from "effect"
-import * as G from "../src/Gate.ts"
+import * as G from "../src/domain/Gate.ts"
 
 const inp = (kw: Partial<G.GateInput> = {}): G.GateInput => ({
   check: "db_health",

@@ -46,6 +46,6 @@ times (the counters at the top right).
 
 ## After the call
 
-Switch to http://localhost:8787/dashboard: the transcript with what every line triggered, the
-claims and their outcomes, the agent tasks, and why Egg Head stayed quiet each time. `?replay`
-shows the last run without the server running a new one.
+Switch to http://localhost:8787/dashboard: pick a line in the transcript; the pane beside it is
+that line's claim, agent work, question, or why Egg Head stayed quiet. `?replay` shows the last
+run without the server running a new one.

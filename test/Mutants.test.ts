@@ -1,16 +1,16 @@
 /**
  * The scenarios have to be able to fail. Each mutant builds the Bridge with one deliberately
- * wrong number (src/Tuning.ts) and some line of some scenario in data/calls/ must then
+ * wrong number (src/domain/Tuning.ts) and some line of some scenario in data/calls/ must then
  * misbehave. A surviving mutant means the Bridge compares against a constant around Tuning, or
  * no scenario pins that behaviour down.
  */
 import { assert, describe, it } from "@effect/vitest"
 import { Effect } from "effect"
 import { readdirSync, readFileSync } from "node:fs"
-import { decodeCall } from "../src/Call.ts"
-import { describeOutcome } from "../src/Expect.ts"
-import type { Report } from "../src/Judge.ts"
-import type { TuningPatch } from "../src/Tuning.ts"
+import { decodeCall } from "../src/runtime/Call.ts"
+import { describeOutcome } from "../src/domain/Expect.ts"
+import type { Report } from "../src/runtime/Judge.ts"
+import type { TuningPatch } from "../src/domain/Tuning.ts"
 import { score } from "./harness/Offline.ts"
 
 const MUTANTS: ReadonlyArray<readonly [name: string, tuning: TuningPatch]> = [

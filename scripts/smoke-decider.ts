@@ -5,10 +5,10 @@
  *   npm run smoke
  */
 import { Console, Effect, Layer, Option, Stream } from "effect"
-import { Bridge, type CallInput } from "../src/Bridge.ts"
-import { MockSource } from "../src/Checks.ts"
-import * as Decider from "../src/Decider.ts"
-import { Writer } from "../src/Speaker.ts"
+import { Bridge, type CallInput } from "../src/runtime/Bridge.ts"
+import { MockSource } from "../src/domain/Checks.ts"
+import * as Decider from "../src/runtime/Decider.ts"
+import { Writer } from "../src/domain/Speaker.ts"
 
 const call: ReadonlyArray<CallInput> = [
   { _tag: "Utterance", speaker: "Priya", text: "Checkout is failing for some users. What are we seeing?", silenceS: 0.6 },

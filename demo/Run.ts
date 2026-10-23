@@ -1,6 +1,6 @@
 /**
  * Plays a scripted call in real time and reports every step to the meeting page and the
- * dashboard. The call loop itself is src/Call.ts (shared with the offline scenarios); this file
+ * dashboard. The call loop itself is src/runtime/Call.ts (shared with the offline scenarios); this file
  * adds what only the demo has:
  *
  * - stats for the page (Decider batches and latency, Bedrock calls, agent tasks);
@@ -10,8 +10,8 @@
  */
 import { Context, Duration, Effect, Layer, Option, Ref, Stream } from "effect"
 import { DecisionModel } from "effect/ai"
-import { Bridge } from "../src/Bridge.ts"
-import { type Call, type Logged, play, type PlayOptions, session } from "../src/Call.ts"
+import { Bridge } from "../src/runtime/Bridge.ts"
+import { type Call, type Logged, play, type PlayOptions, session } from "../src/runtime/Call.ts"
 import { transcribe, Voice } from "./Voice.ts"
 
 export interface Stats {
