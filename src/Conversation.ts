@@ -21,6 +21,7 @@
  */
 import { Schema } from "effect"
 import { Decision } from "effect/ai"
+import type { Voice } from "./Ids.ts"
 import { FINISHED, SELF_REPAIRED } from "./Questions.ts"
 
 export const ADDRESSED =
@@ -93,11 +94,18 @@ export interface ReplyInput {
   readonly silenceS: number
 }
 
+export interface ReplyTuning {
+  readonly finished: number
+  readonly replyMaxWaitS: number
+}
+
+export const REPLY_DEFAULTS: ReplyTuning = { finished: T_FINISHED, replyMaxWaitS: REPLY_MAX_WAIT_S }
+
 /** Has the person speaking to Egg Head finished, so it can reply? */
-export const readyToReply = (r: ReplyInput): { readonly ready: boolean; readonly why: string } => {
-  if (r.silenceS >= REPLY_MAX_WAIT_S) return { ready: true, why: `${r.silenceS.toFixed(1)} s of silence` }
+export const readyToReply = (r: ReplyInput, t: ReplyTuning = REPLY_DEFAULTS): { readonly ready: boolean; readonly why: string } => {
+  if (r.silenceS >= t.replyMaxWaitS) return { ready: true, why: `${r.silenceS.toFixed(1)} s of silence` }
   if (trailsOff(r.text)) return { ready: false, why: "trails off mid-sentence" }
-  if (r.finishedP < T_FINISHED) return { ready: false, why: `Decider: not finished (${r.finishedP.toFixed(2)})` }
+  if (r.finishedP < t.finished) return { ready: false, why: `Decider: not finished (${r.finishedP.toFixed(2)})` }
   return { ready: true, why: `Decider: finished (${r.finishedP.toFixed(2)})` }
 }
 
@@ -108,8 +116,17 @@ export const factOf = (item: { readonly resource: string; readonly status: strin
 /** Short spoken lines, written in code (the instant ones cannot wait for a model). */
 export const ackLine = (speaker: string): string => `On it, ${speaker}.`
 export const OPEN_ACK = "I can check that."
-export const bargeLine = (speaker: string, fact: string): string => `Sorry to cut in, ${speaker}: ${sentence(fact)}`
-export const flagLine = (speaker: string, fact: string): string => `Quick flag, ${speaker}: ${sentence(fact)}`
+export const bargeLine = (speaker: string, fact: string, voice: Voice = "firm"): string =>
+  voice === "doubleChecking"
+    ? `Sorry to cut in, ${speaker}: my quick check shows ${sentence(fact)} I'm double-checking.`
+    : `Sorry to cut in, ${speaker}: ${sentence(fact)}`
+export const flagLine = (speaker: string, fact: string, voice: Voice = "firm"): string =>
+  voice === "couldNotConfirm"
+    ? `I could not confirm further, but my check shows ${sentence(fact)}`
+    : `Quick flag, ${speaker}: ${sentence(fact)}`
+export const retractLine = (speaker: string, fact: string): string =>
+  `Correction: my quick check was wrong, ${sentence(fact)}`
+export const unableLine = (speaker: string): string => `I couldn't find that out, ${speaker}.`
 export const answerLine = (speaker: string, answer: string): string =>
   answer.toLowerCase().startsWith(speaker.toLowerCase()) ? sentence(answer) : `${speaker}, ${sentence(lowerFirst(answer))}`
 

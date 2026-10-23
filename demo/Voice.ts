@@ -11,6 +11,7 @@ import { StartStreamTranscriptionCommand, TranscribeStreamingClient } from "@aws
 import { Context, Effect, Layer, Schema, Stream } from "effect"
 import { createHash } from "node:crypto"
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { estimateMarks, type Marks, Sound } from "../src/Sound.ts"
 
 export const SAMPLE_RATE = 16000
 const voiceRegion = process.env.EGGHEAD_VOICE_REGION ? { region: process.env.EGGHEAD_VOICE_REGION } : {}
@@ -21,12 +22,6 @@ export class AudioError extends Schema.TaggedError<AudioError>()("AudioError", {
   operation: Schema.Literals(["synthesize", "transcribe"]),
   cause: Schema.Defect()
 }) {}
-
-/** Polly speech marks: when each word and mouth shape (viseme) starts, in ms from the start. */
-export interface Marks {
-  readonly words: ReadonlyArray<{ readonly time: number; readonly value: string }>
-  readonly visemes: ReadonlyArray<{ readonly time: number; readonly value: string }>
-}
 
 export interface Clip {
   readonly file: string // name under demo/out/audio/
@@ -42,34 +37,6 @@ export const parseMarks = (jsonl: string): Marks => {
     words: rows.filter((r) => r.type === "word").map(({ time, value }) => ({ time, value })),
     visemes: rows.filter((r) => r.type === "viseme").map(({ time, value }) => ({ time, value }))
   }
-}
-
-/**
- * Marks without Polly (rehearsals): words at a speaking pace, mouth shapes guessed from letters.
- * Close enough for a cartoon mouth.
- */
-export const estimateMarks = (text: string): { readonly marks: Marks; readonly durationS: number } => {
-  const words: Array<{ time: number; value: string }> = []
-  const visemes: Array<{ time: number; value: string }> = []
-  let t = 80
-  for (const w of text.split(/\s+/).filter(Boolean)) {
-    words.push({ time: t, value: w })
-    const letters = w.toLowerCase().replace(/[^a-z0-9]/g, "") || "a"
-    const per = Math.max(45, Math.min(90, 330 / letters.length))
-    for (const ch of letters) {
-      visemes.push({ time: Math.round(t), value: LETTER_VISEME[ch] ?? "@" })
-      t += per
-    }
-    visemes.push({ time: Math.round(t), value: "sil" })
-    t += /[,.;:?!]$/.test(w) ? 260 : 70
-  }
-  return { marks: { words, visemes }, durationS: (t + 200) / 1000 }
-}
-
-const LETTER_VISEME: Readonly<Record<string, string>> = {
-  a: "a", e: "e", i: "i", o: "o", u: "u", y: "i", w: "u", b: "p", m: "p", p: "p", f: "f", v: "f",
-  t: "t", d: "t", n: "t", l: "t", s: "s", z: "s", c: "k", k: "k", g: "k", q: "k", x: "k", h: "k",
-  r: "r", j: "S"
 }
 
 /** 16-bit mono PCM -> WAV bytes, for the browser. */
@@ -162,6 +129,18 @@ export class Voice extends Context.Service<Voice, {
     })
   })
 }
+
+/** The call loop's view of a Voice: durations, marks and the URL the meeting page plays. */
+export const voiceSound = Layer.effect(Sound, Effect.gen(function*() {
+  const voice = yield* Voice
+  return Sound.of({
+    speak: (name, text) =>
+      voice.speak(name, text).pipe(
+        Effect.map((c) => ({ durationS: c.durationS, marks: c.marks, audio: `/audio/${c.file}` })),
+        Effect.orDie
+      )
+  })
+}))
 
 /**
  * Rehearsal voice: no AWS. Each line is silence as long as it would take to say, with

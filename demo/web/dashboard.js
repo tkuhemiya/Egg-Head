@@ -246,6 +246,6 @@ function renderQuiet(s) {
 $("start").onclick = () => {
   pop($("start"), 0.9)
   $("start").disabled = true
-  fetch("/start", { method: "POST" })
+  fetch("/start", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })
 }
 connect(store)

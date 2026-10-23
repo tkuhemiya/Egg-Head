@@ -1,5 +1,6 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Effect, Layer, Option } from "effect"
+import { TestClock } from "effect/testing"
 import { Bridge, type Event } from "../src/Bridge.ts"
 import { MockSource } from "../src/Checks.ts"
 import * as C from "../src/Conversation.ts"
@@ -97,11 +98,15 @@ describe("Bridge with an Investigator", () => {
       assert.deepStrictEqual(said(pause), []) // a silence-only end-of-turn rule would have replied here
       assert.match(Option.getOrThrow(pause[1]!).note ?? "", /has not finished/)
       yield* bridge.hear("Priya", "the checkout queue? How backed up is it?", 0.3)
-      const ack = said([yield* bridge.tick(0.6)])
+      const ackEv = yield* bridge.tick(0.6)
+      const ack = said([ackEv])
       assert.deepStrictEqual(ack, [["ack", "On it, Priya."]])
       assert.strictEqual(yield* bridge.pending, 1)
+      const ackSpeech = Option.flatMap(ackEv, (e) => e.speech ?? Option.none())
+      if (Option.isSome(ackSpeech)) yield* bridge.spoke(ackSpeech.value.id)
+      yield* TestClock.adjust("3 seconds")
       yield* settle
-      const answer = said([yield* bridge.tick(0.9)])
+      const answer = said([yield* bridge.tick(3.1)])
       assert.deepStrictEqual(answer, [["answer", "Priya, checkout-queue: 12,400 visible messages (normal < 100)."]])
       assert.strictEqual(yield* bridge.pending, 0)
     }).pipe(Effect.provide(layer({
@@ -118,9 +123,13 @@ describe("Bridge with an Investigator", () => {
       assert.strictEqual(s.requests[0]!.state, "dropped")
       yield* bridge.hear("Lee", "Did anyone push anything to the payments API today?", 0.3)
       assert.deepStrictEqual(said([yield* bridge.tick(1.5)]), []) // give the call a chance
-      assert.deepStrictEqual(said([yield* bridge.tick(2.6)]), [["ack", C.OPEN_ACK]])
+      const takeEv = yield* bridge.tick(2.6)
+      assert.deepStrictEqual(said([takeEv]), [["ack", C.OPEN_ACK]])
+      const takeSpeech = Option.flatMap(takeEv, (e) => e.speech ?? Option.none())
+      if (Option.isSome(takeSpeech)) yield* bridge.spoke(takeSpeech.value.id)
+      yield* TestClock.adjust("3 seconds")
       yield* settle
-      assert.deepStrictEqual(said([yield* bridge.tick(3)]), [["answer", "Lee, payments-api: last deploy 9 days ago."]])
+      assert.deepStrictEqual(said([yield* bridge.tick(3.1)]), [["answer", "Lee, payments-api: last deploy 9 days ago."]])
       s = yield* bridge.state
       assert.deepStrictEqual(s.requests.map((r) => r.state), ["dropped", "answered"])
     }).pipe(Effect.provide(layer({
@@ -137,7 +146,7 @@ describe("Bridge with an Investigator", () => {
       const mention = yield* bridge.partial("Priya", "The payments API")
       assert.deepStrictEqual(said([mention]), []) // asked Decider: not an instruction
       const barge = yield* bridge.partial("Priya", "Jordan, restart the payments API now")
-      assert.deepStrictEqual(said([barge]), [["barge", "Sorry to cut in, Priya: payments-api is healthy, 5xx rate 0.3%."]])
+      assert.deepStrictEqual(said([barge]), [["barge", "Sorry to cut in, Priya: my quick check shows payments-api is healthy, 5xx rate 0.3%. I'm double-checking."]])
       const s = yield* bridge.state
       assert.isTrue(s.ledger[0]!.raised)
     }).pipe(Effect.provide(layer({

@@ -1,0 +1,23 @@
+{
+  "title": "No agent: flag at the first gap, then wait out the cooldown",
+  "about": "Without an Investigator, Egg Head raises a wrong claim from the fast check at the first gap after one turn. A second wrong claim waits until 30 s after the first flag.",
+  "voices": { "Priya": "Ruth", "Jordan": "Stephen", "Sam": "Gregory", "Lee": "Danielle", "Mei": "Kajal", "Egg Head": "Matthew" },
+  "agent": false,
+  "never": [{ "_tag": "NoTalkOver" }, { "_tag": "SilenceBeforeSpeaking", "minS": 0.5 }, { "_tag": "Cooldown", "s": 30 }],
+  "lines": [
+    { "speaker": "Sam", "text": "The orders DB is fine, CPU is normal.", "pause": 0.4,
+      "decider": { "claim": 0.9, "asserted": "healthy", "check": "db_health" },
+      "why": "false claim; the call gets one turn to correct it" },
+    { "speaker": "Priya", "text": "Okay, so let's focus on the API then.", "pause": 1.5,
+      "expect": [{ "_tag": "Says", "kind": "flag", "toward": "Sam", "about": "orders-db", "when": { "since": "lineEnd", "minS": 0.5, "maxS": 1.0 } }],
+      "why": "Decider says Priya finished: flag at half a second of silence" },
+    { "speaker": "Lee", "text": "We didn't deploy orders-api today.", "pause": 0.4,
+      "decider": { "claim": 0.9, "asserted": "unchanged", "check": "recent_deploys" },
+      "why": "another false claim" },
+    { "speaker": "Jordan", "text": "Let's pull up the error logs.", "pause": 2.0,
+      "why": "a gap, but Egg Head spoke a few seconds ago: cooldown" },
+    { "speaker": "Mei", "text": "Logs are loading.", "pause": 30.0,
+      "expect": [{ "_tag": "Says", "kind": "flag", "toward": "Lee", "about": "orders-api" }],
+      "why": "raised once 30 s have passed since the first flag" }
+  ]
+}

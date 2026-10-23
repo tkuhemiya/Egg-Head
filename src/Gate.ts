@@ -27,6 +27,25 @@ export const T_SILENCE_S = 1.2 // this much silence opens the gate on its own
 export const T_COST_LEVEL = 2 // moderate: do not interrupt for less
 export const COOLDOWN_S = 30.0
 
+/** The numbers `decide` compares against. Defaults are the constants above (src/Tuning.ts overrides them). */
+export interface GateTuning {
+  readonly selfRepaired: number
+  readonly floor: number
+  readonly minSilenceS: number
+  readonly silenceS: number
+  readonly costLevel: number
+  readonly cooldownS: number
+}
+
+export const GATE_DEFAULTS: GateTuning = {
+  selfRepaired: T_SELF_REPAIRED,
+  floor: T_FLOOR,
+  minSilenceS: T_MIN_SILENCE_S,
+  silenceS: T_SILENCE_S,
+  costLevel: T_COST_LEVEL,
+  cooldownS: COOLDOWN_S
+}
+
 // Base cost of staying silent per check type: how much a wrong belief about it misdirects
 // an incident (deploys and databases are the usual wrong turns; an alarm list is context).
 export const BASE_COST: Readonly<Record<string, number>> = {
@@ -39,7 +58,7 @@ export const BASE_COST: Readonly<Record<string, number>> = {
 }
 const DOWN_BUMP = 1 // a check that says "down" is worse than "degraded"
 
-const REPAIR = new RegExp(
+export const REPAIR = new RegExp(
   [
     String.raw`\bwait\b`,
     String.raw`\bhold on\b`,
@@ -51,7 +70,7 @@ const REPAIR = new RegExp(
   ].join("|"),
   "i"
 )
-const PARKED = new RegExp(
+export const PARKED = new RegExp(
   [
     String.raw`\bpark(?:ed|ing)?\b`,
     String.raw`\bnot in the (?:\w+ )?path\b`,
@@ -71,6 +90,12 @@ export interface GateInput {
   readonly interruptP: number // Decider noul, P(speaking now would interrupt)
   readonly laterClaimSupportsCheck?: boolean // router found a later true claim on this resource
   readonly secondsSinceLastSpoke?: number
+  /** When set, skip scanning laterTurns for parking (per-claim verdict). */
+  readonly parked?: boolean
+  /** When set, skip computing repairedBy from laterTurns. */
+  readonly correctedBy?: Option.Option<RepairedBy>
+  /** When set, `persisted` uses this instead of laterTurns.length. */
+  readonly turnsSince?: number
 }
 
 export const Reason = Schema.Literals(["persisted", "not_repaired", "min_silence", "floor_open", "worth_it", "cooldown"])
@@ -89,31 +114,35 @@ export const GateDecision = Schema.Struct({
 export type GateDecision = typeof GateDecision.Type
 
 /** Why this claim no longer needs raising. */
-export const repairedBy = (g: GateInput): Option.Option<RepairedBy> => {
+export const repairedBy = (g: GateInput, t: GateTuning = GATE_DEFAULTS): Option.Option<RepairedBy> => {
+  if (g.correctedBy !== undefined) return g.correctedBy
   if (g.laterClaimSupportsCheck) return Option.some("ledger")
-  if (g.laterTurns.some((t) => REPAIR.test(t))) return Option.some("keyword")
-  if (g.selfRepairedP >= T_SELF_REPAIRED) return Option.some("decider")
+  if (g.laterTurns.some((turn) => REPAIR.test(turn))) return Option.some("keyword")
+  if (g.selfRepairedP >= t.selfRepaired) return Option.some("decider")
   return Option.none()
 }
 
 /** How harmful silence is, from the check that disagreed. 0 none ... 4 critical. */
 export const costLevel = (g: GateInput): number => {
-  if (g.laterTurns.some((t) => PARKED.test(t))) return 1
+  if (g.parked ?? g.laterTurns.some((t) => PARKED.test(t))) return 1
   const level = (BASE_COST[g.check] ?? 2) + (g.status === "down" ? DOWN_BUMP : 0)
   return Math.min(level, LEVELS.length - 1)
 }
 
-export const decide = (g: GateInput): GateDecision => {
+export const gapOpen = (floorP: number, silenceS: number, t: GateTuning = GATE_DEFAULTS): boolean =>
+  floorP >= t.floor || silenceS >= t.silenceS
+
+export const decide = (g: GateInput, t: GateTuning = GATE_DEFAULTS): GateDecision => {
   const floorP = 1 - g.interruptP
-  const rep = repairedBy(g)
+  const rep = repairedBy(g, t)
   const level = costLevel(g)
   const reasons: Record<Reason, boolean> = {
-    persisted: g.laterTurns.length > 0, // the call has moved on at least one turn since the claim
+    persisted: (g.turnsSince ?? g.laterTurns.length) > 0,
     not_repaired: Option.isNone(rep),
-    min_silence: g.silenceS >= T_MIN_SILENCE_S,
-    floor_open: floorP >= T_FLOOR || g.silenceS >= T_SILENCE_S,
-    worth_it: level >= T_COST_LEVEL,
-    cooldown: (g.secondsSinceLastSpoke ?? Infinity) >= COOLDOWN_S
+    min_silence: g.silenceS >= t.minSilenceS,
+    floor_open: gapOpen(floorP, g.silenceS, t),
+    worth_it: level >= t.costLevel,
+    cooldown: (g.secondsSinceLastSpoke ?? Infinity) >= t.cooldownS
   }
   const blockedBy = Option.fromUndefinedOr(Reason.literals.find((k) => !reasons[k]))
   return { speak: Option.isNone(blockedBy), blockedBy, repairedBy: rep, costLevel: level, floorP, reasons }

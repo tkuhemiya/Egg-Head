@@ -1,0 +1,14 @@
+{
+  "title": "The agent fails on a question",
+  "about": "When the Investigator fails, Egg Head still answers a question it took, from the direct check.",
+  "voices": { "Lee": "Danielle", "Priya": "Ruth", "Egg Head": "Matthew" },
+  "agent": { "answerS": 2, "fails": "error" },
+  "never": [{ "_tag": "NoTalkOver" }, { "_tag": "SilenceBeforeSpeaking", "minS": 0.5 }],
+  "lines": [
+    { "speaker": "Lee", "text": "Did anyone push anything to the payments API today?", "pause": 3.0, "waitForEggHead": 30,
+      "decider": { "ask": 0.9 },
+      "expect": [{ "_tag": "Investigates", "job": "answer" }, { "_tag": "Says", "kind": "take", "toward": "Lee", "about": "payments-api", "when": { "since": "lineEnd", "minS": 2.5, "maxS": 3.0 } }, { "_tag": "Says", "kind": "answer", "toward": "Lee", "about": "payments-api" }],
+      "why": "the agent fails; the direct check answers instead" },
+    { "speaker": "Priya", "text": "Thanks.", "pause": 1.0 }
+  ]
+}

@@ -18,7 +18,7 @@ import { aliasHits } from "./Router.ts"
 import { SupportError } from "./Speaker.ts"
 
 export const Finding = Schema.Struct({
-  status: Status,
+  status: Schema.Literals([...Status.literals, "unknown"]),
   fact: Schema.String, // what was found, in words that can be spoken
   by: Schema.String // who found it: "agent" or "direct"
 })

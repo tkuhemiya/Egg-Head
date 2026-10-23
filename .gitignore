@@ -4,3 +4,7 @@ __pycache__/
 node_modules/
 dist/
 demo/out/
+
+# TLC trace files
+spec/*_TTrace_*
+spec/states/

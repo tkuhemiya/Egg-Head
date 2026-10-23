@@ -1,5 +1,5 @@
 {
- "source": "egghead/bridge.py at 64cd96e",
+ "source": "egghead/bridge.py at 64cd96e; long_call parking events updated 2026-10-23: scoped parking no longer drops cost on claims about a different resource",
  "escalatorRoute": {
   "check": "db_health",
   "resource": "orders-db",
@@ -1838,16 +1838,16 @@
      "checkEvidence": null,
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },
@@ -1873,16 +1873,16 @@
      "checkEvidence": null,
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },
@@ -1908,16 +1908,16 @@
      "checkEvidence": null,
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },
@@ -1933,16 +1933,16 @@
      "checkEvidence": null,
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },
@@ -2710,16 +2710,16 @@
      "checkEvidence": null,
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },
@@ -2745,16 +2745,16 @@
      "checkEvidence": "CPU 98% for the last 6 min; alarm OrdersDB-CPU in ALARM",
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },
@@ -2780,16 +2780,16 @@
      "checkEvidence": null,
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },
@@ -2805,16 +2805,16 @@
      "checkEvidence": null,
      "gate": {
       "speak": false,
-      "blockedBy": "worth_it",
+      "blockedBy": "cooldown",
       "repairedBy": null,
-      "costLevel": 1,
+      "costLevel": 3,
       "floorP": 0.8,
       "reasons": {
        "persisted": true,
        "not_repaired": true,
        "min_silence": true,
        "floor_open": true,
-       "worth_it": false,
+       "worth_it": true,
        "cooldown": false
       }
      },

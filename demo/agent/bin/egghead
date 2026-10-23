@@ -7,7 +7,7 @@
  *
  * POSTs to the demo server at $EGGHEAD_REPORT_URL.
  */
-const STATUSES = ["healthy", "degraded", "down", "changed", "unchanged"]
+const STATUSES = ["healthy", "degraded", "down", "changed", "unchanged", "unknown"]
 const [kind, task, ...rest] = process.argv.slice(2)
 const usage = () => {
   process.stderr.write(
