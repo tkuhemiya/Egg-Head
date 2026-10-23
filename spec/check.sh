@@ -25,7 +25,7 @@ for p in $WANT; do
     echo "$kind $p"
     echo "CHECK_DEADLOCK FALSE"
   } > "$cfg"
-  out="$(java -XX:+UseParallelGC -cp "$JAR" tlc2.TLC -workers auto -config "$cfg" -metadir "$META/m-$p" "$SPEC" 2>&1 | grep -v '^Picked up')"
+  out="$(java -XX:+UseParallelGC -cp "$JAR" tlc2.TLC -noGenerateSpecTE -workers auto -config "$cfg" -metadir "$META/m-$p" "$SPEC" 2>&1 | grep -v '^Picked up')"
   if grep -q "No error has been found" <<<"$out"; then
     echo "PASS  $p  ($(grep -o '[0-9,]* distinct states found' <<<"$out" | head -1))"
   else
