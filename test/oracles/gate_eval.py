@@ -2,7 +2,7 @@
 
 Compares the pass-2 gate (questions.speak_gate) with the reworked code gate
 (egghead_gate.py) on the 16 snippets that hold an open flagged claim, and writes
-spike/REPORT-gate.md.
+test/oracles/REPORT-gate.md.
 
 The reworked gate was written after reading these 16 snippets and the pass-2 errors, so
 the score is a fit to them, not a held-out result. It needs a fresh labelled set and a
@@ -81,7 +81,7 @@ def main() -> None:
 
     md = [f"# {args.title}", "", f"> {args.note}", ""]
     for name, key in (("Pass-2 gate (questions.speak_gate)", lambda r: r[1]),
-                      ("Reworked gate (spike/egghead_gate.py)", lambda r: r[2].speak)):
+                      ("Reworked gate (test/oracles/egghead_gate.py)", lambda r: r[2].speak)):
         tp, fp, fn, p, r_ = prf([(key(r), r[0]["labels"]["should_speak"]) for r in rows])
         md.append(f"- {name}: precision **{pct(p)}**, recall **{pct(r_)}** "
                   f"(TP {tp}, FP {fp}, FN {fn}, n {len(rows)})")

@@ -1,10 +1,10 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Effect, Layer, Option } from "effect"
-import { compare, inferAsserted } from "../src/Compare.ts"
-import { CheckSource, MockSource } from "../src/Checks.ts"
-import { ScriptedDecider } from "../src/Decider.ts"
-import type { Turn } from "../src/Questions.ts"
-import { aliasHits, average, decide, route, shortlist, T_ROUTE } from "../src/Router.ts"
+import { compare, inferAsserted } from "../src/domain/Compare.ts"
+import { CheckSource, MockSource } from "../src/domain/Checks.ts"
+import { ScriptedDecider } from "../src/runtime/Decider.ts"
+import type { Turn } from "../src/domain/Questions.ts"
+import { aliasHits, average, decide, route, shortlist, T_ROUTE } from "../src/domain/Router.ts"
 import { scripted } from "./helpers.ts"
 
 describe("compare", () => {

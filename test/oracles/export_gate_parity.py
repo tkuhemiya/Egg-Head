@@ -8,7 +8,7 @@ Two sets go into test/fixtures/gate-parity.json:
   wording, silence, Decider votes, ledger support, cooldown) so each branch is covered. The
   axes are stored once and each row holds only the outputs, in itertools.product order.
 
-Run from the repo root: python3 spike/export_gate_parity.py
+Run from the repo root: python3 test/oracles/export_gate_parity.py
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ import egghead_gate as G
 import gate_eval
 import questions as Q
 
-OUT = Path(__file__).resolve().parent.parent / "test" / "fixtures" / "gate-parity.json"
+OUT = Path(__file__).resolve().parent.parent / "fixtures" / "gate-parity.json"
 
 LATER = [
     [],
@@ -86,7 +86,7 @@ def grid() -> list[list]:
 
 def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    data = {"source": "spike/egghead_gate.py", "levels": G.LEVELS, "reasons": REASONS,
+    data = {"source": "test/oracles/egghead_gate.py", "levels": G.LEVELS, "reasons": REASONS,
             "pass2": pass2(), "axes": AXES, "grid": grid()}
     OUT.write_text(json.dumps(data, separators=(",", ":")) + "\n")
     print(f"wrote {OUT}: {len(data['pass2'])} pass-2 rows, {len(data['grid'])} grid rows")

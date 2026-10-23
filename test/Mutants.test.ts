@@ -7,10 +7,10 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Effect } from "effect"
 import { readdirSync, readFileSync } from "node:fs"
-import { decodeCall } from "../src/Call.ts"
-import { describeOutcome } from "../src/Expect.ts"
-import type { Report } from "../src/Judge.ts"
-import type { TuningPatch } from "../src/Tuning.ts"
+import { decodeCall } from "../src/runtime/Call.ts"
+import { describeOutcome } from "../src/domain/Expect.ts"
+import type { Report } from "../src/runtime/Judge.ts"
+import type { TuningPatch } from "../src/domain/Tuning.ts"
 import { score } from "./harness/Offline.ts"
 
 const MUTANTS: ReadonlyArray<readonly [name: string, tuning: TuningPatch]> = [

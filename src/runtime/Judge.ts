@@ -18,8 +18,8 @@ import {
   type Says,
   type Timing,
   UNPROMPTED
-} from "./Expect.ts"
-import { aliasHits } from "./Router.ts"
+} from "../domain/Expect.ts"
+import { aliasHits } from "../domain/Router.ts"
 
 // ---------------------------------------------------------------------------
 // What happened

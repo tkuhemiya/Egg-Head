@@ -12,9 +12,9 @@ import json
 from pathlib import Path
 
 HERE = Path(__file__).parent
-ROOT = HERE.parent
+ROOT = HERE.parent.parent
 # The labelled snippets and the check world live with the rest of the data.
-DATASET = ROOT / "research/decider/data/source/egghead_spike.jsonl"
+DATASET = ROOT / "docs/research/decider/data/source/egghead_spike.jsonl"
 WORLD = ROOT / "data/world.json"
 DEFAULT_MODEL = "StrandsAgents/strands-decider-2B-qwen3.5-v1-2610"
 

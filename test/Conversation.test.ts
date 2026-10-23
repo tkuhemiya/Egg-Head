@@ -1,11 +1,11 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Effect, Layer, Option } from "effect"
 import { TestClock } from "effect/testing"
-import { Bridge, type Event } from "../src/Bridge.ts"
-import { MockSource } from "../src/Checks.ts"
-import * as C from "../src/Conversation.ts"
-import { Investigator } from "../src/Investigator.ts"
-import { Writer } from "../src/Speaker.ts"
+import { Bridge, type Event } from "../src/runtime/Bridge.ts"
+import { MockSource } from "../src/domain/Checks.ts"
+import * as C from "../src/domain/Conversation.ts"
+import { Investigator } from "../src/runtime/Investigator.ts"
+import { Writer } from "../src/domain/Speaker.ts"
 import { type Line, scripted } from "./helpers.ts"
 
 /** Bridge with an Investigator that answers from the mock world (no model). */
@@ -136,6 +136,25 @@ describe("Bridge with an Investigator", () => {
       "What are we seeing on the orders API?": { ask: 0.9 },
       "Orders API is throwing a lot of 500s.": { claim: 0.9, asserted: "degraded", check: "service_error_rate" },
       "Did anyone push anything to the payments API today?": { ask: 0.9 }
+    }))))
+
+  it.effect("does not barge while Egg Head is already speaking", () =>
+    Effect.gen(function*() {
+      const bridge = yield* Bridge
+      yield* bridge.hear("Jordan", "The payments API is erroring too, that's the real problem.", 0.3)
+      yield* bridge.hear("Priya", "Egg Head, can you check the checkout queue?", 0.3)
+      const ackEv = yield* bridge.tick(0.6)
+      assert.deepStrictEqual(said([ackEv]), [["ack", "On it, Priya."]])
+      const whileSpeaking = yield* bridge.partial("Lee", "Jordan, restart the payments API now")
+      assert.deepStrictEqual(said([whileSpeaking]), [])
+      const ackSpeech = Option.flatMap(ackEv, (e) => e.speech ?? Option.none())
+      if (Option.isSome(ackSpeech)) yield* bridge.spoke(ackSpeech.value.id)
+      const barge = yield* bridge.partial("Lee", "Jordan, restart the payments API now")
+      assert.strictEqual(said([barge])[0]?.[0], "barge")
+    }).pipe(Effect.provide(layer({
+      "The payments API is erroring too, that's the real problem.": { claim: 0.9, asserted: "degraded", check: "service_error_rate" },
+      "Egg Head, can you check the checkout queue?": { addr: 0.9, fin: 0.5 },
+      "Jordan, restart the payments API now": { act: 0.9 }
     }))))
 
   it.effect("barges in when someone is about to act on a wrong claim, not on a mere mention", () =>

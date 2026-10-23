@@ -7,7 +7,7 @@
  * for the local demo, and an AWS source can implement the same service later.
  */
 import { Context, Effect, Layer, Option, Ref, Schema } from "effect"
-import world from "../data/world.json" with { type: "json" }
+import world from "../../data/world.json" with { type: "json" }
 import type { Inventory } from "./Router.ts"
 
 // check name -> description (the Decider option label).

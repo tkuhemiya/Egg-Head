@@ -348,7 +348,11 @@ export const reduce = (s0: State, i: Input, ctx: Ctx): Transition => {
       }
     case "PartialHeard": {
       const claim = s.claims.find((c) => c.id === i.claim || c.resource === i.claim)
-      if (claim === undefined || !Claims.bargeable(claim) || !ctx.policy.barge || s.analysing > 0) {
+      // Barge may cut a human mid-line, but never start while Egg Head is already talking.
+      if (
+        claim === undefined || !Claims.bargeable(claim) || !ctx.policy.barge || s.analysing > 0 ||
+        s.floor.phase._tag !== "Open"
+      ) {
         return wrap({ state: s, event: Option.none(), commands: [] })
       }
       const act = i.evidence.actP

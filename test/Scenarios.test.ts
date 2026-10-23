@@ -5,7 +5,7 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Effect, Exit } from "effect"
 import { readdirSync, readFileSync } from "node:fs"
-import { decodeCall } from "../src/Call.ts"
+import { decodeCall } from "../src/runtime/Call.ts"
 import { behaves, record } from "./harness/Offline.ts"
 
 const DIR = new URL("../data/calls/", import.meta.url)

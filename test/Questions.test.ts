@@ -1,11 +1,11 @@
 /**
- * Parity with the research pipeline the runtime ports (research/decider, exp 9 + final_eval).
- * Fixture: research/decider/scripts/export_runtime_parity.py.
+ * Parity with the research pipeline the runtime ports (docs/research/decider, exp 9 + final_eval).
+ * Fixture: docs/research/decider/scripts/export_runtime_parity.py.
  */
 import { assert, describe, it } from "@effect/vitest"
 import { Effect } from "effect"
 import fixture from "./fixtures/research-parity.json" with { type: "json" }
-import { CheckSource, MockSource } from "../src/Checks.ts"
+import { CheckSource, MockSource } from "../src/domain/Checks.ts"
 import {
   checkCriteria,
   checkInstructions,
@@ -20,8 +20,8 @@ import {
   SELF_REPAIRED,
   type Turn,
   UNKNOWN_RESOURCE_DESCRIPTION
-} from "../src/Questions.ts"
-import { aliasHits, shortlist } from "../src/Router.ts"
+} from "../src/domain/Questions.ts"
+import { aliasHits, shortlist } from "../src/domain/Router.ts"
 
 describe("research parity", () => {
   it("asks the same questions, word for word and in the same order", () => {

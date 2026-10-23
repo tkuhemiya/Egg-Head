@@ -7,7 +7,7 @@ This is a brief for an agent running on a machine that can reach the hosted Deci
 - **Branch.** Work on your own branch off `main` (`git switch -c research/live-runs origin/main`) and open a PR into `main`. Keep your changes inside the paths each task names.
 - **Secrets.** Never commit a key. `.env` is gitignored. The research scripts read OpenRouter's key from `~/.secrets/openrouter.env` (`OPENROUTER_API_KEY=...`).
 - **Honesty.** Every number you report comes from a file you committed. Never tune on `heldout`: score it once, after the choices are written down in a `PREREGISTERED_*.json`. If something fails, commit the failure and say so.
-- **Read first.** `AGENTS.md`, `README.md`, `research/decider/README.md`, `research/decider/FINDINGS.md`, `docs/design/decider-on-state.md` and `docs/design/behaviour-harness.md`.
+- **Read first.** `AGENTS.md`, `README.md`, `docs/research/decider/README.md`, `docs/research/decider/FINDINGS.md`, `docs/design/decider-on-state.md` and `docs/design/behaviour-harness.md`.
 
 ## 0. Check the machine (5 min)
 
@@ -19,7 +19,7 @@ curl -sS -X POST https://api.decider.cloud/v1/systemone -H 'content-type: applic
   -d '{"model":"strands-decider-2b","state":"Sam: orders db is fine","questions":{"q":{"type":"noul","instructions":"Does the latest speaker state a fact about a system?"}}}'
 ```
 
-The first Decider request after idle can take about 30 s, because of a cold start. If the request body shape above is rejected, copy the shape from `research/decider/scripts/lib.py` `ask()`.
+The first Decider request after idle can take about 30 s, because of a cold start. If the request body shape above is rejected, copy the shape from `docs/research/decider/scripts/lib.py` `ask()`.
 
 ## 1. Has the hosted Decider changed? (10 min, Decider only)
 
@@ -27,9 +27,9 @@ The first Decider request after idle can take about 30 s, because of a cold star
 npm run replay -- heldout
 ```
 
-This must reproduce exp 9: claim P 0.884, R 0.905; route P 0.806, R 0.806. The results are in `research/decider/results/runtime_heldout.json`. If the numbers moved, the hosted model changed. Stop, commit the new file, and report the difference: every later number depends on this.
+This must reproduce exp 9: claim P 0.884, R 0.905; route P 0.806, R 0.806. The results are in `docs/research/decider/results/runtime_heldout.json`. If the numbers moved, the hosted model changed. Stop, commit the new file, and report the difference: every later number depends on this.
 
-**Deliverable:** the regenerated `research/decider/results/runtime_heldout.json` and a one-line verdict.
+**Deliverable:** the regenerated `docs/research/decider/results/runtime_heldout.json` and a one-line verdict.
 
 ## 2. The first live runs of agent mode (1 h, Decider + AWS)
 
@@ -47,15 +47,15 @@ This is the README's first open item. You need AWS credentials for Polly, plus B
    - each failing line from the check-run table;
    - the `addressed`, `asks` and `directive` scores on each line (`gateScores` in the run file's `event` entries);
    - the Decider latency (`deciderMs` on each `event` entry; take the p50).
-3. Copy the run files to `research/decider/results/live/agent-mode/` and commit them. They are the only evidence for the uncalibrated cut-offs (`T_ADDRESSED 0.25`, `T_ASKS 0.3`, `T_DIRECTIVE 0.3` in `src/Conversation.ts`). **Do not change those cut-offs.** Task 3 sets them properly.
+3. Copy the run files to `docs/research/decider/results/live/agent-mode/` and commit them. They are the only evidence for the uncalibrated cut-offs (`T_ADDRESSED 0.25`, `T_ASKS 0.3`, `T_DIRECTIVE 0.3` in `src/domain/Conversation.ts`). **Do not change those cut-offs.** Task 3 sets them properly.
 
-**Deliverable:** `research/decider/results/live/agent-mode/*.json` and `research/decider/results/live/agent-mode/SUMMARY.md`. The summary has a table: run, agent, score, failing lines, Decider p50, plus the min, median and max of the score for each question on the lines where it should fire and on the lines where it should not.
+**Deliverable:** `docs/research/decider/results/live/agent-mode/*.json` and `docs/research/decider/results/live/agent-mode/SUMMARY.md`. The summary has a table: run, agent, score, failing lines, Decider p50, plus the min, median and max of the score for each question on the lines where it should fire and on the lines where it should not.
 
 ## 3. Experiment 12: the new questions, and the Decider-on-state idea (1 to 2 days, Decider + OpenRouter)
 
 **Goal.** Set the cut-offs for `addr`, `ask` and `act` from evidence. Then test whether narrow, state-scoped Decider questions beat today's rules for three judgments: "does this line correct claim X", "does this line park topic R" and "does this reply answer question Q". The rationale is in `docs/design/decider-on-state.md`. Use the same method as exp 1 to 11.
 
-### 3a. Data (`research/decider/data/exp12/`)
+### 3a. Data (`docs/research/decider/data/exp12/`)
 
 Write items as JSONL, one file per judgment. Each item has `id`, `split` (dev or heldout, assigned 50/50 by a seeded shuffle *before* labelling), the input (for example `turns` and `claim`, or `question` and `reply`), the gold `label` (true or false), and `kind` (`easy`, `hard_negative` or `hard_positive`). Use the incident world in `data/world.json` (resources: orders-db, payments-db, checkout-queue, orders-api, payments-api, auth-service). Also write at least 30% of the items about **other** settings, so nothing is tuned to the demo: a product launch call, a support escalation, a planning meeting.
 
@@ -73,16 +73,16 @@ Write items as JSONL, one file per judgment. Each item has `id`, `split` (dev or
 - Write every disagreement to `data/exp12/disagreements.jsonl`. **Send that list to the project owner to decide.** Do not settle disagreements yourself.
 - After the owner's decisions, freeze the data with `sha256sum data/exp12/*.jsonl > data/FROZEN_exp12.sha256`.
 
-### 3b. Variants (`research/decider/scripts/exp12_*.py`)
+### 3b. Variants (`docs/research/decider/scripts/exp12_*.py`)
 
 Use `lib.py` (cache, backoff, User-Agent) and `common.py` (renderers). Write `PREREGISTERED_exp12.json` before touching `heldout`.
 
-- For `addressed`, `asks` and `directive`: try the current wording (copy it from `src/Conversation.ts`) and 2 to 3 alternatives. Try kv format with the latest line only, and the current gate format (`renderGate`, 6 turns plus a silence line; exp 7 found a silence line lowers AUC, so test both). Pick the wording and format on dev, Platt-calibrate on dev, choose the threshold for F1 or for a fixed precision ≥ 0.9 (write down which), then score `heldout` once.
+- For `addressed`, `asks` and `directive`: try the current wording (copy it from `src/domain/Conversation.ts`) and 2 to 3 alternatives. Try kv format with the latest line only, and the current gate format (`renderGate`, 6 turns plus a silence line; exp 7 found a silence line lowers AUC, so test both). Pick the wording and format on dev, Platt-calibrate on dev, choose the threshold for F1 or for a fixed precision ≥ 0.9 (write down which), then score `heldout` once.
 - For `corrects`, `parks` and `answered`, four variants:
   1. **Today's rule**, ported to Python:
-     - `corrects` is the `REPAIR` regex in `src/Gate.ts`, plus "a later true claim on the same check and resource";
+     - `corrects` is the `REPAIR` regex in `src/domain/Gate.ts`, plus "a later true claim on the same check and resource";
      - `parks` is the `PARKED` regex, applied to every claim;
-     - `answered` is "a different speaker spoke next" (`src/Bridge.ts` request handling).
+     - `answered` is "a different speaker spoke next" (`src/runtime/Bridge.ts` request handling).
   2. **The generic Decider question** in use today (`SELF_REPAIRED` in `src/Questions.ts` for `corrects`; none exists for the others, so write one).
   3. **The state-scoped yes/no question.** The claim or question is spelled out, and the input is the latest line or the lines since, in kv format.
   4. **A whole-state N-way choice** ("flag / answer / ack / stay quiet") over a kv dump of the open claims, open questions and the last 6 lines. Decider is predicted to lose here, so this variant tests the prediction.
@@ -90,14 +90,14 @@ Use `lib.py` (cache, backoff, User-Agent) and `common.py` (renderers). Write `PR
 
 ### 3c. Report
 
-Add an "Exp 12" section to `research/decider/FINDINGS.md` in the existing style:
+Add an "Exp 12" section to `docs/research/decider/FINDINGS.md` in the existing style:
 - the hypothesis and setup;
 - a dev table and a held-out table, with AUC, F1 at the chosen threshold, precision, recall, ECE (raw and Platt), latency p50 and n;
 - kappa and the number of disagreements;
-- what to put in `src/Conversation.ts` (wording, format, Platt `a`/`b`, threshold) for `addr`, `ask` and `act`;
+- what to put in `src/domain/Conversation.ts` (wording, format, Platt `a`/`b`, threshold) for `addr`, `ask` and `act`;
 - for each of `corrects`, `parks` and `answered`: rule, generic or scoped, and the evidence.
 
-Put the parameters in `research/decider/results/exp12_platt_dev.json`. Do **not** edit `src/`. The runtime change is made on the main branch from your numbers.
+Put the parameters in `docs/research/decider/results/exp12_platt_dev.json`. Do **not** edit `src/`. The runtime change is made on the main branch from your numbers.
 
 **Deliverable:**
 - `data/exp12/*` with `FROZEN_exp12.sha256` and the owner-settled `disagreements.jsonl`;

@@ -2,7 +2,7 @@
 
 The question was whether some of the agent-mode review findings (since fixed by the Bridge rework, [`bridge-rework/README.md`](bridge-rework/README.md)) could be solved by giving Strands Decider Egg Head's program state and letting it pick the decision.
 
-The evidence is the Decider repo (docs, JevBench evaluations, the Strands example, the customize skill) and our own campaign ([`research/decider/FINDINGS.md`](../../research/decider/FINDINGS.md)). The source of each claim is given with it.
+The evidence is the Decider repo (docs, JevBench evaluations, the Strands example, the customize skill) and our own campaign ([`docs/research/decider/FINDINGS.md`](../research/decider/FINDINGS.md)). The source of each claim is given with it.
 
 ## Short answer
 

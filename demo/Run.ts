@@ -10,8 +10,8 @@
  */
 import { Context, Duration, Effect, Layer, Option, Ref, Stream } from "effect"
 import { DecisionModel } from "effect/ai"
-import { Bridge } from "../src/Bridge.ts"
-import { type Call, type Logged, play, type PlayOptions, session } from "../src/Call.ts"
+import { Bridge } from "../src/runtime/Bridge.ts"
+import { type Call, type Logged, play, type PlayOptions, session } from "../src/runtime/Call.ts"
 import { transcribe, Voice } from "./Voice.ts"
 
 export interface Stats {

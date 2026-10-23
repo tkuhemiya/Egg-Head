@@ -3,7 +3,7 @@
 > The new gate was written after reading these 16 snippets and the pass-2 errors. Read the score as a fit, not a held-out result.
 
 - Pass-2 gate (questions.speak_gate): precision **0%**, recall **0%** (TP 0, FP 1, FN 8, n 16)
-- Reworked gate (spike/egghead_gate.py): precision **100%**, recall **100%** (TP 8, FP 0, FN 0, n 16)
+- Reworked gate (test/oracles/egghead_gate.py): precision **100%**, recall **100%** (TP 8, FP 0, FN 0, n 16)
 
 | id | gold | pass 2 | reworked | blocked by | repaired by | cost | P(gap) | silence s |
 |---|---|---|---|---|---|---|---|---|

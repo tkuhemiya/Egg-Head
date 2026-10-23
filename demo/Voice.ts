@@ -11,7 +11,7 @@ import { StartStreamTranscriptionCommand, TranscribeStreamingClient } from "@aws
 import { Context, Effect, Layer, Schema, Stream } from "effect"
 import { createHash } from "node:crypto"
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { estimateMarks, type Marks, Sound } from "../src/Sound.ts"
+import { estimateMarks, type Marks, Sound } from "../src/runtime/Sound.ts"
 
 export const SAMPLE_RATE = 16000
 const voiceRegion = process.env.EGGHEAD_VOICE_REGION ? { region: process.env.EGGHEAD_VOICE_REGION } : {}

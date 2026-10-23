@@ -11,7 +11,7 @@
  *   transcript (window 6) with the silence and the flagged claim. "Finished" is Platt-scaled.
  *
  * Wording, formats, weights and Platt parameters are held to the Python research code by
- * test/Questions.test.ts (fixture from research/decider/scripts/export_runtime_parity.py).
+ * test/Questions.test.ts (fixture from docs/research/decider/scripts/export_runtime_parity.py).
  * Do not reword without re-running the research scripts: small changes move accuracy a lot.
  */
 import { Schema } from "effect"

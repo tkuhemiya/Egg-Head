@@ -1,29 +1,29 @@
 /**
- * Bridge: the shell. Owns the Ref, the pubsub, the hear lane and the interpreter; decides nothing.
+ * Bridge: the shell. Owns the Ref, the pubsub and the hear lane; decides nothing.
+ * Slow work is Gather. The only write is Step.reduce inside transact. Commands run in Interpret.
  */
-import { Clock, Context, Duration, Effect, Layer, Option, PubSub, Ref, Schema, Scope, Semaphore, Stream } from "effect"
+import { Clock, Context, Effect, Layer, Option, PubSub, Ref, Schema, Scope, Semaphore, Stream } from "effect"
 import { type AiError, DecisionModel } from "effect/ai"
-import * as Claims from "./Claims.ts"
-import { CheckSource } from "./Checks.ts"
-import type { Request } from "./Conversation.ts"
-import { blankEvent, type Event as Ev } from "./Event.ts"
+import * as Claims from "../domain/Claims.ts"
+import { CheckSource } from "../domain/Checks.ts"
+import type { Request } from "../domain/Conversation.ts"
+import { type Event as Ev } from "../domain/Event.ts"
 import * as Gather from "./Gather.ts"
-import { Judgments } from "./Judgments.ts"
-import { jobNumber, type SpeechId } from "./Ids.ts"
-import { direct, Investigator } from "./Investigator.ts"
-import type { Ledger } from "./Ledger.ts"
-import type { Turn } from "./Questions.ts"
-import { aliasHits, Escalator } from "./Router.ts"
-import { type SupportError, templateLine, Writer } from "./Speaker.ts"
-import * as Requests from "./Requests.ts"
-import { direct as policyDirect, empty as emptyState, investigated, type Policy, type State } from "./State.ts"
-import type { Command, Transition } from "./State.ts"
-import type { Outcome } from "./Jobs.ts"
-import { pending as pendingOf, reduce } from "./Step.ts"
-import { Tuning } from "./Tuning.ts"
+import { interpret } from "./Interpret.ts"
+import { Judgments } from "../domain/Judgments.ts"
+import { type SpeechId } from "../domain/Ids.ts"
+import { Investigator } from "./Investigator.ts"
+import type { Ledger } from "../domain/Ledger.ts"
+import type { Turn } from "../domain/Questions.ts"
+import { aliasHits, Escalator } from "../domain/Router.ts"
+import { type SupportError, Writer } from "../domain/Speaker.ts"
+import * as Requests from "../domain/Requests.ts"
+import { direct as policyDirect, empty as emptyState, investigated, type Policy, type State } from "../domain/State.ts"
+import { pending as pendingOf, reduce } from "../domain/Step.ts"
+import { Tuning } from "../domain/Tuning.ts"
 
-export * from "./Event.ts"
-export { WINDOW_TURNS } from "./State.ts"
+export * from "../domain/Event.ts"
+export { WINDOW_TURNS } from "../domain/State.ts"
 
 export const Verdict = Schema.Literals(["supports", "contradicts", "inconclusive"])
 export type Verdict = typeof Verdict.Type
@@ -114,54 +114,7 @@ export class Bridge extends Context.Service<Bridge, {
         return t
       }))
 
-    const runJob = (cmd: Command) => {
-      if (cmd._tag !== "StartJob") return Effect.void
-      const { job, payload } = cmd
-      const inv = job.via === "investigator" && Option.isSome(investigator) ? investigator.value : direct(source)
-      const task = jobNumber(job.id)
-      const body: Effect.Effect<Outcome> = payload.kind === "answer"
-        ? inv.answer(task, payload.question).pipe(
-          Effect.map((text): Outcome => ({ _tag: "Reported", report: { _tag: "Answered", text, by: inv.name } })),
-          Effect.catch((e: SupportError): Effect.Effect<Outcome> =>
-            Effect.succeed(
-              String(e.cause).includes("no resource")
-                ? { _tag: "Reported", report: { _tag: "Unknown", why: "no resource named in the question", by: inv.name } }
-                : { _tag: "Failed", reason: String(e.cause) }
-            )
-          )
-        )
-        : inv.confirm(task, Claims.toLedgerItem(payload.claim, true)).pipe(
-          Effect.map((f): Outcome =>
-            f.status === "unknown"
-              ? { _tag: "Reported", report: { _tag: "Unknown", why: f.fact.slice(0, 240), by: f.by } }
-              : { _tag: "Reported", report: { _tag: "Checked", status: f.status, fact: f.fact.slice(0, 240), by: f.by } }
-          ),
-          Effect.catch((e: SupportError): Effect.Effect<Outcome> => Effect.succeed({ _tag: "Failed", reason: String(e.cause) }))
-        )
-      const seconds = Math.max(0.05, job.deadlineAt - job.startedAt)
-      return body.pipe(
-        Effect.timeoutOption(Duration.seconds(seconds)),
-        Effect.flatMap((opt) => transact({ _tag: "JobDone", id: job.id, outcome: Option.match(opt, { onNone: () => ({ _tag: "TimedOut" as const }), onSome: (o) => o }) })),
-        Effect.flatMap((t) => interpret(t)),
-        Effect.catchCause(Effect.logError),
-        Effect.forkIn(scope),
-        Effect.asVoid
-      )
-    }
-
-    const interpret = (t: Transition): Effect.Effect<Ev, SupportError> =>
-      Effect.gen(function*() {
-        let current = t
-        for (const cmd of t.commands) {
-          if (cmd._tag === "StartJob") yield* runJob(cmd)
-          if (cmd._tag === "Compose") {
-            const item = Claims.toLedgerItem(cmd.claim, policy.secondLook)
-            const text = yield* writer.write(item).pipe(Effect.catch(() => Effect.succeed(templateLine(item))))
-            current = yield* transact({ _tag: "Composed", id: cmd.id, text: Option.some(text) })
-          }
-        }
-        return Option.getOrElse(current.event, () => Option.getOrElse(t.event, () => blankEvent(0, "", "")))
-      })
+    const apply = interpret({ transact, writer, source, investigator, policy, scope })
 
     const hear = (speaker: string, text: string, silenceS = 0) =>
       hearLane.withPermits(1)(Effect.gen(function*() {
@@ -177,7 +130,7 @@ export class Bridge extends Context.Service<Bridge, {
             ? { _tag: "LineUnderstood", turn, silenceS, evidence: gathered.evidence }
             : { _tag: "LineFailed", turn, reason: String(gathered.e) }
         )
-        const event = yield* interpret(t)
+        const event = yield* apply(t)
         if (!gathered.ok) return yield* Effect.fail(gathered.e)
         return event
       }))
@@ -186,7 +139,7 @@ export class Bridge extends Context.Service<Bridge, {
       Effect.gen(function*() {
         const t = yield* transact({ _tag: "Silence", silenceS })
         if (Option.isNone(t.event) && t.commands.length === 0) return Option.none<Ev>()
-        const event = yield* interpret(t)
+        const event = yield* apply(t)
         return Option.some(event)
       })
 
@@ -194,6 +147,7 @@ export class Bridge extends Context.Service<Bridge, {
       Effect.gen(function*() {
         if (!policy.barge) return Option.none<Ev>()
         const snap = yield* Ref.get(state)
+        if (snap.floor.phase._tag !== "Open") return Option.none<Ev>()
         const named = new Set(aliasHits(text))
         const item = snap.claims.find((c) => named.has(c.resource) && Claims.bargeable(c))
         if (item === undefined) return Option.none<Ev>()
@@ -205,7 +159,7 @@ export class Bridge extends Context.Service<Bridge, {
         const evidence = yield* Gather.partial(snap, item.id, speaker, text, deps)
         const t = yield* transact({ _tag: "PartialHeard", speaker, text, claim: item.id, evidence })
         if (Option.isNone(t.event) && t.commands.length === 0) return Option.none<Ev>()
-        return Option.some(yield* interpret(t))
+        return Option.some(yield* apply(t))
       })
 
     const spoke = (id: SpeechId, how: "finished" | "dropped" = "finished") =>

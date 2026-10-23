@@ -1,20 +1,20 @@
 /**
- * Fidelity check: run the runtime router (src/Router.ts) over the research dataset against a
- * real Decider and score it like research/decider/scripts/exp9_recall.py. The numbers should
+ * Fidelity check: run the runtime router (src/domain/Router.ts) over the research dataset against a
+ * real Decider and score it like docs/research/decider/scripts/exp9_recall.py. The numbers should
  * land near exp 9's (held-out: claim P 0.88 R 0.90; route P 0.81 R 0.81). Hosted answers can
  * drift, and the runtime batches option rotations into one request (exp 8: within 0.002).
  *
- *   npm run replay -- dev        # or heldout; writes research/decider/results/runtime_<split>.json
+ *   npm run replay -- dev        # or heldout; writes docs/research/decider/results/runtime_<split>.json
  */
 import { Console, Duration, Effect, Layer, Option } from "effect"
 import { readFileSync, writeFileSync } from "node:fs"
-import { CheckSource, MockSource } from "../src/Checks.ts"
-import * as Decider from "../src/Decider.ts"
-import type { Turn } from "../src/Questions.ts"
-import { route } from "../src/Router.ts"
+import { CheckSource, MockSource } from "../src/domain/Checks.ts"
+import * as Decider from "../src/runtime/Decider.ts"
+import type { Turn } from "../src/domain/Questions.ts"
+import { route } from "../src/domain/Router.ts"
 
 const split = process.argv[2] ?? "dev"
-const ROOT = new URL("../research/decider/", import.meta.url)
+const ROOT = new URL("../docs/research/decider/", import.meta.url)
 
 interface Item {
   readonly id: string

@@ -4,23 +4,40 @@ Hackathon agent: incident-call bridge that uses **Strands Decider 2B** for fast 
 
 ## Layout
 
+Imports run one way: `src/domain` never imports `src/runtime`. `demo/` talks to runtime's public services, not the reducer.
+
 | Path | Role |
 |------|------|
-| `src/` | Runtime, TypeScript on [Effect 4](https://effect.website): Decider provider, questions, gate, checks, Bedrock (Strands TS), and the `Bridge`: `Gather` (slow work against a snapshot), `Step.reduce` (pure; meets `Claims`, `Requests`, `Jobs`, `Floor`, `Agenda`) and a shell that commits then runs commands |
-| `test/` | Vitest + `@effect/vitest` (`ScriptedDecider` layer; no live Decider or AWS). `test/fixtures/` holds the Python parity oracles |
+| `src/domain/` | Pure reducer and ports: `Step.reduce`, `Claims`, `Requests`, `Jobs`, `Floor`, `Agenda`, `Gate`, `Router`, `Event` (wire type for the dashboard). Effect `Schema`/`Option` only; no HTTP, no Polly |
+| `src/runtime/` | Effect shells: `Bridge` (owns the `Ref` and hear lane), `Gather`, `Interpret` (commands after commit), `Decider`, `Investigator`, `Bedrock`, `Call` (the player), `Judge` |
+| `test/` | Vitest + `@effect/vitest` (`ScriptedDecider` layer; no live Decider or AWS). `test/fixtures/` holds the Python parity oracles. `test/oracles/` is the frozen Python gate |
 | `data/world.json` | Mock check world for the demo (`MockSource`); `data/aws.json` is the same incident in AWS CLI shapes, for the agent's stand-in `aws` |
 | `scripts/` | `smoke-decider.ts` (short live call), `replay-research.ts` (router vs the research numbers), `probe-bedrock.ts` (two live Bedrock calls), `record-demo.ts` (film the meeting page to an mp4), `aws-usage.sh` (spend from CloudWatch) |
 | `demo/` | The demo: meeting page and dashboard (`web/`), real-time call runner, Polly voices (with viseme marks) and Transcribe streaming, the terminal agent (`Agent.ts`, `agent/`: pi extension, system prompt, stand-in `aws` CLI and `egghead` report command). Call scripts are in `data/calls/`; [`demo/RECORDING.md`](demo/RECORDING.md) is the video run sheet |
-| `spec/` | TLA+ model of when Egg Head speaks (`Bridge.tla`); `spec/check.sh` model-checks every rule (needs Java). `test/SpecSync.test.ts` keeps its tags in step with the code |
-| `docs/` | Design notes (`design/bridge-rework/README.md` is the current Bridge), the decision log (`decisions/quality-run.tsv`, append-only) and `live-work.md`, the runs that need a network |
-| `spike/` | Python, frozen. What is left of the Day-1 go/no-go spike: `egghead_gate.py` (the Python gate the research scripts import and `src/Gate.ts` is held to), the pass-2 answers and reports, and the gate parity export |
-| `research/decider/` | Decider 2B research campaign (prompting, bias, routing, calibration); see [`FINDINGS.md`](research/decider/FINDINGS.md) |
+| `spec/` | TLA+ model of when Egg Head speaks (`Bridge.tla`); `spec/check.sh` model-checks every rule (needs Java). `test/SpecSync.test.ts` keeps its tags in step with the code. Not docs |
+| `docs/` | Design notes (`design/bridge-rework/README.md` is the current Bridge), the decision log (`decisions/quality-run.tsv`, append-only), `live-work.md`, and `research/decider/` |
+| `docs/research/decider/` | Decider 2B research campaign (prompting, bias, routing, calibration); see [`FINDINGS.md`](docs/research/decider/FINDINGS.md) |
 
-**Decider research (Oct 2026):** Prefer separate yes/no questions in one batch over N-way choices; rotate or average `choice` option order; use the latest utterance (kv format) for claim detection and Platt-calibrate probabilities on dev before thresholding. Full methods and held-out numbers are in [`research/decider/FINDINGS.md`](research/decider/FINDINGS.md).
+## Glossary
+
+Use these names. Do not reuse them for something else.
+
+- **Floor** — who is talking, including Egg Head (`Open` / `Composing` / `Speaking`). `src/domain/Floor.ts`.
+- **Hold** — clock the humans wait on while Egg Head writes. `src/runtime/Call.ts`. Not the Floor.
+- **Claim** — a checkable statement on the ledger, with a phase (`Fresh` / `Checking` / `Standing` / `Closed`).
+- **Request** — a question to Egg Head or left hanging for the call.
+- **Job** — Investigator work started only after a committed transition.
+- **Agenda** — ordered candidates for what to say next (answer, ack, take, retract, flag).
+- **Gather** — slow work (Decider, checks) against a snapshot, no lock.
+- **Reduce** — `Step.reduce`: pure, total, the only writer of Bridge state.
+- **Interpret** — run `StartJob` / `Compose` after `Ref.modify`.
+- **Event** — what one input did. `speech` and `moves` are the source of truth; `said` / `saidKind` / `agent` are a projection so the dashboard JS keeps working.
+
+**Decider research (Oct 2026):** Prefer separate yes/no questions in one batch over N-way choices; rotate or average `choice` option order; use the latest utterance (kv format) for claim detection and Platt-calibrate probabilities on dev before thresholding. Full methods and held-out numbers are in [`docs/research/decider/FINDINGS.md`](docs/research/decider/FINDINGS.md).
 
 ## Runtime (TypeScript + Effect)
 
-Node ≥ 22. Python is only for `spike/` and `research/`.
+Node ≥ 22. Python is only for `test/oracles/` and `docs/research/`.
 
 ```bash
 npm install
@@ -35,22 +52,23 @@ scripts/aws-usage.sh        # Bedrock / Polly / Transcribe usage and estimated s
 Effect idioms used throughout (follow them in new code; `node_modules/effect/AGENTS.md` is the reference):
 
 - Services are `Context.Service` classes with `Layer`s; wire with `Layer.provide`. No globals.
-- Pure core (`Gate`, `Router`, `Compare`, `Ledger`) is plain functions over immutable data; effects stay at the edges.
+- Pure core lives in `src/domain/` (`Gate`, `Router`, `Compare`, `Step.reduce`) as plain functions over immutable data; effects stay in `src/runtime/`.
+- Bind services to named variables in Effect generators. Do not nest `yield* (yield* Foo).bar()`.
 - Domain records (`Route`, `GateDecision`, `LedgerItem`, `Event`) are `Schema`s; absent values are `Option` (`OptionFromNullOr`, so JSON shows `null`).
 - Untrusted input (Decider responses, `world.json`) is decoded with `Schema`. Errors are tagged (`AiError`, `SupportError`).
 - State lives in one `Ref`; every input goes through `Step.reduce` in one `Ref.modify`, and `hear` lines are serialised with a `Semaphore`. Time comes from `Clock` (use `TestClock` in tests).
 
-**Router = research pipeline:** `src/Questions.ts` and `src/Router.ts` port the frozen research pipeline (FINDINGS.md exp 9 + final_eval): claim from four yes/no layers on the latest line (kv format) combined with the dev-fit logistic weights; code-first resource lookup by alias; check limited to that resource's checks; every choice averaged over option orders; fire at min(claim, resource, check) ≥ 0.25. The gate asks `self_repaired` and Platt-scaled `finished`. `test/Questions.test.ts` holds wording, renderers and combiners to the Python (`research/decider/scripts/export_runtime_parity.py`). `npm run replay -- heldout` reproduced exp 9 exactly on 22 Oct (claim P 0.884 R 0.905; route P 0.806 R 0.806; results in `research/decider/results/runtime_*.json`). A claim the router cannot route is escalated (to Bedrock when wired).
+**Router = research pipeline:** `src/domain/Questions.ts` and `src/domain/Router.ts` port the frozen research pipeline (FINDINGS.md exp 9 + final_eval): claim from four yes/no layers on the latest line (kv format) combined with the dev-fit logistic weights; code-first resource lookup by alias; check limited to that resource's checks; every choice averaged over option orders; fire at min(claim, resource, check) ≥ 0.25. The gate asks `self_repaired` and Platt-scaled `finished`. `test/Questions.test.ts` holds wording, renderers and combiners to the Python (`docs/research/decider/scripts/export_runtime_parity.py`). `npm run replay -- heldout` reproduced exp 9 exactly on 22 Oct (claim P 0.884 R 0.905; route P 0.806 R 0.806; results in `docs/research/decider/results/runtime_*.json`). A claim the router cannot route is escalated (to Bedrock when wired).
 
-**Parity:** the port is held to the Python runtime it replaced. `test/Parity.test.ts` replays golden fixtures: the gate (the 16 pass-2 snippets, which must still give REPORT-gate.md's numbers, plus a 20k-point input grid from `spike/export_gate_parity.py`) and ten full Bridge traces, replayed as behaviour through the new router (each recorded batch becomes the route and gate signals it implied). Changing gate thresholds, wording or Bridge behaviour on purpose means regenerating the fixture and saying so.
+**Parity:** the port is held to the Python runtime it replaced. `test/Parity.test.ts` replays golden fixtures: the gate (the 16 pass-2 snippets, which must still give REPORT-gate.md's numbers, plus a 20k-point input grid from `test/oracles/export_gate_parity.py`) and ten full Bridge traces, replayed as behaviour through the new router (each recorded batch becomes the route and gate signals it implied). Changing gate thresholds, wording or Bridge behaviour on purpose means regenerating the fixture and saying so.
 
-**Agent mode (`src/Investigator.ts`, `src/Conversation.ts`):** give the Bridge an `Investigator` and it (1) sends a contradicted claim that survives one turn uncorrected to the Investigator before the gate may raise it, so a claim the call corrects itself costs no model call; (2) answers when spoken to, once the speaker has finished (`finished` Platt ≥ 0.5 and the words do not trail off; 4 s of silence otherwise), and takes a question to the call that nobody answers in 2.5 s; (3) barges in from `Bridge.partial` (live partial transcripts) when the line names a resource with an open wrong claim and Decider says the speaker is telling someone to act now. Three new yes/no questions (`addr`, `ask` with the gate batch; `act` on partials) have no research numbers yet. Without an Investigator the Bridge is unchanged, so the parity fixtures did not move. `test/Conversation.test.ts` covers it with `Investigator.direct`.
+**Agent mode (`src/runtime/Investigator.ts`, `src/domain/Conversation.ts`):** give the Bridge an `Investigator` and it (1) sends a contradicted claim that survives one turn uncorrected to the Investigator before the gate may raise it, so a claim the call corrects itself costs no model call; (2) answers when spoken to, once the speaker has finished (`finished` Platt ≥ 0.5 and the words do not trail off; 4 s of silence otherwise), and takes a question to the call that nobody answers in 2.5 s; (3) barges in from `Bridge.partial` (live partial transcripts) when the line names a resource with an open wrong claim and Decider says the speaker is telling someone to act now. Barge may cut a human; it does not start while Egg Head is `Speaking` or `Composing`. Three new yes/no questions (`addr`, `ask` with the gate batch; `act` on partials) have no research numbers yet. Without an Investigator the Bridge is unchanged, so the parity fixtures did not move. `test/Conversation.test.ts` covers it with `Investigator.direct`.
 
 Regenerate the gate fixture after an intentional gate change (no Decider calls, standard library only):
 
 ```bash
-python3 spike/gate_eval.py            # must still print REPORT-gate.md's numbers
-python3 spike/export_gate_parity.py   # writes test/fixtures/gate-parity.json
+python3 test/oracles/gate_eval.py            # must still print REPORT-gate.md's numbers
+python3 test/oracles/export_gate_parity.py   # writes test/fixtures/gate-parity.json
 ```
 
 ## Strands Decider 2B (hosted API)
@@ -81,7 +99,7 @@ strands-decider serve StrandsAgents/strands-decider-2B-qwen3.5-v1-2610 --port 80
 
 ## Pointing Egg Head at Decider
 
-`src/Decider.ts` makes Strands Decider an Effect [`DecisionModel`](https://effect.website) provider: `noul` = `Decision.probability`, `choice` = `Decision.classify`, `score` = `Decision.rate`. Every backend shares one translation and Effect's answer validation (distributions must sum to 1 within Decider's 4-decimal rounding).
+`src/runtime/Decider.ts` makes Strands Decider an Effect [`DecisionModel`](https://effect.website) provider: `noul` = `Decision.probability`, `choice` = `Decision.classify`, `score` = `Decision.rate`. Every backend shares one translation and Effect's answer validation (distributions must sum to 1 within Decider's 4-decimal rounding).
 
 - `layerFromEnv`: production wiring from the environment (below)
 - `layerFetch({ url, model?, userAgent? })` / `layerHttp(...)`: HTTP `/v1/systemone` with retry on transient errors, timeout and an in-memory cache of identical requests
@@ -107,7 +125,7 @@ export EGGHEAD_DECIDER_URL=http://127.0.0.1:8000
 
 A live agent is `Bridge.layer` over `Decider.layerFromEnv`, `MockSource.layer()` (or an AWS `CheckSource`) and a `Writer` (`Writer.template`, or `BedrockSupport.bridgeServices` for Bedrock + escalation); see `scripts/smoke-decider.ts`. Tests use `ScriptedDecider.layer`.
 
-Bedrock (separate): `EGGHEAD_MODEL_ID` (we use `nvidia.nemotron-nano-3-30b`: tool use and structured output both work through Strands, ~1.5–3 s per call), `AWS_REGION`, and `AWS_BEARER_TOKEN_BEDROCK` (a Bedrock API key) or the usual credential chain; keep them in `.env` (gitignored) — see `src/Bedrock.ts` (Strands TS `Agent`, `SpeakGuard` is the `InterventionHandler`; a denied `beforeModelCall` never reaches the model, tested against a real Strands agent).
+Bedrock (separate): `EGGHEAD_MODEL_ID` (we use `nvidia.nemotron-nano-3-30b`: tool use and structured output both work through Strands, ~1.5–3 s per call), `AWS_REGION`, and `AWS_BEARER_TOKEN_BEDROCK` (a Bedrock API key) or the usual credential chain; keep them in `.env` (gitignored) — see `src/runtime/Bedrock.ts` (Strands TS `Agent`, `SpeakGuard` is the `InterventionHandler`; a denied `beforeModelCall` never reaches the model, tested against a real Strands agent).
 
 ## Demo
 
@@ -130,6 +148,8 @@ What the call shows (`data/calls/checkout-incident.json`; each line has `expect`
 - **Spoken to:** "Egg Head, can you check the, uh…" then a 1.7 s pause: Decider says not finished (and the words trail off), so it waits; it replies once Priya finishes ("On it"), and answers at the next gap.
 - **A hanging question:** nobody answers for 2.5 s, so Egg Head takes it.
 - **Barge-in:** while a line plays, the runner feeds words as partial transcripts (Polly word marks) to `Bridge.partial`; a resource with an open wrong claim (code) plus Decider's "telling someone to act now" cuts the speaker off.
+
+If rehearsal dies with `node-pty: posix_spawnp failed`, the Darwin `spawn-helper` lost its execute bit (npm install-scripts). `demo/Agent.ts` chmods it on start; you can also `chmod +x node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper`.
 
 The agent's shell has `demo/agent/bin` first on PATH: `aws` is a stand-in that answers from `data/aws.json` in real CLI shapes (alarms, metrics, RDS, SQS, ECS deploys, `--query`, `--output text`), and `egghead report|answer` POSTs the result to `/agent/report`. Jobs run one at a time with a timeout (`--agent-timeout`, 60 s); on a timeout the Bridge falls back to the direct check. Runs are saved to `demo/out/runs/`, voice clips and marks cached in `demo/out/audio/` (re-runs cost no Polly), pi's settings live in `demo/out/agent/`.
 

@@ -1,5 +1,5 @@
 /**
- * Event: what one Bridge input did, for the dashboard, the page and the Judge.
+ * Event: the wire type for the dashboard, the page and the Judge.
  * `speech` and `moves` are the source of truth; `said` / `saidKind` / `agent` / `request` /
  * `claim` / `note` are filled as a projection so existing tests and demo JS keep working.
  */

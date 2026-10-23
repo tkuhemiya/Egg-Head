@@ -3,16 +3,16 @@
  */
 import { Duration, Effect, Option } from "effect"
 import { DecisionModel } from "effect/ai"
-import { compare, inferAsserted } from "./Compare.ts"
-import * as C from "./Conversation.ts"
-import { isOpen } from "./Claims.ts"
-import type { CheckSource } from "./Checks.ts"
-import * as J from "./Judgments.ts"
-import { finishedProbability, gateQuestions, renderGate, renderKv } from "./Questions.ts"
-import { Escalator, route } from "./Router.ts"
-import { WINDOW_TURNS } from "./State.ts"
-import type { LineEvidence, PartialEvidence, Policy, State } from "./State.ts"
-import type { TuningShape } from "./Tuning.ts"
+import { compare, inferAsserted } from "../domain/Compare.ts"
+import * as C from "../domain/Conversation.ts"
+import { isOpen } from "../domain/Claims.ts"
+import type { CheckSource } from "../domain/Checks.ts"
+import * as J from "../domain/Judgments.ts"
+import { finishedProbability, gateQuestions, renderGate, renderKv } from "../domain/Questions.ts"
+import { Escalator, route } from "../domain/Router.ts"
+import { WINDOW_TURNS } from "../domain/State.ts"
+import type { LineEvidence, PartialEvidence, Policy, State } from "../domain/State.ts"
+import type { TuningShape } from "../domain/Tuning.ts"
 
 export interface Deps {
   readonly decider: DecisionModel.DecisionModel

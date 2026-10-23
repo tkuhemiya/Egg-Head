@@ -2,7 +2,7 @@
 Techniques: definition-in-question, contrastive framing, negated question pairs, persona prefix, contextual calibration
 (content-free prior), paraphrase ensembles; option wording for the check choice; contrastive repair question for the gate."""
 import json, os, sys, math, statistics as S
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "spike"))  # frozen Python reference gate
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "test", "oracles"))  # frozen Python reference gate
 from lib import ask_many, load, auc, ROOT, binary_metrics_at, best_threshold
 from common import render, CLAIM_Q, CHECKS, W, gold_route
 split = sys.argv[1]; items = load(split)

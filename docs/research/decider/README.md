@@ -21,4 +21,4 @@ python3 exp9_recall.py dev                   # likewise exp10_prompting, exp11_l
 python3 final_eval.py dev                    # sanity check
 python3 final_eval.py heldout                # already run once; do not tune on it (same for every `heldout` arg)
 ```
-`final_eval.py` and `exp10_prompting.py` import the frozen Python gate from `spike/egghead_gate.py` (the runtime is TypeScript now; `src/Gate.ts` is held to it by a parity test). Cached requests cost nothing. New ones go to the public API with concurrency 2 and a named User-Agent. Python 3.10+, standard library only.
+`final_eval.py` and `exp10_prompting.py` import the frozen Python gate from `test/oracles/egghead_gate.py` (the runtime is TypeScript now; `src/domain/Gate.ts` is held to it by a parity test). Cached requests cost nothing. New ones go to the public API with concurrency 2 and a named User-Agent. Python 3.10+, standard library only.

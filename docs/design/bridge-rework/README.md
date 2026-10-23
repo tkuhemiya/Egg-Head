@@ -18,7 +18,7 @@ Owner decisions as data:
 
 1. Barge only with an Investigator. Unconfirmed barges are tentative and start a confirm job. Never on a corrected claim. Firm only for `Standing{confirmed}`.
 2. A failed second look starts a direct recheck. Still wrong → tentative flag (`couldNotConfirm`). Right → close overruled; if a tentative barge already went out, retract out loud.
-3. One line per gap (`Floor.mayStart`): a human turn since, or `quietAfterSpeechS` (3 s) after Egg Head’s line ended. Cooldown stays on unprompted flags only.
+3. One line per gap (`Floor.mayStart`): a human turn since, or `quietAfterSpeechS` (3 s) after Egg Head’s line ended. Cooldown stays on unprompted flags only. Barge skips the quiet-time half so it can cut a human, but it still requires the floor to be Open: Egg Head does not talk over itself.
 4. Parking closes only open wrong claims about the named resource. “Park that” with no resource named parks the newest open claim.
 5. Writer failure uses the template line instead of failing the step.
 

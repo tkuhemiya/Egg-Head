@@ -11,11 +11,11 @@
  */
 import { Clock, Context, Deferred, Effect, Fiber, Layer, Option, Ref, Schema, Stream } from "effect"
 import { Bridge, type BridgeError, type BridgeState, Event } from "./Bridge.ts"
-import { CHECKS, World } from "./Checks.ts"
-import { describe, Expect, Invariant } from "./Expect.ts"
+import { CHECKS, World } from "../domain/Checks.ts"
+import { describe, Expect, Invariant } from "../domain/Expect.ts"
 import { Hints } from "./Hints.ts"
 import { Marks, Sound, type Spoken } from "./Sound.ts"
-import { Writer } from "./Speaker.ts"
+import { Writer } from "../domain/Speaker.ts"
 
 // ---------------------------------------------------------------------------
 // The scenario
@@ -126,17 +126,17 @@ export const decodeLog = (entries: ReadonlyArray<unknown>): Effect.Effect<Readon
 // The loop
 // ---------------------------------------------------------------------------
 
-/** Who has the floor. Taking it starts when Egg Head decides to speak, before the line is written. */
-export class Floor extends Context.Service<Floor, {
+/** Clock the humans wait on while Egg Head writes. Not `src/Floor.ts` (who is talking). */
+export class Hold extends Context.Service<Hold, {
   /** Humans wait until this Clock time, in seconds. */
   readonly until: Ref.Ref<number>
-}>()("egghead/Floor") {
-  static readonly layer = Layer.effect(Floor, Effect.map(Ref.make(0), (until) => Floor.of({ until })))
+}>()("egghead/Hold") {
+  static readonly layer = Layer.effect(Hold, Effect.map(Ref.make(0), (until) => Hold.of({ until })))
 
   /** Wraps the Writer: the humans pause while Bedrock writes. */
-  static readonly holdWhileWriting = Layer.effect(Writer, Effect.gen(function*() {
+  static readonly whileWriting = Layer.effect(Writer, Effect.gen(function*() {
     const inner = yield* Writer
-    const { until } = yield* Floor
+    const { until } = yield* Hold
     return Writer.of({
       write: (item) =>
         Effect.flatMap(Clock.currentTimeMillis, (ms) => Ref.set(until, ms / 1000 + 30)).pipe(Effect.andThen(inner.write(item)))
@@ -177,7 +177,7 @@ export interface CallSession {
 export const session = Effect.fnUntraced(function*(call: Call, options: PlayOptions) {
   const bridge = yield* Bridge
   const sound = yield* Sound
-  const humansWaitUntil = (yield* Floor).until // Clock seconds
+  const humansWaitUntil = (yield* Hold).until // Clock seconds
   const nowMs = Clock.currentTimeMillis
   const now = Effect.map(nowMs, (ms) => ms / 1000)
   const origin = options.originMs ?? (yield* nowMs)

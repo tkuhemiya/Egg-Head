@@ -10,13 +10,26 @@
  * Bridge falls back to the direct check (Investigator.direct).
  */
 import { Context, Deferred, Duration, Effect, Layer, Option, Ref, Schema, Semaphore } from "effect"
-import { mkdirSync } from "node:fs"
+import { chmodSync, mkdirSync, readdirSync, statSync } from "node:fs"
+import { createRequire } from "node:module"
+import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import * as pty from "node-pty"
-import { Investigator } from "../src/Investigator.ts"
-import type { LedgerItem } from "../src/Ledger.ts"
-import { SupportError } from "../src/Speaker.ts"
-import { Status } from "../src/Checks.ts"
+import { Investigator } from "../src/runtime/Investigator.ts"
+import type { LedgerItem } from "../src/domain/Ledger.ts"
+import { SupportError } from "../src/domain/Speaker.ts"
+import { Status } from "../src/domain/Checks.ts"
+
+/** npm can drop the execute bit on node-pty's spawn-helper; posix_spawnp then fails on macOS. */
+const chmodPtyHelpers = () => {
+  const root = dirname(createRequire(import.meta.url).resolve("node-pty/package.json"))
+  for (const plat of readdirSync(join(root, "prebuilds"))) {
+    const helper = join(root, "prebuilds", plat, "spawn-helper")
+    try {
+      if ((statSync(helper).mode & 0o111) === 0) chmodSync(helper, 0o755)
+    } catch { /* windows prebuilds have no helper */ }
+  }
+}
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url))
 const BIN = fileURLToPath(new URL("./agent/bin", import.meta.url))
@@ -116,6 +129,7 @@ export class AgentTerminal extends Context.Service<AgentTerminal, {
 }>()("egghead/demo/AgentTerminal") {
   static readonly layer = (options: AgentOptions) =>
     Layer.effect(AgentTerminal, Effect.gen(function*() {
+      chmodPtyHelpers()
       mkdirSync(`${HOME}workspace`, { recursive: true })
       const listeners = new Set<(chunk: string) => void>()
       let scrollback = ""

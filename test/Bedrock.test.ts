@@ -2,9 +2,9 @@ import { Agent, Model } from "@strands-agents/sdk"
 import { assert, describe, it } from "@effect/vitest"
 import { Effect, Fiber, Layer, Option } from "effect"
 import { TestClock } from "effect/testing"
-import { type AgentFactory, type AgentLike, BedrockSupport, checkTool, RouteChoice, SpeakGuard } from "../src/Bedrock.ts"
-import { CheckSource, MockSource } from "../src/Checks.ts"
-import type { LedgerItem } from "../src/Ledger.ts"
+import { type AgentFactory, type AgentLike, BedrockSupport, checkTool, RouteChoice, SpeakGuard } from "../src/runtime/Bedrock.ts"
+import { CheckSource, MockSource } from "../src/domain/Checks.ts"
+import type { LedgerItem } from "../src/domain/Ledger.ts"
 
 const ITEM: LedgerItem = {
   speaker: "Sam",

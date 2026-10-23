@@ -8,9 +8,9 @@
  */
 import { Effect, Option, Schema } from "effect"
 import { AiError } from "effect/ai"
-import { CHECKS, Status } from "./Checks.ts"
+import { CHECKS, Status } from "../domain/Checks.ts"
 import { type SystemOneAnswer, type SystemOneRequest, ScriptedDecider } from "./Decider.ts"
-import { NONE_CHECK, UNKNOWN_RESOURCE } from "./Questions.ts"
+import { NONE_CHECK, UNKNOWN_RESOURCE } from "../domain/Questions.ts"
 
 const P = Schema.Number.check(Schema.isBetween({ minimum: 0, maximum: 1 }))
 

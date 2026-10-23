@@ -5,7 +5,6 @@ import { Option } from "effect"
 import { compare } from "./Compare.ts"
 import { factOf } from "./Conversation.ts"
 import type { Move } from "./Event.ts"
-import * as Floor from "./Floor.ts"
 import { Basis, certaintyOf, ClaimId, claimId, type Voice } from "./Ids.ts"
 import * as Jobs from "./Jobs.ts"
 import type { Outcome, Report } from "./Jobs.ts"
@@ -262,7 +261,6 @@ export const jobFinished = (s: State, jobId: string, outcome: Outcome, ctx: Ctx)
   }
   return { claims: s.claims.map((x) => x.id === c.id ? standingC : x), jobs: s.jobs, ...none }
   void viaNote
-  void Floor
 }
 
 export const spoken = (

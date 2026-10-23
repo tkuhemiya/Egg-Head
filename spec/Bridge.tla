@@ -1,12 +1,12 @@
 ------------------------------- MODULE Bridge -------------------------------
 (***************************************************************************)
-(* When does Egg Head speak? A model of the W3 reducer (src/Step.ts) in   *)
+(* When does Egg Head speak? A model of the W3 reducer (src/domain/Step.ts) in   *)
 (* agent mode. Each input tag is one action; citations are to the code.    *)
 (*                                                                         *)
-(* ClaimStatuses  <-> src/Claims.ts CLAIM_TAGS                             *)
-(* RequestStatuses <-> src/Requests.ts REQUEST_TAGS                        *)
-(* JobStatuses     <-> src/Jobs.ts JOB_TAGS                                *)
-(* SpeechStatuses  <-> src/Floor.ts FLOOR_TAGS                             *)
+(* ClaimStatuses  <-> src/domain/Claims.ts CLAIM_TAGS                             *)
+(* RequestStatuses <-> src/domain/Requests.ts REQUEST_TAGS                        *)
+(* JobStatuses     <-> src/domain/Jobs.ts JOB_TAGS                                *)
+(* SpeechStatuses  <-> src/domain/Floor.ts FLOOR_TAGS                             *)
 (***************************************************************************)
 EXTENDS Naturals, FiniteSets
 
@@ -39,7 +39,7 @@ VARIABLES
     told,      \* claim -> a tentative barge already went out
     jobs,      \* claims with a second look in flight
     attempts,  \* claim -> number of confirm/recheck jobs started
-    basis,     \* claim -> "none" | "confirmed" | "fastCheck" (src/Ids.ts Basis)
+    basis,     \* claim -> "none" | "confirmed" | "fastCheck" (src/domain/Ids.ts Basis)
     req,       \* one question to Egg Head
     reqJob,    \* its Investigator answer job is in flight
     floor,     \* SpeechStatuses
@@ -48,13 +48,13 @@ VARIABLES
     how,       \* claim -> "firm" or "tentative" (what was said)
     harm       \* ghost: what went wrong when Egg Head spoke
 
-res == [c \in Claims |-> c]  \* each claim is its own resource (src/Claims.ts resource)
+res == [c \in Claims |-> c]  \* each claim is its own resource (src/domain/Claims.ts resource)
 vars == <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis,
           req, reqJob, floor, humanSince, said, how, harm>>
 
 Open(c) == status[c] \in {"Fresh", "Checking", "Standing"}
 
-\* src/Claims.ts bargeable + bargeVoice; src/Step.ts PartialHeard
+\* src/domain/Claims.ts bargeable + bargeVoice; src/domain/Step.ts PartialHeard
 HarmOf(c, firm) ==
     (IF firm /\ basis[c] # "confirmed" THEN {"firm unconfirmed"} ELSE {})
     \cup (IF repaired[c] \/ status[c] = "Closed" THEN {"corrected"} ELSE {})
@@ -79,17 +79,17 @@ Init ==
     /\ how = [c \in Claims |-> "none"]
     /\ harm = {}
 
-MaySpeak == floor = "Open"  \* src/Floor.ts mayStart: not while Speaking or Composing
+MaySpeak == floor = "Open"  \* src/domain/Floor.ts mayStart: not while Speaking or Composing
 
-\* ghost: a line started while Egg Head was already speaking (barge-in is exempt by design)
+\* ghost: a line started while Egg Head was already speaking
 Overlap == IF floor # "Open" THEN {"overlap"} ELSE {}
 
-\* src/Agenda.ts next + src/Claims.ts spoken (flag)
+\* src/domain/Agenda.ts next + src/domain/Claims.ts spoken (flag)
 GateItem == {c \in Claims : status[c] = "Standing"}
 Oldest == IF GateItem = {} THEN CHOOSE x \in Claims : TRUE
           ELSE CHOOSE c \in GateItem : \A d \in GateItem : intro[c] <= intro[d]
 
-\* src/Step.ts speakTail / Floor.take
+\* src/domain/Step.ts speakTail / Floor.take
 SpeakFlag(c) ==
     /\ status[c] = "Standing"
     /\ ~repaired[c]
@@ -103,7 +103,7 @@ SpeakFlag(c) ==
     /\ harm' = harm \cup HarmOf(c, basis[c] = "confirmed") \cup Overlap
     /\ UNCHANGED <<turn, intro, truth, repaired, parked, told, jobs, attempts, basis, req, reqJob>>
 
-\* src/Requests.ts worked then jobFinished then answered
+\* src/domain/Requests.ts worked then jobFinished then answered
 SpeakAnswer ==
     /\ req = "Ready"
     /\ MaySpeak
@@ -131,26 +131,26 @@ Step(floorOpen) ==
        ELSE UNCHANGED vars
 
 (***************************************************************************)
-(* input: LineBegan  (src/Step.ts LineBegan)                               *)
+(* input: LineBegan  (src/domain/Step.ts LineBegan)                               *)
 (***************************************************************************)
 LineBegan ==
     /\ turn < MaxTurns
     /\ UNCHANGED vars
 
 (***************************************************************************)
-(* input: LineUnderstood  (src/Step.ts understood)                         *)
+(* input: LineUnderstood  (src/domain/Step.ts understood)                         *)
 (***************************************************************************)
 LineKinds == {"other", "repair", "park", "question", "claim"}
 
-\* src/Judgments.ts parksToday: only claims whose resource is named (here: the
-\* park names r). src/Claims.ts judge closes them.
+\* src/domain/Judgments.ts parksToday: only claims whose resource is named (here: the
+\* park names r). src/domain/Claims.ts judge closes them.
 ParkNamed(r) ==
     [c \in Claims |-> IF res[c] = r /\ Open(c) THEN TRUE ELSE parked[c]]
 
 Hear(kind, c, found) ==
     /\ turn < MaxTurns
     /\ LET t == turn + 1
-           \* src/Judgments.ts correctsToday
+           \* src/domain/Judgments.ts correctsToday
            rep == IF kind = "repair" THEN [x \in Claims |-> repaired[x] \/ Open(x)] ELSE repaired
            \* park names c's resource; other resources stay open (finding 6)
            prk == IF kind = "park" THEN ParkNamed(c) ELSE parked
@@ -183,14 +183,14 @@ HearAny ==
     \/ \E c \in Claims : Hear("other", c, "wrong") \/ Hear("repair", c, "wrong") \/ Hear("park", c, "wrong") \/ Hear("question", c, "wrong")
 
 (***************************************************************************)
-(* input: LineFailed  (src/Step.ts LineFailed)                             *)
+(* input: LineFailed  (src/domain/Step.ts LineFailed)                             *)
 (***************************************************************************)
 LineFailed ==
     /\ turn > 0
     /\ UNCHANGED vars
 
 (***************************************************************************)
-(* input: Silence  (src/Step.ts Silence)                                   *)
+(* input: Silence  (src/domain/Step.ts Silence)                                   *)
 (***************************************************************************)
 Tick(floorOpen) ==
     /\ turn > 0
@@ -199,21 +199,22 @@ Tick(floorOpen) ==
     /\ UNCHANGED <<turn, intro, truth, repaired, parked, told, jobs, attempts, basis>>
 
 (***************************************************************************)
-(* input: PartialHeard  (src/Step.ts PartialHeard; src/Claims.ts spoken)   *)
+(* input: PartialHeard  (src/domain/Step.ts PartialHeard; src/domain/Claims.ts spoken)   *)
 (***************************************************************************)
 Barge(c) ==
     /\ Open(c)
     /\ ~repaired[c]
     /\ ~parked[c]
-    /\ ~(told[c] /\ basis[c] # "confirmed")  \* src/Claims.ts bargeable
+    /\ ~(told[c] /\ basis[c] # "confirmed")  \* src/domain/Claims.ts bargeable
     /\ status[c] # "Closed"
+    /\ MaySpeak  \* src/domain/Step.ts PartialHeard: barge cuts a human, not Egg Head
     /\ LET firm == status[c] = "Standing" /\ basis[c] = "confirmed"
        IN /\ said' = said \cup {c}
           /\ how' = [how EXCEPT ![c] = IF firm THEN "firm" ELSE "tentative"]
           /\ told' = [told EXCEPT ![c] = TRUE]
           /\ floor' = "Speaking"
           /\ humanSince' = FALSE
-          /\ harm' = harm \cup HarmOf(c, firm)
+          /\ harm' = harm \cup HarmOf(c, firm) \cup Overlap
           /\ IF firm
              THEN /\ status' = [status EXCEPT ![c] = "Closed"]
                   /\ UNCHANGED <<jobs, attempts, basis>>
@@ -226,7 +227,7 @@ Barge(c) ==
           /\ UNCHANGED <<turn, intro, truth, repaired, parked, req, reqJob>>
 
 (***************************************************************************)
-(* input: JobDone  (src/Claims.ts jobFinished, src/Requests.ts jobFinished)*)
+(* input: JobDone  (src/domain/Claims.ts jobFinished, src/domain/Requests.ts jobFinished)*)
 (***************************************************************************)
 Report(c, outcome) ==
     /\ c \in jobs
@@ -260,11 +261,11 @@ Answer(outcome) ==
     /\ reqJob
     /\ req = "Working"
     /\ reqJob' = FALSE
-    /\ req' = "Ready"     \* found, unknown, or failed: always a line to say (src/Requests.ts)
+    /\ req' = "Ready"     \* found, unknown, or failed: always a line to say (src/domain/Requests.ts)
     /\ UNCHANGED <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis, floor, humanSince, said, how, harm>>
 
 (***************************************************************************)
-(* input: Composed  (src/Step.ts Composed)                                 *)
+(* input: Composed  (src/domain/Step.ts Composed)                                 *)
 (***************************************************************************)
 Composed ==
     /\ floor = "Composing"
@@ -272,7 +273,7 @@ Composed ==
     /\ UNCHANGED <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis, req, reqJob, humanSince, said, how, harm>>
 
 (***************************************************************************)
-(* input: SpeechEnded  (src/Floor.ts ended)                                *)
+(* input: SpeechEnded  (src/domain/Floor.ts ended)                                *)
 (***************************************************************************)
 SpeechEnded ==
     /\ floor = "Speaking"
@@ -280,7 +281,7 @@ SpeechEnded ==
     /\ UNCHANGED <<turn, status, intro, truth, repaired, parked, told, jobs, attempts, basis, req, reqJob, humanSince, said, how, harm>>
 
 (***************************************************************************)
-(* input: Sweep  (src/Step.ts sweep; job deadline)                         *)
+(* input: Sweep  (src/domain/Step.ts sweep; job deadline)                         *)
 (***************************************************************************)
 Sweep ==
     \E c \in jobs : Report(c, "failed")
@@ -316,29 +317,30 @@ TypeOK ==
     /\ said \subseteq Claims
     /\ jobs \subseteq Claims
 
-\* src/Claims.ts bargeVoice, src/Step.ts speakTail: a tentative barge on an unconfirmed claim is allowed.
+\* src/domain/Claims.ts bargeVoice, src/domain/Step.ts speakTail: a tentative barge on an unconfirmed claim is allowed.
 NeverFirmOnUnconfirmed == "firm unconfirmed" \notin harm
 
-\* src/Claims.ts bargeable; corrected and parked claims are Closed
+\* src/domain/Claims.ts bargeable; corrected and parked claims are Closed
 NeverSaysCorrected == "corrected" \notin harm
 
-\* src/Claims.ts jobFinished: a claim the agent finds right is Closed (overruled)
+\* src/domain/Claims.ts jobFinished: a claim the agent finds right is Closed (overruled)
 NeverSaysRightClaimIsWrong == "claim was right" \notin harm
 
-\* src/Claims.ts spoken: a tentative barge starts a confirm job
+\* src/domain/Claims.ts spoken: a tentative barge starts a confirm job
 TentativeIsChecked == \A c \in Claims : told[c] => status[c] \in {"Checking", "Standing", "Closed"}
 
-\* src/Claims.ts judge + src/Judgments.ts parksToday: a park of r never closes a claim about another resource.
+\* src/domain/Claims.ts judge + src/domain/Judgments.ts parksToday: a park of r never closes a claim about another resource.
 ParkingIsScoped == "parked other" \notin harm
 
-\* src/Floor.ts mayStart: no flag, ack or answer starts while Egg Head is speaking. The quiet-time
-\* half of the rule (quietAfterSpeechS) is timing and is not modelled; barge-in is exempt.
+\* src/domain/Floor.ts mayStart / src/domain/Step.ts PartialHeard: no flag, ack, answer or barge starts
+\* while Egg Head is speaking or composing. quietAfterSpeechS is timing and is not modelled;
+\* barge still skips that quiet-time half (it may cut a human) but not MaySpeak.
 OneLinePerGap == "overlap" \notin harm
 
-\* src/Requests.ts jobFinished always reaches Ready, then Agenda answers.
+\* src/domain/Requests.ts jobFinished always reaches Ready, then Agenda answers.
 AckIsAnswered == (req = "Working") ~> (req = "Closed")
 
-\* src/Claims.ts Standing is spoken or closed (overruled, parked, repaired).
+\* src/domain/Claims.ts Standing is spoken or closed (overruled, parked, repaired).
 ConfirmedIsResolved == \A c \in Claims : (status[c] = "Standing") ~> (status[c] = "Closed")
 
 =============================================================================

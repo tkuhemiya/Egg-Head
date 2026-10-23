@@ -1,6 +1,6 @@
 /**
  * Parity with the Python runtime this port replaced. Fixtures were exported from the Python
- * code (spike/export_gate_parity.py for the gate; the Bridge traces were snapshotted from
+ * code (test/oracles/export_gate_parity.py for the gate; the Bridge traces were snapshotted from
  * egghead/ before it was removed, see each fixture's `source`).
  *
  * The questions have since moved to the research pipeline (test/Questions.test.ts), so the
@@ -11,11 +11,11 @@ import { assert, describe, it } from "@effect/vitest"
 import { Effect, Layer, Option, Stream } from "effect"
 import gateFixture from "./fixtures/gate-parity.json" with { type: "json" }
 import bridgeFixture from "./fixtures/bridge-parity.json" with { type: "json" }
-import { Bridge, type CallInput, type Event } from "../src/Bridge.ts"
-import { MockSource } from "../src/Checks.ts"
-import * as G from "../src/Gate.ts"
-import { Escalator, type Route } from "../src/Router.ts"
-import { Writer } from "../src/Speaker.ts"
+import { Bridge, type CallInput, type Event } from "../src/runtime/Bridge.ts"
+import { MockSource } from "../src/domain/Checks.ts"
+import * as G from "../src/domain/Gate.ts"
+import { Escalator, type Route } from "../src/domain/Router.ts"
+import { Writer } from "../src/domain/Speaker.ts"
 import { finFor, type Line, scripted } from "./helpers.ts"
 
 const fromPython = (i: Record<string, any>): G.GateInput => ({
@@ -42,7 +42,7 @@ const toPython = (d: G.GateDecision): Record<string, unknown> => ({
 const product = <T>(axes: ReadonlyArray<ReadonlyArray<T>>): Array<Array<T>> =>
   axes.reduce<Array<Array<T>>>((acc, axis) => acc.flatMap((prefix) => axis.map((v) => [...prefix, v])), [[]])
 
-describe("gate parity with spike/egghead_gate.py", () => {
+describe("gate parity with test/oracles/egghead_gate.py", () => {
   it("reproduces REPORT-gate.md on the 16 pass-2 snippets", () => {
     let tp = 0, fp = 0, fn = 0
     for (const row of gateFixture.pass2) {

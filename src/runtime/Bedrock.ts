@@ -29,12 +29,12 @@ import {
   tool
 } from "@strands-agents/sdk"
 import { Config, Context, Effect, Layer, Option, Ref } from "effect"
-import { z } from "zod"
-import { CHECKS, CheckSource, isCheck } from "./Checks.ts"
-import type { LedgerItem } from "./Ledger.ts"
-import type { Turn } from "./Questions.ts"
-import { Escalator, ignore, type Route } from "./Router.ts"
-import { SupportError, Writer } from "./Speaker.ts"
+import { z } from "zod" // Strands `tool()` and structuredOutputSchema take Zod, not Effect Schema
+import { CHECKS, CheckSource, isCheck } from "../domain/Checks.ts"
+import type { LedgerItem } from "../domain/Ledger.ts"
+import type { Turn } from "../domain/Questions.ts"
+import { Escalator, ignore, type Route } from "../domain/Router.ts"
+import { SupportError, Writer } from "../domain/Speaker.ts"
 
 export const WRITER_PROMPT = "You are Egg Head, a quiet teammate on an incident bridge call. A claim someone made was " +
   "contradicted by a live check. Say it in ONE spoken sentence of at most 20 words. Start with 'Quick flag:', " +

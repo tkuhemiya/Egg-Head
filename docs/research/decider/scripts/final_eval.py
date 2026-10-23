@@ -2,8 +2,8 @@
 Run on dev to sanity-check, then ONCE on heldout."""
 import json, math, os, re, statistics as S, sys
 
-_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-_SPIKE = os.path.join(_REPO_ROOT, "spike")  # frozen Python reference gate (runtime is TypeScript now)
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+_SPIKE = os.path.join(_REPO_ROOT, "test", "oracles")  # frozen Python reference gate (runtime is TypeScript now)
 if _SPIKE not in sys.path:
     sys.path.insert(0, _SPIKE)
 from lib import ask_many, load, STATS, prf, ROOT

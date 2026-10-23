@@ -11,11 +11,11 @@
  * and the Bridge falls back to it when the agent fails or takes too long.
  */
 import { Context, Effect, Layer, Option, Schema } from "effect"
-import { CheckSource, Status } from "./Checks.ts"
-import { factOf } from "./Conversation.ts"
-import type { LedgerItem } from "./Ledger.ts"
-import { aliasHits } from "./Router.ts"
-import { SupportError } from "./Speaker.ts"
+import { CheckSource, Status } from "../domain/Checks.ts"
+import { factOf } from "../domain/Conversation.ts"
+import type { LedgerItem } from "../domain/Ledger.ts"
+import { aliasHits } from "../domain/Router.ts"
+import { SupportError } from "../domain/Speaker.ts"
 
 export const Finding = Schema.Struct({
   status: Schema.Literals([...Status.literals, "unknown"]),

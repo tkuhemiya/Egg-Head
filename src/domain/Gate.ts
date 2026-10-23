@@ -1,7 +1,7 @@
 /**
  * SpeakGate: should Egg Head interrupt the call with a contradicted claim?
  *
- * Pass-2 spike findings (spike/REPORT.md) decide who owns what:
+ * Pass-2 spike findings (test/oracles/REPORT.md) decide who owns what:
  *
  * - `floor_free` (asked as "would speaking interrupt?" and inverted) was 87% accurate, but it
  *   missed the cases where someone was still mid-thought. Decider stays the gap detector and
@@ -13,7 +13,7 @@
  *   check that disagreed, and drops when the call parked the topic.
  *
  * All of it is plain code over the Decider probabilities, so each decision can be shown on
- * the dashboard with the reason it was made. `spike/egghead_gate.py` is the frozen Python
+ * the dashboard with the reason it was made. `test/oracles/egghead_gate.py` is the frozen Python
  * original; test/Gate.parity.test.ts holds this port to it.
  */
 import { Option, Schema } from "effect"

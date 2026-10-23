@@ -42,7 +42,7 @@ Two reusable patterns come out of it: a **claim-check router** (claim → check 
 
 ## Results
 
-From the Decider research campaign ([`research/decider/FINDINGS.md`](research/decider/FINDINGS.md); 273 lines we labelled, held-out split scored once):
+From the Decider research campaign ([`docs/research/decider/FINDINGS.md`](docs/research/decider/FINDINGS.md); 273 lines we labelled, held-out split scored once):
 
 | Task (held-out) | Decider pipeline | Baseline |
 |---|---|---|

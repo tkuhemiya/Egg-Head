@@ -11,7 +11,7 @@ import {
   optionsFromEnv,
   PUBLIC_DECIDER_URL,
   ScriptedDecider
-} from "../src/Decider.ts"
+} from "../src/runtime/Decider.ts"
 
 const withEnv = (env: Record<string, string>) => Effect.provide(ConfigProvider.layer(ConfigProvider.fromEnvRecord(env)))
 

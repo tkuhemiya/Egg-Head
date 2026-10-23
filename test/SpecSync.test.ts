@@ -3,11 +3,11 @@
  */
 import { assert, it } from "@effect/vitest"
 import { readFileSync } from "node:fs"
-import { CLAIM_TAGS } from "../src/Claims.ts"
-import { FLOOR_TAGS } from "../src/Floor.ts"
-import { JOB_TAGS } from "../src/Jobs.ts"
-import { REQUEST_TAGS } from "../src/Requests.ts"
-import { INPUT_TAGS } from "../src/State.ts"
+import { CLAIM_TAGS } from "../src/domain/Claims.ts"
+import { FLOOR_TAGS } from "../src/domain/Floor.ts"
+import { JOB_TAGS } from "../src/domain/Jobs.ts"
+import { REQUEST_TAGS } from "../src/domain/Requests.ts"
+import { INPUT_TAGS } from "../src/domain/State.ts"
 
 const spec = readFileSync(new URL("../spec/Bridge.tla", import.meta.url), "utf8")
 const set = (name: string): ReadonlyArray<string> => {

@@ -1,6 +1,6 @@
 # Day-1 spike (history, frozen)
 
-The go/no-go test from 17 Oct: does Decider 2B answer Egg Head's questions reliably? Pass 1 (the original wording, T_ROUTE=0.9) never fired; pass 2 (simpler wording, latest-line routing, T_ROUTE=0.7) gave **GO-with-changes** ([REPORT.md](REPORT.md)). The speak gate was then reworked in code and re-scored on the pass-2 answers ([REPORT-gate.md](REPORT-gate.md); a fit to those 16 snippets, not a held-out result). The research campaign in [`research/decider/`](../research/decider/FINDINGS.md) replaced this harness, and the TypeScript runtime replaced the gate.
+The go/no-go test from 17 Oct: does Decider 2B answer Egg Head's questions reliably? Pass 1 (the original wording, T_ROUTE=0.9) never fired; pass 2 (simpler wording, latest-line routing, T_ROUTE=0.7) gave **GO-with-changes** ([REPORT.md](REPORT.md)). The speak gate was then reworked in code and re-scored on the pass-2 answers ([REPORT-gate.md](REPORT-gate.md); a fit to those 16 snippets, not a held-out result). The research campaign in [`docs/research/decider/`](../../docs/research/decider/FINDINGS.md) replaced this harness, and the TypeScript runtime replaced the gate.
 
 What pass 2 decided:
 
@@ -18,15 +18,15 @@ What is left is what the parity tests and research scripts still need:
 
 | File | What |
 |---|---|
-| `egghead_gate.py` | The frozen Python speak gate. `src/Gate.ts` is held to it (`test/Parity.test.ts`); `research/decider/scripts/final_eval.py` and `exp10_prompting.py` import it. |
+| `egghead_gate.py` | The frozen Python speak gate. `src/domain/Gate.ts` is held to it (`test/Parity.test.ts`); `docs/research/decider/scripts/final_eval.py` and `exp10_prompting.py` import it. |
 | `questions.py` | The pass-2 question set, gates and claim/check comparison. |
 | `out/results.jsonl`, `out/meta.json` | The pass-2 Decider answers (local HF weights; `meta.json` records the backend). |
 | `gate_eval.py` | Re-scores the gate on those answers and writes `REPORT-gate.md`. |
 | `export_gate_parity.py` | Writes `test/fixtures/gate-parity.json` (the 16 pass-2 rows plus a 20k-point input grid). |
 
-The labelled snippets are `research/decider/data/source/egghead_spike.jsonl` and the check world is `data/world.json`. The pass-1 archive, the run/eval harness and the never-scored held-out gate set are in git history.
+The labelled snippets are `docs/research/decider/data/source/egghead_spike.jsonl` and the check world is `data/world.json`. The pass-1 archive, the run/eval harness and the never-scored held-out gate set are in git history.
 
 ```bash
-python3 spike/gate_eval.py            # REPORT-gate.md (standard library only)
-python3 spike/export_gate_parity.py   # regenerate the gate fixture after an intentional gate change
+python3 test/oracles/gate_eval.py            # REPORT-gate.md (standard library only)
+python3 test/oracles/export_gate_parity.py   # regenerate the gate fixture after an intentional gate change
 ```
