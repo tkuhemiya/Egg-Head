@@ -8,7 +8,7 @@ import { createTree, trace } from "./tree.js"
 
 const $ = (id) => document.getElementById(id)
 const cfg = await fetch("/config").then((r) => r.json())
-const colors = Object.fromEntries(cfg.people.map((p, i) => [p, personOf(p, i).shirt]))
+const colors = Object.fromEntries(cfg.people.map((p, i) => [p, personOf(p, i).accentC]))
 const clock = (ms) => {
   const s = Math.max(0, Math.round(ms / 1000))
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
