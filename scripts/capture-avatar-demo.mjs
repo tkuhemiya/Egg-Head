@@ -59,7 +59,7 @@ await page.screenshot({ path: join(outDir, "preview-speaking.png") })
 
 await page.goto(`http://127.0.0.1:${demoPort}/?nocam`, { waitUntil: "networkidle" })
 await page.click("#start")
-await page.waitForTimeout(1200)
+await page.waitForTimeout(3500)
 await page.screenshot({ path: join(outDir, "meeting-start.png"), fullPage: false })
 
 const framesDir = join(outDir, "frames")

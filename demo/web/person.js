@@ -22,7 +22,7 @@ export function personOf(name, i = 0) {
   const pick = (arr) => arr[Math.floor(r() * arr.length)]
   const spec = fixed ?? { skin: Math.floor(r() * SKIN.length), hair: Math.floor(r() * HAIR.length), style: pick(STYLES), accent: Math.floor(r() * ACCENT.length), glasses: r() < 0.25, role: "" }
   const accent = ACCENT[spec.accent % ACCENT.length]
-  return { ...spec, skinC: SKIN[spec.skin], hairC: HAIR[spec.hair], accentC: accent, bg: [accent + "55", accent + "22"] }
+  return { ...spec, skinC: SKIN[spec.skin], hairC: HAIR[spec.hair], accentC: accent }
 }
 
 function hairBack(g, p) {

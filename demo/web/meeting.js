@@ -1,6 +1,6 @@
 // The meeting page: cartoon teammates who lip-sync to their Polly voices, your camera, Egg Head
 // with what it is doing right now, a look-up pane (pi runs underneath), and a feed.
-import { drawEggHead, drawPerson, personOf } from "./avatars.js"
+import { drawEggHead, drawPerson, drawRoom, personOf, roomOf } from "./avatars.js"
 import { enter, flash, morph, pop, reconcile, roll, shake } from "./motion.js"
 import { connect, createStore, eggState, esc } from "./store.js"
 
@@ -28,11 +28,15 @@ const grid = $("grid")
 function tile(name, cls = "") {
   const t = h("div", `tile ${cls}`)
   const p = personOf(name, tiles.size)
-  if (p.bg && !cls.includes("egg")) t.style.cssText = `--bg1:${p.bg[0]};--bg2:${p.bg[1]}`
   const art = h("div", "art")
   const badge = h("div", "bubble")
   const label = h("div", "name", `${cls.includes("me") ? MIC_OFF : MIC_ON}<span>${esc(name)}</span>${p.role && !cls ? `<span class="role">${esc(p.role)}</span>` : ""}`)
-  t.append(art, badge, label)
+  if (!cls.includes("egg") && !cls.includes("me")) {
+    t.classList.add("has-room")
+    const room = h("div", "room")
+    room.append(drawRoom(roomOf(name, tiles.size).id))
+    t.append(room, art, badge, label)
+  } else t.append(art, badge, label)
   grid.insertBefore(t, $("captions"))
   return { t, art, badge, label }
 }
