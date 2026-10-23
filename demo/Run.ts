@@ -1,55 +1,18 @@
 /**
- * Plays a scripted call in real time through the Bridge and reports every step to the
- * meeting page and the dashboard. Two modes:
+ * Plays a scripted call in real time and reports every step to the meeting page and the
+ * dashboard. The call loop itself is src/Call.ts (shared with the offline scenarios); this file
+ * adds what only the demo has:
  *
- * - text: each line's text goes to the Bridge when its audio ends (the transcript is known).
- *   While a line plays, the words heard so far go to `Bridge.partial` as a streaming
- *   recogniser's partial results would (word times from Polly's speech marks), so Egg Head
- *   can cut a speaker off mid-line.
- * - transcribe: the call audio is streamed to Amazon Transcribe and the Bridge hears what
+ * - stats for the page (Decider batches and latency, Bedrock calls, agent tasks);
+ * - transcribe mode: the call audio is streamed to Amazon Transcribe and the Bridge hears what
  *   Transcribe returns. The speaker is the line playing at that moment (a meeting platform
  *   knows who is unmuted); speaker identity is not something the Decider needs.
- *
- * Silence is measured, not scripted: the Bridge hears a line when it ends, then gets VAD-style
- * silence ticks until the next line starts. Humans pause for Egg Head when it speaks, and a
- * line marked `waitForEggHead` gives it the floor until its pending work is said.
  */
-import { Clock, Context, Deferred, Duration, Effect, Fiber, Layer, Option, Ref, Schema, Stream } from "effect"
+import { Context, Duration, Effect, Layer, Option, Ref, Stream } from "effect"
 import { DecisionModel } from "effect/ai"
-import { Bridge, Event } from "../src/Bridge.ts"
-import { Writer } from "../src/Speaker.ts"
-import { type Clip, type Marks, transcribe, Voice } from "./Voice.ts"
-
-export const Call = Schema.Struct({
-  title: Schema.String,
-  voices: Schema.Record(Schema.String, Schema.String),
-  lines: Schema.Array(Schema.Struct({
-    speaker: Schema.String,
-    text: Schema.String,
-    pause: Schema.Number,
-    expect: Schema.String,
-    /** Humans hold after this line until Egg Head has said what it is working on (at most this many s). */
-    waitForEggHead: Schema.optionalKey(Schema.Number),
-    /** What Decider is expected to answer on this line; only rehearsals use it (demo/Rehearsal.ts). */
-    decider: Schema.optionalKey(Schema.Record(Schema.String, Schema.Union([Schema.Number, Schema.String])))
-  }))
-})
-export type Call = typeof Call.Type
-
-export type SaidKind = "flag" | "ack" | "answer" | "barge" | "line"
-
-export type Message =
-  | { readonly type: "meta"; readonly title: string; readonly mode: string; readonly writer: string; readonly agent: string; readonly lines: number; readonly people: ReadonlyArray<string> }
-  | { readonly type: "line"; readonly index: number; readonly speaker: string; readonly text: string; readonly audio: string; readonly durationS: number; readonly expect: string; readonly marks: Marks }
-  | { readonly type: "cut"; readonly index: number; readonly speaker: string; readonly text: string }
-  | { readonly type: "heard"; readonly index: number; readonly speaker: string; readonly text: string }
-  | { readonly type: "event"; readonly index: number; readonly event: unknown }
-  | { readonly type: "floor"; readonly index: number }
-  | { readonly type: "hold"; readonly index: number; readonly on: boolean }
-  | { readonly type: "status"; readonly text: string }
-  | { readonly type: "egghead"; readonly index: number; readonly text: string; readonly audio: string; readonly durationS: number; readonly marks: Marks; readonly kind: SaidKind }
-  | { readonly type: "stats"; readonly stats: Stats }
-  | { readonly type: "done" }
+import { Bridge } from "../src/Bridge.ts"
+import { type Call, type Logged, play, type PlayOptions, session } from "../src/Call.ts"
+import { transcribe, Voice } from "./Voice.ts"
 
 export interface Stats {
   readonly lines: number
@@ -59,6 +22,9 @@ export interface Stats {
   readonly agentTasks: number
   readonly spoke: number
 }
+
+/** Messages only the page shows; the run log the Judge reads does not need them. */
+export type PageOnly = { readonly type: "stats"; readonly stats: Stats } | { readonly type: "status"; readonly text: string }
 
 /** Counts DecisionModel calls and their latency (wraps the real provider). */
 export class DeciderMeter extends Context.Service<DeciderMeter, {
@@ -81,258 +47,86 @@ export class DeciderMeter extends Context.Service<DeciderMeter, {
   }))
 }
 
-/**
- * Who has the floor. When the gate opens, Egg Head takes it at once (the humans pause) even
- * though Bedrock still needs a few seconds to write the sentence.
- */
-export class Floor extends Context.Service<Floor, {
-  /** Humans wait until this Clock time, in seconds. */
-  readonly until: Ref.Ref<number>
-}>()("egghead/demo/Floor") {
-  static readonly layer = Layer.effect(Floor, Effect.map(Ref.make(0), (until) => Floor.of({ until })))
-
-  /** Wraps the Writer: taking the floor starts when writing starts. */
-  static readonly holdWhileWriting = Layer.effect(Writer, Effect.gen(function*() {
-    const inner = yield* Writer
-    const { until } = yield* Floor
-    return Writer.of({
-      write: (item) =>
-        Effect.flatMap(Clock.currentTimeMillis, (ms) => Ref.set(until, ms / 1000 + 30)).pipe(Effect.andThen(inner.write(item)))
-    })
-  }))
-}
-
 export interface RunOptions {
   readonly mode: "text" | "transcribe"
   readonly writer: string
   readonly agent: string
+  readonly originMs: number
   readonly bedrockCalls: Effect.Effect<number>
-  readonly publish: (m: Message) => Effect.Effect<void>
+  readonly publish: (m: Logged | PageOnly) => Effect.Effect<void>
 }
 
-const encodeEvent = Schema.encodeSync(Schema.toCodecJson(Event))
-const TICK_MS = 250
-const ASR_DELAY_S = 0.3 // a streaming recogniser finalises a segment about this long after speech ends
-const PARTIAL_DELAY_S = 0.25 // and shows a word as a partial result about this long after it is said
 const DEFAULT_WAIT_S = 30
 
 export const run = Effect.fnUntraced(function*(call: Call, options: RunOptions) {
   const bridge = yield* Bridge
-  const voice = yield* Voice
   const meter = yield* DeciderMeter
-  const { publish } = options
-  const now = Effect.map(Clock.currentTimeMillis, (ms) => ms / 1000)
-  const clips: Array<Clip> = yield* Effect.forEach(call.lines, (l) => voice.speak(call.voices[l.speaker] ?? "Joanna", l.text))
-  const current = yield* Ref.make(0) // line whose audio is playing or just ended
-  const lastEnd = yield* Ref.make(Number.NEGATIVE_INFINITY)
-  const spoke = yield* Ref.make(0)
-  const humansWaitUntil = (yield* Floor).until // Clock seconds; humans pause while Egg Head talks
+  let lines = 0
+  let spoke = 0
 
   const stats = Effect.gen(function*() {
     const ms = [...(yield* meter.batches)].sort((a, b) => a - b)
-    const s = yield* bridge.state
     return {
-      lines: (yield* Ref.get(current)) + 1,
+      lines,
       deciderBatches: ms.length,
       deciderMsP50: ms.length ? Math.round(ms[Math.floor(ms.length / 2)]!) : 0,
       bedrockCalls: yield* options.bedrockCalls,
-      agentTasks: s.tasks,
-      spoke: yield* Ref.get(spoke)
+      agentTasks: (yield* bridge.state).tasks,
+      spoke
     } satisfies Stats
   })
 
-  // Every Bridge decision goes to the page; when Egg Head speaks, voice it and hold the humans.
-  const lineOfTurn = yield* Ref.make<ReadonlyArray<number>>([]) // Bridge turn -> call line
-  const hear = (i: number, speaker: string, text: string, silenceS: number) =>
-    Ref.update(lineOfTurn, (t) => [...t, i]).pipe(Effect.andThen(bridge.hear(speaker, text, silenceS)))
-
-  const onEvent = (ev: Event) =>
+  // fresh stats follow every decision and every line Egg Head says
+  const publish = (m: Logged) =>
     Effect.gen(function*() {
-      const index = (yield* Ref.get(lineOfTurn))[ev.turn] ?? (yield* Ref.get(current))
-      yield* publish({ type: "event", index, event: encodeEvent(ev) })
-      if (Option.isSome(ev.said)) {
-        yield* Ref.set(humansWaitUntil, (yield* now) + 30) // hold the next line while the voice is made
-        const clip = yield* voice.speak(call.voices["Egg Head"] ?? "Matthew", ev.said.value)
-        yield* Ref.update(spoke, (n) => n + 1)
-        yield* Ref.set(humansWaitUntil, (yield* now) + clip.durationS + 0.6)
-        yield* publish({
-          type: "egghead",
-          index,
-          text: ev.said.value,
-          audio: `/audio/${clip.file}`,
-          durationS: clip.durationS,
-          marks: clip.marks,
-          kind: ev.saidKind ?? "line"
-        })
-      }
-      yield* publish({ type: "stats", stats: yield* stats })
+      if (m.type === "line") lines = m.index + 1
+      if (m.type === "egghead") spoke++
+      if (m.type === "done") yield* options.publish({ type: "stats", stats: yield* stats })
+      yield* options.publish(m)
+      if (m.type === "event" || m.type === "egghead") yield* options.publish({ type: "stats", stats: yield* stats })
     })
-  yield* bridge.changes.pipe(Stream.runForEach(onEvent), Effect.forkScoped)
-  yield* Effect.yieldNow
+  const playOptions: PlayOptions = { mode: options.mode, writer: options.writer, agent: options.agent, publish, originMs: options.originMs }
 
-  // Announce when Egg Head takes the floor (the gate opened; the line is being written).
-  let announced = 0
-  const floorWatch = yield* Effect.gen(function*() {
-    while (true) {
-      yield* Effect.sleep("100 millis")
-      const hold = yield* Ref.get(humansWaitUntil)
-      if (hold !== announced && hold - (yield* now) > 20) {
-        announced = hold
-        yield* publish({ type: "floor", index: yield* Ref.get(current) })
-      }
-    }
-  }).pipe(Effect.forkScoped)
+  if (options.mode === "text") return yield* play(call, playOptions)
 
-  // VAD-style silence ticks between lines
-  const ticker = yield* Effect.gen(function*() {
-    while (true) {
-      yield* Effect.sleep(`${TICK_MS} millis`)
-      const end = yield* Ref.get(lastEnd)
-      const t = yield* now
-      if (Number.isFinite(end) && t - end >= 0.5) yield* bridge.tick(t - end)
-    }
-  }).pipe(Effect.forkScoped)
-
-  // Humans wait while Egg Head talks (the hold can grow while we wait).
-  const holdForEggHead = Effect.gen(function*() {
-    while ((yield* Ref.get(humansWaitUntil)) > (yield* now)) yield* Effect.sleep("100 millis")
-  })
-
-  // A line marked waitForEggHead: the call gives Egg Head the floor until its work is said.
-  const waitForEggHead = (i: number, maxS: number) =>
-    Effect.gen(function*() {
-      const until = (yield* now) + maxS
-      if ((yield* bridge.pending) === 0) return
-      yield* publish({ type: "hold", index: i, on: true })
-      while ((yield* now) < until && ((yield* bridge.pending) > 0 || (yield* Ref.get(humansWaitUntil)) > (yield* now))) {
-        yield* Effect.sleep("100 millis")
-      }
-      yield* publish({ type: "hold", index: i, on: false })
-    })
-
-  const publishLine = (i: number) => {
-    const l = call.lines[i]!
-    const c = clips[i]!
-    return publish({ type: "line", index: i, speaker: l.speaker, text: l.text, audio: `/audio/${c.file}`, durationS: c.durationS, expect: l.expect, marks: c.marks })
-  }
-
-  /** Play line i; feed the words heard so far to Bridge.partial. Some(text) when Egg Head cut in. */
-  const playLine = (i: number) =>
-    Effect.gen(function*() {
-      yield* holdForEggHead
-      const l = call.lines[i]!
-      const clip = clips[i]!
-      yield* Ref.set(current, i)
-      yield* Ref.set(lastEnd, Number.NEGATIVE_INFINITY) // someone is talking
-      yield* publishLine(i)
-      const cut = yield* Deferred.make<string>()
-      const words = clip.marks.words
-      const startMs = yield* Clock.currentTimeMillis
-      const partials = yield* Effect.gen(function*() {
-        // a word shows as a partial result once the next one starts (the last one goes to hear())
-        for (let k = 0; k < words.length - 1; k++) {
-          const wait = startMs + words[k + 1]!.time + PARTIAL_DELAY_S * 1000 - (yield* Clock.currentTimeMillis)
-          if (wait > 0) yield* Effect.sleep(`${Math.round(wait)} millis`)
-          const text = words.slice(0, k + 1).map((w) => w.value).join(" ")
-          const ev = yield* bridge.partial(l.speaker, text).pipe(Effect.catchCause(() => Effect.succeedNone))
-          if (Option.isSome(ev) && Option.isSome(ev.value.said)) {
-            yield* Deferred.succeed(cut, text)
-            return
-          }
-        }
-      }).pipe(Effect.forkScoped)
-      const ended = yield* Effect.raceFirst(
-        Effect.as(Effect.sleep(`${Math.round(clip.durationS * 1000)} millis`), Option.none<string>()),
-        Effect.map(Deferred.await(cut), Option.some)
-      )
-      yield* Fiber.interrupt(partials)
-      yield* Ref.set(lastEnd, yield* now)
-      if (Option.isSome(ended)) yield* publish({ type: "cut", index: i, speaker: l.speaker, text: ended.value })
-      return ended
-    })
-
-  const peopleOf = [...new Set(call.lines.map((l) => l.speaker))]
-  yield* publish({ type: "meta", title: call.title, mode: options.mode, writer: options.writer, agent: options.agent, lines: call.lines.length, people: peopleOf })
-
-  const hearing: Array<Fiber.Fiber<unknown, unknown>> = []
-  if (options.mode === "text") {
+  // Audio for Transcribe: each line's PCM, then silence for the pause (and while Egg Head talks).
+  const voice = yield* Voice
+  const pcms = yield* Effect.forEach(call.lines, (l) => Effect.map(voice.speak(call.voices[l.speaker] ?? "Joanna", l.text), (c) => c.pcm))
+  const s = yield* session(call, playOptions)
+  const CHUNK = 3200 // 100 ms of 16 kHz 16-bit
+  const silence = new Uint8Array(CHUNK)
+  const runFork = Effect.runForkWith(yield* Effect.context<never>())
+  const settle = (effect: Effect.Effect<void>) => new Promise<void>((resolve) => runFork(Effect.ensuring(effect, Effect.sync(resolve))))
+  const offsets: Array<number> = [] // audio-time start of each line, seconds
+  let audioS = 0
+  const pace = (ms: number) => new Promise((r) => setTimeout(r, ms))
+  const audio = (async function*() {
     for (let i = 0; i < call.lines.length; i++) {
-      const l = call.lines[i]!
-      const cutAt = yield* playLine(i)
-      const text = Option.match(cutAt, { onNone: () => l.text, onSome: (t) => `${t}—` })
-      yield* Effect.sleep(`${ASR_DELAY_S * 1000} millis`)
-      yield* publish({ type: "heard", index: i, speaker: l.speaker, text })
-      // the call does not wait for Egg Head to think (the Bridge takes one utterance at a time)
-      hearing.push(yield* Effect.forkScoped(hear(i, l.speaker, text, (yield* now) - (yield* Ref.get(lastEnd)))))
-      const pause = Option.isSome(cutAt) ? 0.2 : l.pause
-      if (pause > ASR_DELAY_S) yield* Effect.sleep(`${Math.round((pause - ASR_DELAY_S) * 1000)} millis`)
-      if (l.waitForEggHead !== undefined) {
-        yield* Fiber.join(hearing[hearing.length - 1]!).pipe(Effect.ignore) // Egg Head has heard the line
-        yield* waitForEggHead(i, l.waitForEggHead || DEFAULT_WAIT_S)
-      }
-    }
-  } else {
-    // Audio for Transcribe: each line's PCM, then silence for the pause (and while Egg Head talks).
-    const CHUNK = 3200 // 100 ms of 16 kHz 16-bit
-    const silence = new Uint8Array(CHUNK)
-    const runFork = Effect.runForkWith(yield* Effect.context<never>())
-    const offsets: Array<number> = [] // audio-time start of each line, seconds
-    let audioS = 0
-    const pace = (ms: number) => new Promise((r) => setTimeout(r, ms))
-    const audio = (async function*() {
-      for (let i = 0; i < call.lines.length; i++) {
-        await new Promise<void>((resolve) => runFork(Effect.ensuring(startLineAudio(i), Effect.sync(resolve))))
-        offsets[i] = audioS
-        const pcm = clips[i]!.pcm
-        for (let o = 0; o < pcm.length; o += CHUNK) {
-          yield pcm.subarray(o, o + CHUNK)
-          audioS += Math.min(CHUNK, pcm.length - o) / 2 / 16000
-          await pace(100)
-        }
-        runFork(Ref.set(lastEnd, Date.now() / 1000))
-        const pauseChunks = Math.round(call.lines[i]!.pause * 10)
-        for (let k = 0; k < pauseChunks; k++) {
-          yield silence
-          audioS += 0.1
-          await pace(100)
-        }
-        const wait = call.lines[i]!.waitForEggHead
-        if (wait !== undefined) await new Promise<void>((resolve) => runFork(Effect.ensuring(waitForEggHead(i, wait || DEFAULT_WAIT_S), Effect.sync(resolve))))
-      }
-      for (let k = 0; k < 30; k++) {
-        yield silence
+      await settle(s.begin(i)) // the line starts playing on the page; humans wait for Egg Head before it
+      offsets[i] = audioS
+      const pcm = pcms[i]!
+      for (let o = 0; o < pcm.length; o += CHUNK) {
+        yield pcm.subarray(o, o + CHUNK)
+        audioS += Math.min(CHUNK, pcm.length - o) / 2 / 16000
         await pace(100)
       }
-    })()
-    // the line starts playing on the page; humans wait for Egg Head before it
-    const startLineAudio = (i: number) =>
-      Effect.gen(function*() {
-        yield* holdForEggHead
-        yield* Ref.set(current, i)
-        yield* Ref.set(lastEnd, Number.NEGATIVE_INFINITY)
-        yield* publishLine(i)
-      })
-    yield* transcribe(audio).pipe(
-      Stream.runForEach((seg) =>
-        Effect.gen(function*() {
-          const i = Math.max(0, offsets.findLastIndex((o) => o <= seg.startS + 0.05))
-          const speaker = call.lines[i]!.speaker
-          yield* publish({ type: "heard", index: i, speaker, text: seg.text })
-          const end = yield* Ref.get(lastEnd)
-          yield* hear(i, speaker, seg.text, Number.isFinite(end) ? (yield* now) - end : 0)
-        })
-      )
-    )
-  }
-
-  yield* Fiber.joinAll(hearing)
-  // let Egg Head finish what it is working on before the call ends
-  yield* waitForEggHead(call.lines.length - 1, 20)
-  yield* holdForEggHead
-  yield* Effect.sleep("1500 millis")
-  yield* Fiber.interrupt(ticker)
-  yield* Fiber.interrupt(floorWatch)
-  yield* publish({ type: "stats", stats: yield* stats })
-  yield* publish({ type: "done" })
-  return yield* bridge.state
+      runFork(s.played(i, Option.none()))
+      const pauseChunks = Math.round(call.lines[i]!.pause * 10)
+      for (let k = 0; k < pauseChunks; k++) {
+        yield silence
+        audioS += 0.1
+        await pace(100)
+      }
+      const wait = call.lines[i]!.waitForEggHead
+      if (wait !== undefined) await settle(s.holdFor(i, wait || DEFAULT_WAIT_S))
+    }
+    for (let k = 0; k < 30; k++) {
+      yield silence
+      await pace(100)
+    }
+  })()
+  yield* transcribe(audio).pipe(
+    Stream.runForEach((seg) => s.hear(Math.max(0, offsets.findLastIndex((o) => o <= seg.startS + 0.05)), seg.text))
+  )
+  return yield* s.finish
 })

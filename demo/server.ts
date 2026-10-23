@@ -14,22 +14,25 @@
  *
  * Needs AWS credentials for Polly (and Transcribe in that mode), and Bedrock for pi and
  * --writer bedrock: `npm run demo` loads .env (AWS_BEARER_TOKEN_BEDROCK, EGGHEAD_MODEL_ID,
- * AWS_REGION). Every run's messages are saved to demo/out/runs/<time>.json.
+ * AWS_REGION). Every run is saved to demo/out/runs/<time>.json with the scenario it played, and
+ * scored against the scenario's expectations (`npx tsx scripts/check-run.ts latest` for the table).
  */
-import { Console, Duration, Effect, Layer, ManagedRuntime, Schema } from "effect"
+import { Console, Duration, Effect, Layer, ManagedRuntime, Result, Schema } from "effect"
 import { Decision, DecisionModel } from "effect/ai"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 import { parseArgs } from "node:util"
 import { BedrockSupport } from "../src/Bedrock.ts"
 import { Bridge } from "../src/Bridge.ts"
+import { Call, decodeCallSync, encodeLogged, Floor, type Logged } from "../src/Call.ts"
 import { MockSource } from "../src/Checks.ts"
 import * as Decider from "../src/Decider.ts"
+import { hinted } from "../src/Hints.ts"
+import { judge, LIVE, render } from "../src/Judge.ts"
 import { Writer } from "../src/Speaker.ts"
 import { AgentTerminal, customOptions, piOptions } from "./Agent.ts"
-import { rehearsalDecider } from "./Rehearsal.ts"
-import { Call, DeciderMeter, Floor, type Message, run } from "./Run.ts"
-import { rehearsalVoice, Voice } from "./Voice.ts"
+import { DeciderMeter, type PageOnly, run } from "./Run.ts"
+import { rehearsalVoice, Voice, voiceSound } from "./Voice.ts"
 
 const { values: args } = parseArgs({
   options: {
@@ -48,7 +51,8 @@ const { values: args } = parseArgs({
 const rehearsal = args.rehearsal!
 const mode = args.mode === "transcribe" && !rehearsal ? "transcribe" : "text"
 const writer = args.writer === "bedrock" && !rehearsal ? "bedrock" : "template"
-const call = Schema.decodeUnknownSync(Call)(JSON.parse(readFileSync(args.call!, "utf8")))
+const call = decodeCallSync(JSON.parse(readFileSync(args.call!, "utf8")))
+const deciderBackend = process.env.EGGHEAD_DECIDER_BACKEND ?? "public"
 const port = Number(args.port)
 const WEB = new URL("./web/", import.meta.url) // read per request, so edits show on reload
 const VENDOR: Readonly<Record<string, string>> = {
@@ -78,18 +82,21 @@ const agent = agentRuntime ? await agentRuntime.runPromise(Effect.gen(function*(
 })) : undefined
 const agentLabel = agent?.label ?? "none"
 
-const history: Array<Message & { readonly at: number }> = [] // `at`: ms since the run started
+const history: Array<unknown> = [] // as sent to the pages; `at`: ms since the run started
+const log: Array<Logged> = [] // what the Judge reads
 const clients = new Set<ServerResponse>()
 let runStarted = 0
-const publish = (m: Message) =>
+const publish = (m: Logged | PageOnly) =>
   Effect.sync(() => {
-    const stamped = { ...m, at: Date.now() - runStarted }
+    if ("at" in m) log.push(m)
+    const stamped = "at" in m ? encodeLogged(m) : { ...m, at: Date.now() - runStarted }
     history.push(stamped)
     const data = `data: ${JSON.stringify(stamped)}\n\n`
     for (const c of clients) c.write(data)
   })
 
-const deciderLayer = rehearsal ? rehearsalDecider(call) : Decider.layerFromEnv
+// Rehearsals answer from each line's hints, with about the hosted API's latency.
+const deciderLayer = rehearsal ? hinted(call.lines, { latencyMs: 200 }) : Decider.layerFromEnv
 
 // One run = fresh Bridge, ledger, Decider cache and Bedrock counters (the terminal agent stays).
 const runLayer = () => {
@@ -101,7 +108,7 @@ const runLayer = () => {
   const writing = Layer.provideMerge(Floor.holdWhileWriting, Layer.merge(support, Floor.layer))
   const investigator = agent ? AgentTerminal.investigator.pipe(Layer.provide(Layer.succeed(AgentTerminal, agent))) : Layer.empty
   return Bridge.layer.pipe(
-    Layer.provideMerge(Layer.mergeAll(decider, source, writing, rehearsal ? rehearsalVoice : Voice.layer, investigator))
+    Layer.provideMerge(Layer.mergeAll(decider, source, writing, Layer.provideMerge(voiceSound, rehearsal ? rehearsalVoice : Voice.layer), investigator))
   )
 }
 
@@ -117,6 +124,7 @@ const start = () => {
   running = true
   runStarted = Date.now()
   history.length = 0
+  log.length = 0
   for (const c of clients) c.write(`data: ${JSON.stringify({ type: "reset" })}\n\n`)
   const program = Effect.gen(function*() {
     // The hosted Decider sleeps when idle and the first request then takes ~15-30 s. Wake it
@@ -128,21 +136,27 @@ const start = () => {
     const bedrockCalls = support._tag === "Some"
       ? Effect.map(support.value.calls, (c) => c.write + c.route)
       : Effect.succeed(0)
-    const state = yield* run(call, { mode, writer, agent: agentLabel, bedrockCalls, publish })
+    const state = yield* run(call, { mode, writer, agent: agentLabel, originMs: runStarted, bedrockCalls, publish })
     yield* Console.log(`done: ${state.events.filter((e) => e.said._tag === "Some").length} spoken, ${state.tasks} agent tasks, ${state.escalations} escalations`)
   }).pipe(Effect.scoped, Effect.provide(runLayer()))
   Effect.runPromise(program)
     .catch((e) => {
       console.error(e)
-      return Effect.runPromise(publish({ type: "done" }))
+      return Effect.runPromise(publish({ type: "done", at: Date.now() - runStarted }))
     })
     .finally(() => {
       running = false
       mkdirSync(RUNS, { recursive: true })
-      writeFileSync(
-        new URL(`${new Date().toISOString().replace(/[:.]/g, "-")}.json`, RUNS),
-        JSON.stringify({ mode, writer, agent: agentLabel, rehearsal, call: args.call, history }, null, 1)
-      )
+      const record = {
+        scenario: Schema.encodeSync(Call)(call),
+        run: { startedAt: new Date(runStarted).toISOString(), decider: rehearsal ? "hints" : deciderBackend, mode, writer, agent: agentLabel, rehearsal, call: args.call },
+        log: history
+      }
+      writeFileSync(new URL(`${new Date().toISOString().replace(/[:.]/g, "-")}.json`, RUNS), JSON.stringify(record, null, 1))
+      const scored = judge(call, log, LIVE)
+      console.log(Result.isSuccess(scored)
+        ? `${render(scored.success, { onlyFailures: true })}\n(npx tsx scripts/check-run.ts latest for every line)`
+        : `could not score the run: line ${scored.failure.index} was "${scored.failure.recorded}"`)
     })
 }
 

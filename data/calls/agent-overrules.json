@@ -1,0 +1,18 @@
+{
+  "title": "The second look overrules the fast check",
+  "about": "A claim the fast check contradicts goes to the Investigator after one uncorrected turn. When the Investigator finds the claim was right, Egg Head says nothing.",
+  "voices": { "Priya": "Ruth", "Jordan": "Stephen", "Sam": "Gregory", "Egg Head": "Matthew" },
+  "agent": { "confirmS": 2, "sees": { "orders-db": { "db_health": { "status": "healthy", "evidence": "CPU 31%, the alarm cleared at 14:09" } } } },
+  "never": [{ "_tag": "MaxSpeeches", "n": 0 }],
+  "lines": [
+    { "speaker": "Sam", "text": "The orders DB is fine, CPU is normal.", "pause": 0.4,
+      "decider": { "claim": 0.9, "asserted": "healthy", "check": "db_health" },
+      "why": "the fast check says orders-db is degraded" },
+    { "speaker": "Jordan", "text": "Then it's probably the new connection pool code.", "pause": 0.5,
+      "decider": { "claim": 0.1 },
+      "expect": [{ "_tag": "Investigates", "job": "confirm" }],
+      "why": "nobody corrected Sam: second look" },
+    { "speaker": "Priya", "text": "Okay, so let's focus on the API then.", "pause": 4.0,
+      "why": "the agent found the claim was right: stay quiet, even in a long gap" }
+  ]
+}

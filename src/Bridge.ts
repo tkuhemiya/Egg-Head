@@ -32,6 +32,7 @@ import * as L from "./Ledger.ts"
 import { finishedProbability, gateQuestions, renderGate, renderKv, type Turn } from "./Questions.ts"
 import { aliasHits, Escalator, Route, route } from "./Router.ts"
 import { type SupportError, Writer } from "./Speaker.ts"
+import { Tuning } from "./Tuning.ts"
 
 export const WINDOW_TURNS = 12 // rolling window; the model context is 4,096 tokens
 
@@ -149,6 +150,7 @@ export class Bridge extends Context.Service<Bridge, {
     const escalator = yield* Effect.serviceOption(Escalator)
     const investigator = yield* Effect.serviceOption(Investigator)
     const decider = yield* DecisionModel.DecisionModel
+    const tuning = yield* Tuning
     const scope = yield* Scope.Scope
     const state = yield* Ref.make(initial)
     const lock = yield* Semaphore.make(1)
@@ -181,8 +183,8 @@ export class Bridge extends Context.Service<Bridge, {
         interruptP,
         laterClaimSupportsCheck: supportsOpen,
         secondsSinceLastSpoke: now - s.lastSpokeS
-      })
-      const decided = { ...ev, gate: Option.some(gate), ...(agentMode ? { claim: item.turn } : {}) }
+      }, tuning.gate)
+      const decided = { ...ev, gate: Option.some(gate), claim: item.turn }
       if (gate.speak) {
         const said = item.fact !== undefined ? C.flagLine(item.speaker, item.fact) : yield* writer.write(item)
         return [
@@ -294,7 +296,7 @@ export class Bridge extends Context.Service<Bridge, {
     const dispatched = (task: number, job: "confirm" | "answer", detail: string): AgentNote => ({ task, job, action: "dispatched", detail })
 
     const floorOpen = (s: BridgeState, silenceS: number) =>
-      silenceS >= G.T_MIN_SILENCE_S && (s.finishedP >= G.T_FLOOR || silenceS >= G.T_SILENCE_S)
+      silenceS >= tuning.gate.minSilenceS && (s.finishedP >= tuning.gate.floor || silenceS >= tuning.gate.silenceS)
 
     /** With an Investigator: say a ready answer, or reply to a finished question, if the floor allows. */
     const converse = Effect.fnUntraced(function*(s: BridgeState, ev: Event, silenceS: number, inv: Investigator["Service"]) {
@@ -309,10 +311,10 @@ export class Bridge extends Context.Service<Bridge, {
         ] as const
       }
       const listening = s.requests.find((r) => r.state === "listening")
-      if (listening && silenceS >= G.T_MIN_SILENCE_S) {
+      if (listening && silenceS >= tuning.gate.minSilenceS) {
         const latestBy = s.turns[s.turns.length - 1]?.[0]
         if (listening.kind === "addressed") {
-          const r = C.readyToReply({ finishedP: s.finishedP, text: listening.text, silenceS })
+          const r = C.readyToReply({ finishedP: s.finishedP, text: listening.text, silenceS }, tuning)
           if (!r.ready) {
             const note = `${listening.speaker} is talking to Egg Head but has not finished: ${r.why}. Waiting.`
             if (silenceS >= 1.0 && !s.notes.includes(`${listening.id}:${r.why}`)) {
@@ -330,7 +332,7 @@ export class Bridge extends Context.Service<Bridge, {
             true
           ] as const
         }
-        if (latestBy === listening.speaker && silenceS >= C.OPEN_SILENCE_S) {
+        if (latestBy === listening.speaker && silenceS >= tuning.openSilenceS) {
           const [asked, job] = answerRequest(s, listening, inv)
           yield* job
           const req = { ...asked.requests.find((x) => x.id === listening.id)!, note: `nobody answered in ${silenceS.toFixed(1)} s; Egg Head takes it` }
@@ -414,7 +416,7 @@ export class Bridge extends Context.Service<Bridge, {
               silenceS,
               ...signalsOf(s),
               laterClaimSupportsCheck: false
-            })
+            }, tuning.gate)
             if (Option.isSome(rep)) {
               s = { ...s, ledger: L.update(s.ledger, item, { agent: "skipped", raised: true }) }
               ev = { ...ev, claim: item.turn, note: `${item.speaker}'s claim was corrected by the call (${rep.value}) before any LLM call. Staying quiet.` }
@@ -465,14 +467,14 @@ export class Bridge extends Context.Service<Bridge, {
             const req = { ...listening, text: `${listening.text} ${text}`, note: "still asking" }
             s = { ...s, requests: s.requests.map((r) => (r.id === req.id ? req : r)) }
             ev = { ...ev, request: req }
-          } else if (C.namesEggHead(text) && a.addr.probability >= C.T_ADDRESSED) {
+          } else if (C.namesEggHead(text) && a.addr.probability >= tuning.addressed) {
             const req: C.Request = {
               id: s.requests.length + 1, kind: "addressed", speaker, text, turn: ev.turn, state: "listening",
               answer: Option.none(), note: `asked Egg Head (Decider ${a.addr.probability.toFixed(2)})`
             }
             s = { ...s, requests: [...s.requests.map(dropOpen(speaker)), req] }
             ev = { ...ev, request: req }
-          } else if (C.isQuestion(text) && a.ask.probability >= C.T_ASKS && rt.action !== "check") {
+          } else if (C.isQuestion(text) && a.ask.probability >= tuning.asks && rt.action !== "check") {
             const req: C.Request = {
               id: s.requests.length + 1, kind: "open", speaker, text, turn: ev.turn, state: "listening",
               answer: Option.none(), note: `question to the call (Decider ${a.ask.probability.toFixed(2)}); waiting to see if anyone answers`
@@ -536,7 +538,7 @@ export class Bridge extends Context.Service<Bridge, {
           deciderMs: Duration.toMillis(elapsed),
           gateScores: { directive: act }
         }
-        if (act < C.T_DIRECTIVE) {
+        if (act < tuning.directive) {
           return Option.some(yield* commit(s, { ...ev, claim: item.turn, note: `Mentions ${item.resource} (open claim) but Decider says it is not an instruction to act (${act.toFixed(2)}).` }))
         }
         const fact = item.fact ?? C.factOf(item)

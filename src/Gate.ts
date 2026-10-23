@@ -27,6 +27,25 @@ export const T_SILENCE_S = 1.2 // this much silence opens the gate on its own
 export const T_COST_LEVEL = 2 // moderate: do not interrupt for less
 export const COOLDOWN_S = 30.0
 
+/** The numbers `decide` compares against. Defaults are the constants above (src/Tuning.ts overrides them). */
+export interface GateTuning {
+  readonly selfRepaired: number
+  readonly floor: number
+  readonly minSilenceS: number
+  readonly silenceS: number
+  readonly costLevel: number
+  readonly cooldownS: number
+}
+
+export const GATE_DEFAULTS: GateTuning = {
+  selfRepaired: T_SELF_REPAIRED,
+  floor: T_FLOOR,
+  minSilenceS: T_MIN_SILENCE_S,
+  silenceS: T_SILENCE_S,
+  costLevel: T_COST_LEVEL,
+  cooldownS: COOLDOWN_S
+}
+
 // Base cost of staying silent per check type: how much a wrong belief about it misdirects
 // an incident (deploys and databases are the usual wrong turns; an alarm list is context).
 export const BASE_COST: Readonly<Record<string, number>> = {
@@ -89,10 +108,10 @@ export const GateDecision = Schema.Struct({
 export type GateDecision = typeof GateDecision.Type
 
 /** Why this claim no longer needs raising. */
-export const repairedBy = (g: GateInput): Option.Option<RepairedBy> => {
+export const repairedBy = (g: GateInput, t: GateTuning = GATE_DEFAULTS): Option.Option<RepairedBy> => {
   if (g.laterClaimSupportsCheck) return Option.some("ledger")
-  if (g.laterTurns.some((t) => REPAIR.test(t))) return Option.some("keyword")
-  if (g.selfRepairedP >= T_SELF_REPAIRED) return Option.some("decider")
+  if (g.laterTurns.some((turn) => REPAIR.test(turn))) return Option.some("keyword")
+  if (g.selfRepairedP >= t.selfRepaired) return Option.some("decider")
   return Option.none()
 }
 
@@ -103,17 +122,17 @@ export const costLevel = (g: GateInput): number => {
   return Math.min(level, LEVELS.length - 1)
 }
 
-export const decide = (g: GateInput): GateDecision => {
+export const decide = (g: GateInput, t: GateTuning = GATE_DEFAULTS): GateDecision => {
   const floorP = 1 - g.interruptP
-  const rep = repairedBy(g)
+  const rep = repairedBy(g, t)
   const level = costLevel(g)
   const reasons: Record<Reason, boolean> = {
     persisted: g.laterTurns.length > 0, // the call has moved on at least one turn since the claim
     not_repaired: Option.isNone(rep),
-    min_silence: g.silenceS >= T_MIN_SILENCE_S,
-    floor_open: floorP >= T_FLOOR || g.silenceS >= T_SILENCE_S,
-    worth_it: level >= T_COST_LEVEL,
-    cooldown: (g.secondsSinceLastSpoke ?? Infinity) >= COOLDOWN_S
+    min_silence: g.silenceS >= t.minSilenceS,
+    floor_open: floorP >= t.floor || g.silenceS >= t.silenceS,
+    worth_it: level >= t.costLevel,
+    cooldown: (g.secondsSinceLastSpoke ?? Infinity) >= t.cooldownS
   }
   const blockedBy = Option.fromUndefinedOr(Reason.literals.find((k) => !reasons[k]))
   return { speak: Option.isNone(blockedBy), blockedBy, repairedBy: rep, costLevel: level, floorP, reasons }

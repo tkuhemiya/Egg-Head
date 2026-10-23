@@ -1,0 +1,20 @@
+{
+  "title": "About to act on a wrong claim",
+  "about": "Barge-in from partial transcripts: naming a resource with an open, confirmed wrong claim is not enough; an instruction to act on it now is.",
+  "voices": { "Priya": "Ruth", "Jordan": "Stephen", "Mei": "Kajal", "Egg Head": "Matthew" },
+  "agent": { "confirmS": 0.5 },
+  "never": [{ "_tag": "NoTalkOver" }],
+  "lines": [
+    { "speaker": "Jordan", "text": "The payments API is erroring too, I bet that's what's breaking checkout.", "pause": 0.3,
+      "decider": { "claim": 0.9, "asserted": "degraded", "check": "service_error_rate" },
+      "why": "false claim; no gap to raise it" },
+    { "speaker": "Mei", "text": "Hmm, the payments API dashboards look quiet to me.", "pause": 0.4,
+      "expect": [{ "_tag": "Investigates", "job": "confirm" }],
+      "why": "nobody corrected Jordan, so the agent takes a second look; Mei names the resource but tells nobody to act: no barge" },
+    { "speaker": "Priya", "text": "Okay. Jordan, restart the payments API now, and Lee, keep an eye on the dashboards.", "pause": 0.6,
+      "decider": { "act": 0.9 },
+      "expect": [{ "_tag": "Says", "kind": "barge", "toward": "Priya", "about": "payments-api" }],
+      "why": "the agent confirmed the claim is wrong; cut Priya off before the restart goes ahead" },
+    { "speaker": "Priya", "text": "Good catch. Jordan, hold off on that.", "pause": 1.0 }
+  ]
+}

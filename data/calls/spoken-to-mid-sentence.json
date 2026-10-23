@@ -1,0 +1,16 @@
+{
+  "title": "Spoken to, then a pause mid-sentence",
+  "about": "End of turn for a voice agent addressed by name: a 1.7 s pause after a trailing 'uh' is not the end of the request. A silence-only end-of-turn detector would reply at about 0.8 s.",
+  "voices": { "Priya": "Ruth", "Egg Head": "Matthew" },
+  "agent": { "answerS": 2 },
+  "never": [{ "_tag": "NoTalkOver" }, { "_tag": "SilenceBeforeSpeaking", "minS": 0.5 }],
+  "lines": [
+    { "speaker": "Priya", "text": "Egg Head, can you check the, uh…", "pause": 1.7,
+      "decider": { "addr": 0.9, "fin": 0.02 },
+      "why": "addressed but not finished (Decider says so, and the words trail off): wait" },
+    { "speaker": "Priya", "text": "the checkout queue? How backed up is it?", "pause": 0.8, "waitForEggHead": 30,
+      "decider": { "fin": 0.5 },
+      "expect": [{ "_tag": "Investigates", "job": "answer" }, { "_tag": "Says", "kind": "ack", "toward": "Priya", "about": "checkout-queue", "when": { "since": "lineEnd", "minS": 0.5, "maxS": 1.0 } }, { "_tag": "Says", "kind": "answer", "toward": "Priya", "about": "checkout-queue" }],
+      "why": "finished: acknowledge at once, answer when the lookup is back" }
+  ]
+}

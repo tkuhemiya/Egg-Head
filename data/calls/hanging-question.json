@@ -1,0 +1,20 @@
+{
+  "title": "A question nobody answers",
+  "about": "Egg Head gives the call 2.5 s to answer a question about a system, then takes it and answers once the lookup is back. If anyone answers first, it stays out.",
+  "voices": { "Priya": "Ruth", "Jordan": "Stephen", "Lee": "Danielle", "Egg Head": "Matthew" },
+  "agent": { "answerS": 3 },
+  "never": [{ "_tag": "NoTalkOver" }, { "_tag": "SilenceBeforeSpeaking", "minS": 0.5 }],
+  "lines": [
+    { "speaker": "Priya", "text": "What are we seeing on the orders API?", "pause": 1.2,
+      "decider": { "ask": 0.9 },
+      "why": "a question to the call; Jordan answers it within 2.5 s" },
+    { "speaker": "Jordan", "text": "Orders API is throwing a lot of 500s.", "pause": 0.6,
+      "decider": { "claim": 0.9, "asserted": "degraded", "check": "service_error_rate" },
+      "why": "answered, and true: nothing to do" },
+    { "speaker": "Lee", "text": "Did anyone push anything to the payments API today?", "pause": 3.0, "waitForEggHead": 30,
+      "decider": { "ask": 0.9 },
+      "expect": [{ "_tag": "Investigates", "job": "answer" }, { "_tag": "Says", "kind": "take", "toward": "Lee", "about": "payments-api", "when": { "since": "lineEnd", "minS": 2.5, "maxS": 3.0 } }, { "_tag": "Says", "kind": "answer", "toward": "Lee", "about": "payments-api" }],
+      "why": "nobody answers for 2.5 s, so Egg Head takes it, then answers when the lookup is back" },
+    { "speaker": "Priya", "text": "Thanks. Let's keep going.", "pause": 1.0 }
+  ]
+}

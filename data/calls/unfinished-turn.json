@@ -1,0 +1,15 @@
+{
+  "title": "No agent: the speaker sounds unfinished",
+  "about": "When Decider says the latest speaker has not finished, the gate waits for 1.2 s of silence before it raises a wrong claim.",
+  "voices": { "Sam": "Gregory", "Mei": "Kajal", "Egg Head": "Matthew" },
+  "agent": false,
+  "never": [{ "_tag": "NoTalkOver" }, { "_tag": "SilenceBeforeSpeaking", "minS": 0.5 }],
+  "lines": [
+    { "speaker": "Sam", "text": "The orders DB is fine, CPU is normal.", "pause": 0.4,
+      "decider": { "claim": 0.9, "asserted": "healthy", "check": "db_health" } },
+    { "speaker": "Mei", "text": "So if the database is not the problem, then", "pause": 2.5,
+      "decider": { "fin": 0.02 },
+      "expect": [{ "_tag": "Says", "kind": "flag", "toward": "Sam", "about": "orders-db", "when": { "since": "lineEnd", "minS": 1.2, "maxS": 1.5 } }],
+      "why": "Decider says Mei has not finished: the floor opens on 1.2 s of silence, not before" }
+  ]
+}
