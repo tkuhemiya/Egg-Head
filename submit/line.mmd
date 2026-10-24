@@ -1,0 +1,26 @@
+flowchart TD
+  A[A line is heard] --> B([Decider: a claim? what state does it say?])
+  B -- yes --> C[Code: which resource, by name]
+  C --> D([Decider: which check?])
+  D -- no confident check --> X[LLM: route it, optional]
+  X --> E
+  D --> E[Code: run the check]
+  E -- agrees, or can't tell --> Q[Stay quiet]
+  E -- contradicts --> F[Code: wait one turn]
+  F -- the call fixes it --> Q
+  F -- still wrong --> I[LLM agent: second look]
+  F -- someone is told to act on it --> P([Decider, on the partial line: act now?])
+  P -- yes --> R[Cut in]
+  I -- it was right --> Q
+  I -- confirmed --> J([Decider: already corrected? finished? + code: speak gate])
+  J -- closed --> Q
+  J -- open --> K[Say one sentence]
+  B -- no --> G([Decider: spoken to? asking the call? finished?])
+  G -- neither --> Q
+  G -- "spoken to, or nobody answers in 2.5 s" --> L[LLM agent: look it up]
+  L --> M[Code: wait for a gap]
+  M --> K
+  classDef decider fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef llm fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+  class B,D,P,J,G decider
+  class X,I,L llm
